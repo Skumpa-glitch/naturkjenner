@@ -108,8 +108,6 @@ body::before {
 .confidence.high { background: rgba(74,124,89,0.1); color: var(--leaf); }
 .confidence.medium { background: rgba(201,146,58,0.12); color: var(--gold); }
 .confidence.low { background: rgba(176,92,58,0.1); color: var(--rust); }
-.save-btn { background: transparent; border: 1px solid var(--sand); border-radius: 6px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: all 0.2s; flex-shrink: 0; }
-.save-btn.saved { background: var(--forest); border-color: var(--forest); }
 .details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--warm); display: none; }
 .details.open { display: block; }
 .details p { font-size: 13px; color: #4a4640; line-height: 1.65; margin-bottom: 10px; }
@@ -170,6 +168,10 @@ body::before {
 .collection-stat { flex: 1; background: white; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid var(--sand); }
 .collection-stat-num { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; color: var(--forest); }
 .collection-stat-label { font-size: 10px; color: var(--ghost); text-transform: uppercase; letter-spacing: 0.5px; }
+.save-event-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 8px; background: white; color: var(--forest); border: 2px solid var(--leaf); cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 500; margin: 12px 0; transition: all 0.2s; }
+.save-event-btn:active { transform: scale(0.98); }
+.save-event-btn.saved { background: var(--forest); color: var(--paper); border-color: var(--forest); pointer-events: none; }
+.event-detail { border-top: 1px solid var(--sand); }
 .section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
 .cat-title { font-size: 10px; font-weight: 600; color: var(--ghost); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
 .hidden { display: none !important; }
@@ -554,15 +556,24 @@ async function dbDelete(id) {
   });
 }
 
-// Migrate old localStorage collection to IndexedDB
+// Migrate old localStorage collection to IndexedDB (event format)
 async function migrateFromLocalStorage() {
   const old = localStorage.getItem('naturkjenner_collection');
   if (!old) return;
   try {
     const items = JSON.parse(old);
     if (items.length > 0) {
+      // Group old items into individual events (one per species, since we don't have the scan grouping)
       for (const item of items) {
-        await dbAdd({ ...item, timestamp: Date.now(), image: null });
+        const evt = {
+          image: null,
+          results: [item],
+          categories: [item.category].filter(Boolean),
+          primaryName: item.name,
+          primaryCategory: item.category,
+          timestamp: Date.now()
+        };
+        await dbAdd(evt);
       }
     }
     localStorage.removeItem('naturkjenner_collection');
@@ -778,36 +789,33 @@ function compressForStorage(dataUrl) {
   });
 }
 
-function isSaved(name) { return collection.some(s => s.name === name); }
-function isSavedById(id) { return collection.some(s => s.id === id); }
+let currentScanResults = []; // holds results from current scan
 
-async function toggleSave(species) {
-  const existing = collection.find(s => s.name === species.name);
-  if (existing) {
-    await dbDelete(existing.id);
-    collection = collection.filter(s => s.id !== existing.id);
-  } else {
-    const compressed = currentScanImage ? await compressForStorage(currentScanImage) : null;
-    const event = {
-      name: species.name,
-      latin: species.latin,
-      category: species.category,
-      confidence: species.confidence,
-      description: species.description,
-      habitat: species.habitat,
-      season: species.season,
-      rarity: species.rarity,
-      edible: species.edible,
-      funFact: species.funFact,
-      image: compressed,
-      timestamp: Date.now()
-    };
-    const newId = await dbAdd(event);
-    event.id = newId;
-    collection.push(event);
-  }
+async function saveEvent() {
+  if (!currentScanImage || currentScanResults.length === 0) return;
+  const compressed = await compressForStorage(currentScanImage);
+  const categories = [...new Set(currentScanResults.map(r => r.category))];
+  const evt = {
+    image: compressed,
+    results: currentScanResults,
+    categories: categories,
+    primaryName: currentScanResults[0].name,
+    primaryCategory: currentScanResults[0].category,
+    timestamp: Date.now()
+  };
+  const newId = await dbAdd(evt);
+  evt.id = newId;
+  collection.push(evt);
   updateCollectionCount();
+  // Update save button
+  const btn = document.getElementById('saveEventBtn');
+  if (btn) {
+    btn.innerHTML = '✅ Lagret i samlingen';
+    btn.classList.add('saved');
+    btn.disabled = true;
+  }
 }
+
 function updateCollectionCount() { document.getElementById('collectionCount').textContent = collection.length; }
 
 function confidenceHTML(conf) {
@@ -821,7 +829,6 @@ const speciesStore = {};
 
 function speciesCardHTML(species, rank, showConfidence) {
   const isTop = rank === 0 && showConfidence;
-  const saved = isSaved(species.name);
   const id = 'card-' + Math.random().toString(36).substr(2, 8);
   speciesStore[id] = species;
 
@@ -832,9 +839,7 @@ function speciesCardHTML(species, rank, showConfidence) {
         '<div class="result-name">' + species.name + '</div>' +
         '<div class="result-latin">' + species.latin + '</div>' +
         (showConfidence ? confidenceHTML(species.confidence) : '') +
-      '</div>' +
-      '<button class="save-btn ' + (saved ? 'saved' : '') + '" id="save-' + id + '" onclick="event.stopPropagation(); doSave(\'' + id + '\')">' + (saved ? '✅' : '💾') + '</button>' +
-      '</div>' +
+      '</div></div>' +
       safetyWarningHTML(species) +
       '<div class="details" id="details-' + id + '">' +
         '<p>' + species.description + '</p>' +
@@ -848,18 +853,6 @@ function speciesCardHTML(species, rank, showConfidence) {
       '</div>' +
       '<div class="toggle-hint" id="hint-' + id + '">▼ Vis detaljer</div>' +
     '</div></div>';
-}
-
-async function doSave(id) {
-  const sp = speciesStore[id];
-  if (!sp) return;
-  await toggleSave(sp);
-  const btn = document.getElementById('save-' + id);
-  if (btn) {
-    const saved = isSaved(sp.name);
-    btn.className = 'save-btn' + (saved ? ' saved' : '');
-    btn.textContent = saved ? '✅' : '💾';
-  }
 }
 
 function toggleDetails(id) {
@@ -877,6 +870,7 @@ function toggleDetails(id) {
 // ============================================================
 function showResults(imageData, results, errorMsg) {
   currentScanImage = imageData;
+  currentScanResults = results || [];
   const area = document.getElementById('resultsArea');
   document.getElementById('exploreArea').classList.add('hidden');
 
@@ -890,6 +884,9 @@ function showResults(imageData, results, errorMsg) {
   if (results.length > 0) {
     area.innerHTML = '<div class="fade-in" style="margin-top:20px">' +
       '<img src="' + imageData + '" class="preview-img" alt="Ditt bilde">' +
+      '<button class="save-event-btn" id="saveEventBtn" onclick="saveEvent()">' +
+        '<span style="font-size:18px">📌</span> Lagre denne hendelsen i samlingen' +
+      '</button>' +
       '<div class="explore-title">🤖 AI-identifisering (' + results.length + ' treff)</div>' +
       results.map((r, i) => '<div class="fade-in fade-in-' + i + '">' + speciesCardHTML(r, i, true) + '</div>').join('') +
       '<div class="tip-box">💡 Drevet av Google Gemini AI. Trykk på kort for detaljer.</div>' +
@@ -938,6 +935,21 @@ function formatDate(ts) {
   return day + '. ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + h + ':' + m;
 }
 
+function getAllCategories() {
+  const cats = new Set();
+  collection.forEach(evt => {
+    if (evt.categories) evt.categories.forEach(c => cats.add(c));
+    else if (evt.primaryCategory) cats.add(evt.primaryCategory);
+  });
+  return [...cats].sort();
+}
+
+function eventMatchesFilter(evt, filter) {
+  if (filter === 'all') return true;
+  if (evt.categories) return evt.categories.includes(filter);
+  return evt.primaryCategory === filter;
+}
+
 function showCollection() {
   currentView = 'collection';
   document.getElementById('homeView').classList.add('hidden');
@@ -948,64 +960,96 @@ function showCollection() {
   document.getElementById('navCollection').classList.add('active');
 
   if (collection.length === 0) {
-    cv.innerHTML = '<div class="empty"><div class="empty-icon">🌿</div><h3>Samlingen din er tom</h3><p>Ta bilder og lagre artene du finner!</p>' +
+    cv.innerHTML = '<div class="empty"><div class="empty-icon">🌿</div><h3>Samlingen din er tom</h3><p>Scan noe i naturen og lagre hendelsen!</p>' +
       '<button class="camera-btn" style="margin-top:20px;max-width:250px;font-size:15px;padding:14px" onclick="showHome()">Start å utforske</button></div>';
     return;
   }
 
-  // Get unique categories
-  const cats = [...new Set(collection.map(i => i.category))].sort();
-
-  // Filter
-  const filtered = collectionFilter === 'all' ? collection : collection.filter(i => i.category === collectionFilter);
-
-  // Sort by newest first
+  const cats = getAllCategories();
+  const filtered = collection.filter(evt => eventMatchesFilter(evt, collectionFilter));
   const sorted = [...filtered].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-  // Stats
-  const uniqueCats = cats.length;
+  // Count total species across all events
+  const totalSpecies = collection.reduce((sum, evt) => sum + (evt.results ? evt.results.length : 1), 0);
 
   cv.innerHTML =
     '<div class="section-title" style="margin-bottom:4px">Min samling</div>' +
     '<div class="collection-stats">' +
-      '<div class="collection-stat"><div class="collection-stat-num">' + collection.length + '</div><div class="collection-stat-label">Funn</div></div>' +
-      '<div class="collection-stat"><div class="collection-stat-num">' + uniqueCats + '</div><div class="collection-stat-label">Kategorier</div></div>' +
+      '<div class="collection-stat"><div class="collection-stat-num">' + collection.length + '</div><div class="collection-stat-label">Hendelser</div></div>' +
+      '<div class="collection-stat"><div class="collection-stat-num">' + totalSpecies + '</div><div class="collection-stat-label">Arter</div></div>' +
+      '<div class="collection-stat"><div class="collection-stat-num">' + cats.length + '</div><div class="collection-stat-label">Kategorier</div></div>' +
     '</div>' +
     '<div class="collection-filter">' +
       '<select id="catFilter" onchange="filterCollection(this.value)">' +
-        '<option value="all"' + (collectionFilter === 'all' ? ' selected' : '') + '>Alle kategorier (' + collection.length + ')</option>' +
+        '<option value="all"' + (collectionFilter === 'all' ? ' selected' : '') + '>Se alle (' + collection.length + ')</option>' +
         cats.map(c => {
-          const count = collection.filter(i => i.category === c).length;
+          const count = collection.filter(evt => eventMatchesFilter(evt, c)).length;
           return '<option value="' + c.replace(/"/g,'&quot;') + '"' + (collectionFilter === c ? ' selected' : '') + '>' + c + ' (' + count + ')</option>';
         }).join('') +
       '</select>' +
     '</div>' +
-    (sorted.length === 0 ? '<div style="text-align:center;padding:30px;color:var(--ghost)">Ingen funn i denne kategorien</div>' :
-    sorted.map(item => {
-      const confCls = (item.confidence || 0) >= 75 ? 'high' : (item.confidence || 0) >= 50 ? 'medium' : 'low';
-      const dateStr = item.timestamp ? formatDate(item.timestamp) : '';
-      const imgHTML = item.image
-        ? '<img class="collection-event-img" src="' + item.image + '" alt="' + item.name + '">'
-        : '<div class="collection-event-img placeholder">' + (item.category ? item.category.split(' ')[0] : '🌿') + '</div>';
+    (sorted.length === 0 ? '<div style="text-align:center;padding:30px;color:var(--ghost)">Ingen hendelser i denne kategorien</div>' :
+    sorted.map(evt => {
+      const dateStr = evt.timestamp ? formatDate(evt.timestamp) : '';
+      const results = evt.results || [];
+      const topResult = results[0];
+      const speciesNames = results.map(r => r.name).join(', ') || evt.primaryName || 'Ukjent';
+      const catTags = (evt.categories || [evt.primaryCategory]).filter(Boolean);
 
-      return '<div class="collection-event">' +
+      const imgHTML = evt.image
+        ? '<img class="collection-event-img" src="' + evt.image + '" alt="Hendelse">'
+        : '<div class="collection-event-img placeholder">📷</div>';
+
+      const evtId = 'evt-' + evt.id;
+
+      return '<div class="collection-event" onclick="toggleEventDetail(\'' + evtId + '\')">' +
         '<div class="collection-event-inner">' +
           imgHTML +
           '<div class="collection-event-info">' +
-            '<div class="collection-event-name">' + item.name + '</div>' +
-            '<div class="collection-event-latin">' + (item.latin || '') + '</div>' +
+            '<div class="collection-event-name">' + (topResult ? topResult.name : evt.primaryName || 'Hendelse') + '</div>' +
+            (results.length > 1 ? '<div style="font-size:11px;color:var(--ghost);margin-top:1px">+ ' + (results.length - 1) + ' andre arter</div>' : '') +
             '<div class="collection-event-meta">' +
-              '<span class="collection-event-cat">' + (item.category || '') + '</span>' +
-              (item.confidence ? '<span class="collection-event-conf ' + confCls + '">' + item.confidence + '%</span>' : '') +
+              catTags.map(c => '<span class="collection-event-cat">' + c + '</span>').join(' ') +
             '</div>' +
             (dateStr ? '<div class="collection-event-date">📅 ' + dateStr + '</div>' : '') +
           '</div>' +
           '<div class="collection-event-actions">' +
-            '<button class="remove-btn" onclick="removeFromCollection(' + item.id + ')">🗑️</button>' +
+            '<button class="remove-btn" onclick="event.stopPropagation(); removeFromCollection(' + evt.id + ')">🗑️</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="event-detail hidden" id="' + evtId + '">' +
+          (evt.image ? '<img src="' + evt.image + '" style="width:100%;border-radius:0;max-height:300px;object-fit:cover;" alt="Bilde">' : '') +
+          '<div style="padding:12px">' +
+            results.map((r, i) => {
+              const confCls = (r.confidence || 0) >= 75 ? 'high' : (r.confidence || 0) >= 50 ? 'medium' : 'low';
+              return '<div style="' + (i > 0 ? 'border-top:1px solid var(--warm);padding-top:10px;margin-top:10px;' : '') + '">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+                  '<div>' +
+                    '<div class="result-category">' + (i === 0 ? '🏆 ' : '') + r.category + '</div>' +
+                    '<div class="result-name" style="font-size:17px">' + r.name + '</div>' +
+                    '<div class="result-latin">' + (r.latin || '') + '</div>' +
+                  '</div>' +
+                  '<span class="collection-event-conf ' + confCls + '">' + (r.confidence || '?') + '%</span>' +
+                '</div>' +
+                '<p style="font-size:12.5px;color:#4a4640;line-height:1.6;margin:8px 0">' + (r.description || '') + '</p>' +
+                '<div class="detail-grid">' +
+                  '<div class="detail-item"><div class="detail-label">📍 Habitat</div><div class="detail-value">' + (r.habitat || '') + '</div></div>' +
+                  '<div class="detail-item"><div class="detail-label">📅 Sesong</div><div class="detail-value">' + (r.season || '') + '</div></div>' +
+                  '<div class="detail-item"><div class="detail-label">🔍 Sjeldenhet</div><div class="detail-value">' + (r.rarity || '') + '</div></div>' +
+                  '<div class="detail-item"><div class="detail-label">' + (r.edible ? '✅' : '❌') + ' Spiselig</div><div class="detail-value">' + (r.edible ? 'Ja' : 'Nei') + '</div></div>' +
+                '</div>' +
+                (r.funFact ? '<div class="fun-fact"><span style="font-size:16px;flex-shrink:0">💡</span><span>' + r.funFact + '</span></div>' : '') +
+              '</div>';
+            }).join('') +
           '</div>' +
         '</div>' +
       '</div>';
     }).join(''));
+}
+
+function toggleEventDetail(evtId) {
+  const el = document.getElementById(evtId);
+  if (el) el.classList.toggle('hidden');
 }
 
 function filterCollection(val) {
