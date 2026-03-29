@@ -6,6 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Naturkjenner">
+<meta name="theme-color" content="#1f3d2b">
+<meta name="description" content="Identifiser norske arter med AI – planter, dyr, sopp, fugler, dyrespor og marint liv">
+<link rel="manifest" href="data:application/json,{%22name%22:%22Naturkjenner%22,%22short_name%22:%22Naturkjenner%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f7f3ec%22,%22theme_color%22:%22%231f3d2b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Crect%2520fill%3D%27%25231f3d2b%27%2520width%3D%2527100%27%2520height%3D%2527100%27%2520rx%3D%252720%27%2F%253E%253Ctext%2520y%3D%2527.9em%27%2520x%3D%252750%27%2520text-anchor%3D%27middle%27%2520font-size%3D%252760%27%2520dominant-baseline%3D%27middle%27%253E%25F0%259F%258C%25BF%253C%2Ftext%253E%253C%2Fsvg%253E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f3d2b' width='100' height='100' rx='20'/><text y='.9em' x='50' text-anchor='middle' font-size='60' dominant-baseline='middle'>🌿</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f3d2b' width='100' height='100' rx='20'/><text y='.9em' x='50' text-anchor='middle' font-size='60' dominant-baseline='middle'>🌿</text></svg>">
 <title>Naturkjenner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -215,6 +220,10 @@ body::before {
         <h3>🌊 Slik bruker du appen</h3>
         <p><strong>1.</strong> Ta bilde av noe du finner i naturen<br><strong>2.</strong> AI-en analyserer bildet og identifiserer arten<br><strong>3.</strong> Lagre funn i samlingen din<br><strong>4.</strong> Utforsk artsdatabasen for å lære mer</p>
       </div>
+      <div id="seasonBox" style="margin-top:14px; background:white; border-radius:8px; padding:16px; border:1px solid var(--sand);">
+        <div style="font-size:10px; font-weight:600; color:var(--ghost); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px">📅 I sesong nå</div>
+        <div id="seasonContent" style="font-size:13px; color:var(--ink); line-height:1.7"></div>
+      </div>
     </div>
   </div>
   <div id="browseView" class="hidden"></div>
@@ -345,6 +354,9 @@ const SPECIES_DB = {
     { name:"Søl", latin:"Palmaria palmata", category:"🌿 Tang/Tare", description:"Rødlig tang. Populær snacks!", habitat:"Eksponert kyst", funFact:"Mer protein enn de fleste grønnsaker.", rarity:"Vanlig", edible:true, season:"Vår–sommer" },
     { name:"Blæretang", latin:"Fucus vesiculosus", category:"🌿 Tang/Tare", description:"Tang med karakteristiske luftblærer.", habitat:"Fjæresonen langs hele kysten", funFact:"Rik på jod og mineraler – brukt i folkemedisin i hundrevis av år.", rarity:"Svært vanlig", edible:true, season:"Hele året" },
     { name:"Fingertare", latin:"Laminaria digitata", category:"🌿 Tang/Tare", description:"Stor tare med fingerformede blad.", habitat:"Strømrike kystområder", funFact:"Brukes til å lage alginat – finnes i iskrem og tannpasta.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Krusflik", latin:"Chondrus crispus", category:"🌿 Tang/Tare", description:"Rødlig, krusete tang. Kalles 'Irish moss'.", habitat:"Fjæresonen, klippekysten", funFact:"Inneholder carrageenan som brukes som fortykningsmiddel i mat – du spiser sannsynligvis dette ukentlig uten å vite det!", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Havsalat", latin:"Ulva lactuca", category:"🌿 Tang/Tare", description:"Tynn, grønn tang som ligner salat. Vanlig i fjæra.", habitat:"Fjæresonen, brygger, steiner", funFact:"Kan spises rå som salat eller tørkes til snacks. Rik på jern og vitamin C.", rarity:"Svært vanlig", edible:true, season:"Mai–Okt" },
+    { name:"Stortare", latin:"Laminaria hyperborea", category:"🌿 Tang/Tare", description:"Norges største tang – kan bli 3 meter. Danner undervannsskog.", habitat:"Eksponert kyst ned til 30 meter", funFact:"Tareskogene langs norskekysten er blant verdens mest produktive økosystemer.", rarity:"Vanlig", edible:true, season:"Hele året" },
   ],
   other: [
     { name:"Sjøstjerne", latin:"Asterias rubens", category:"⭐ Havliv", description:"Rød/oransje med 5 armer.", habitat:"Fjæresonen", funFact:"Kan regenerere en tapt arm!", rarity:"Vanlig", edible:false, season:"Hele året" },
@@ -393,6 +405,10 @@ const SPECIES_DB = {
     { name:"Edderkoppspinner", latin:"Araneus diadematus", category:"🐛 Insekt", description:"Korsedderkopp med tydelig korsmerke på bakkroppen.", habitat:"Hager, skog, busker", funFact:"Spinner nytt nett hver eneste natt.", rarity:"Svært vanlig", edible:false, season:"Apr–Okt" },
     { name:"Løpebille", latin:"Carabus nemoralis", category:"🐛 Insekt", description:"Stor, mørk bille som løper raskt på bakken.", habitat:"Hager, skog, kompost", funFact:"Nyttig for hagen – spiser snegler og skadedyr.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
     { name:"Sitronsommerfugl", latin:"Gonepteryx rhamni", category:"🐛 Insekt", description:"Knallgul sommerfugl – vårens første tegn.", habitat:"Skogkanter, hager", funFact:"Lever i opptil 13 måneder – lengst av alle europeiske sommerfugler.", rarity:"Vanlig", edible:false, season:"Mar–Sept" },
+    { name:"Flått", latin:"Ixodes ricinus", category:"🐛 Insekt", description:"Blodsugendemidd som kan overføre borreliose og TBE.", habitat:"Skog, kratt, høyt gress", funFact:"Kan vente i opptil 3 år på et bytte. Sjekk deg alltid etter turer i skog!", rarity:"Svært vanlig", edible:false, season:"Mar–Nov" },
+    { name:"Veps", latin:"Vespula vulgaris", category:"🐛 Insekt", description:"Gul-svart stripet insekt. Kan stikke gjentatte ganger.", habitat:"Hager, skog, bygninger", funFact:"Veps spiser skadedyr og pollinerer – de er faktisk nyttige, bare irriterende i august.", rarity:"Svært vanlig", edible:false, season:"Mai–Okt" },
+    { name:"Neslesommerfugl", latin:"Aglais urticae", category:"🐛 Insekt", description:"Oransje-svart sommerfugl. En av de første om våren.", habitat:"Hager, enger, veikanter", funFact:"Larvene lever kun på brennesle – derav navnet.", rarity:"Svært vanlig", edible:false, season:"Mar–Okt" },
+    { name:"Skogsmaur", latin:"Formica rufa", category:"🐛 Insekt", description:"Bygger store maurtuer av barnåler i skogen.", habitat:"Barskog", funFact:"En stor maurtue kan inneholde over 500 000 maur og regulerer temperaturen selv.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
   ],
   tracks: [
     { name:"Elgspor", latin:"Alces alces", category:"🐾 Spor", description:"Store, avlange klover (12-16 cm). To tydelige halvmåner. Ofte dype avtrykk i bløt mark.", habitat:"Skog over hele Norge", funFact:"Elg har biklover som vises i dyp snø – ser ut som fire merker.", rarity:"Vanlig", edible:false, season:"Hele året" },
@@ -490,10 +506,11 @@ HVA DU SKAL IDENTIFISERE (vær ivrig!):
 - Alle levende organismer: dyr, fugler, fisk, krabber, skalldyr, skjell, insekter, edderkopper, snegler, sjødyr, pattedyr, reptiler
 - Alle planter: blomster, trær, busker, gress, mose, lav, sopp, bær, tang, tare, alger
 - Også døde/tørkede naturlige organismer (f.eks. skjell på stranda, tørt sjøgress)
-- DYRESPOR: fotspor/klover i snø, gjørme eller sand – identifiser HVILKET DYR som laget sporet
-- AVFØRING/EKSKREMENTER: identifiser HVILKET DYR avføringen kommer fra basert på form, størrelse og innhold
-- GNAGMERKER: bevergnag på trær, barkgnag fra elg/hjort, pinnekvist-biting fra rådyr
-- FJÆR: løse fjær på bakken – identifiser hvilken fugl de tilhører
+- DYRESPOR: fotspor/klover i snø, gjørme eller sand – identifiser HVILKET DYR som laget sporet. Vurder sporform, størrelse, klomerker, biklover og gangmønster.
+- AVFØRING/EKSKREMENTER: identifiser HVILKET DYR avføringen kommer fra. Vurder: form (pellets=hjortedyr/hare, pølse=rovdyr), størrelse, innhold (hår/bein=rovdyr, planterester=hjortedyr), plassering (synlig sted=revir-markering).
+- GNAGMERKER: bevergnag på trær (timeglassform), barkgnag fra elg/hjort (vertikale striper), pinnekvist-biting fra rådyr (rufsete kutt vs. hare som kutter rent)
+- FJÆR: løse fjær på bakken – identifiser hvilken fugl de tilhører basert på farge, mønster, størrelse og form
+- Når du identifiserer spor/avføring, bruk category "🐾 Spor" og oppgi DYRETS navn (f.eks. "Elgspor" eller "Rev-avføring"), ikke bare "spor"
 
 HVA DU SKAL IGNORERE (ikke identifiser disse):
 - Menneskeskapte objekter: emballasje, produkter, møbler, bygninger, klær, tekst, logoer
@@ -815,8 +832,35 @@ function removeFromCollection(name) {
   showCollection();
 }
 
+// ============================================================
+// SEASONAL GUIDE
+// ============================================================
+function updateSeasonGuide() {
+  const el = document.getElementById('seasonContent');
+  if (!el) return;
+  const month = new Date().getMonth(); // 0-11
+  const seasons = {
+    0: { emoji: '❄️', title: 'Januar', tips: 'Dyrespor i snøen er perfekt for sporing! Se etter elg-, rev- og harespor. Sjøpinnsvin-sesong langs kysten. Fugler ved fôrbrettet: kjøttmeis, blåmeis, flaggspett. Stjernebilder er tydelige på kalde, klare kvelder.' },
+    1: { emoji: '❄️', title: 'Februar', tips: 'Fortsatt gode sporingsforhold i snøen. Gaupespor i fjellskogen. Havørn starter hekkesesongen. Sjøpinnsvin-sesong fortsetter. Første tegn til vår: rødhals synger i hagen.' },
+    2: { emoji: '🌱', title: 'Mars', tips: 'Vårtegn! Sitronsommerfugl og neslesommerfugl dukker opp. Hestehov blomstrer som en av de første. Rådyr og hjort feller gevir – se etter gevirstenger! Trekkfugler begynner å komme tilbake.' },
+    3: { emoji: '🌸', title: 'April', tips: 'Hvitveis dekker skogbunnen. Ramsløk-sesong starter! Lunde og sjøfugl ankommer kystklippene. Grodder og frosker i dammer. Humler er aktive – viktig for pollinering.' },
+    4: { emoji: '🌿', title: 'Mai', tips: 'Blomstereng-sesong! Tiriltunge, blåklokke, prestekrage. Fuglekvitter overalt – lær deg sangene. Tang og tare er best å høste nå. Pinnsvin våkner fra dvale.' },
+    5: { emoji: '☀️', title: 'Juni', tips: 'Bær begynner å modne: jordbær og markjordbær. Makrell langs kysten. Sommerfugler overalt. Orkidéer i kalkrik mark. Sel på skjær med unger.' },
+    6: { emoji: '🍓', title: 'Juli', tips: 'Blåbær og bringebær! Kantarell-sesongen starter i slutten av juli. Makrellfiske fra brygga. Krabber nær land. Sjøstjerner og sjøanemoner i fjæra.' },
+    7: { emoji: '🍄', title: 'August', tips: 'SOPP-SESONG! Kantarell, steinsopp, piggsopp. Bær overalt: blåbær, tyttebær, molte. Krabbesafari langs kysten. Østers-sesong starter. Rød fluesopp dukker opp – vakker men giftig!' },
+    8: { emoji: '🍂', title: 'September', tips: 'Sopp-høysesong: traktkantarell, krepling, svart trompetsopp. Tyttebær og tranebær. Hjort-brunst på Vestlandet – hør brølingen! Trekkfugler samler seg for avreise.' },
+    9: { emoji: '🍁', title: 'Oktober', tips: 'Siste sopp-sjanse: traktkantarell holder seg lenge. Høstfarger i skogen. Elg-brunst. Trekkfuglene drar sørover. Blåskjell-sesong starter igjen.' },
+    10: { emoji: '🌧️', title: 'November', tips: 'Dyrespor blir synlige igjen med første snø. Fugler samler seg ved fôrbrett. Storskarv og havørn langs kysten. Sjøpinnsvin-sesong nærmer seg. Forbered deg på vinter-sporing!' },
+    11: { emoji: '⛄', title: 'Desember', tips: 'Vinter-sporing: rev, hare og rådyr-spor i snøen. Fugler ved fôrbrettet. Nordlys i nord! Stjernebilder tydelige. Sjøpinnsvin-sesong startet. Perfekt tid for innendørs artslæring.' },
+  };
+  const s = seasons[month] || seasons[0];
+  el.innerHTML = '<div style="font-family:Playfair Display,Georgia,serif;font-size:15px;font-weight:600;color:var(--forest);margin-bottom:6px">' + s.emoji + ' ' + s.title + '</div>' +
+    '<div style="font-size:12.5px;color:#555;line-height:1.65">' + s.tips + '</div>';
+}
+
 // Init
 renderApiStatus();
+updateSeasonGuide();
 </script>
 </body>
 </html>
