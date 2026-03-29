@@ -159,7 +159,7 @@ body::before {
   <div class="header-inner">
     <div>
       <h1>Naturkjenner <span class="ai-badge">AI</span></h1>
-      <div class="subtitle">Identifiser planter, dyr og marint liv</div>
+      <div class="subtitle">Identifiser planter, dyr, spor og marint liv</div>
     </div>
     <button class="collection-badge" onclick="showCollection()">
       📋 <span id="collectionCount">0</span>
@@ -194,6 +194,7 @@ body::before {
         <button class="explore-btn" onclick="browseCategory('shells')"><div class="explore-icon">🐚</div><div class="explore-label">Skjell</div></button>
         <button class="explore-btn" onclick="browseCategory('seaweed')"><div class="explore-icon">🌿</div><div class="explore-label">Tang</div></button>
         <button class="explore-btn" onclick="browseCategory('insects')"><div class="explore-icon">🐛</div><div class="explore-label">Insekter</div></button>
+        <button class="explore-btn" onclick="browseCategory('tracks')"><div class="explore-icon">🐾</div><div class="explore-label">Spor</div></button>
         <button class="explore-btn" onclick="browseCategory('other')"><div class="explore-icon">⭐</div><div class="explore-label">Havliv</div></button>
       </div>
       <div class="howto">
@@ -365,9 +366,25 @@ const SPECIES_DB = {
     { name:"Edderkoppspinner", latin:"Araneus diadematus", category:"🐛 Insekt", description:"Korsedderkopp med tydelig korsmerke på bakkroppen.", habitat:"Hager, skog, busker", funFact:"Spinner nytt nett hver eneste natt.", rarity:"Svært vanlig", edible:false, season:"Apr–Okt" },
     { name:"Løpebille", latin:"Carabus nemoralis", category:"🐛 Insekt", description:"Stor, mørk bille som løper raskt på bakken.", habitat:"Hager, skog, kompost", funFact:"Nyttig for hagen – spiser snegler og skadedyr.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
     { name:"Sitronsommerfugl", latin:"Gonepteryx rhamni", category:"🐛 Insekt", description:"Knallgul sommerfugl – vårens første tegn.", habitat:"Skogkanter, hager", funFact:"Lever i opptil 13 måneder – lengst av alle europeiske sommerfugler.", rarity:"Vanlig", edible:false, season:"Mar–Sept" },
+  ],
+  tracks: [
+    { name:"Elgspor", latin:"Alces alces", category:"🐾 Spor", description:"Store, avlange klover (12-16 cm). To tydelige halvmåner. Ofte dype avtrykk i bløt mark.", habitat:"Skog over hele Norge", funFact:"Elg har biklover som vises i dyp snø – ser ut som fire merker.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Elg-avføring", latin:"Alces alces", category:"🐾 Spor", description:"Vinterstid: tørre, ovale pellets (2-3 cm). Sommerstid: klumpete og bløtere pga. grønn vegetasjon.", habitat:"Skog, beiteområder", funFact:"En elg produserer ca. 13 000 lorter per dag om vinteren!", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Hjortespor", latin:"Cervus elaphus", category:"🐾 Spor", description:"Ligner elgspor men mindre (8-10 cm). Mer avrundet form. Vanligst på Vestlandet.", habitat:"Skog, fjellsider, Vestlandet", funFact:"Hjorten setter sporene tettere enn elgen – kortere bein i forhold til kroppen.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Rådyrspor", latin:"Capreolus capreolus", category:"🐾 Spor", description:"Små, spisse klover (4-5 cm). Elegante, smale avtrykk. Ofte parvis.", habitat:"Skog, åkerkanter", funFact:"Rådyr setter bakfoten nøyaktig der framfoten var – kalles 'registrering'.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Rådyr-avføring", latin:"Capreolus capreolus", category:"🐾 Spor", description:"Små, mørke pellets (1-1.5 cm), ofte i hauger på 20-30 stk. Glatte og ovale.", habitat:"Skog, åkerkanter", funFact:"Rådyr har faste 'do-plasser' der de legger fra seg gjentatte ganger.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Revespor", latin:"Vulpes vulpes", category:"🐾 Spor", description:"Hundelignende, men smalere og mer ovalt (5 cm). Klo-merker synlige. Rett linje – 'snorgang'.", habitat:"Over hele Norge", funFact:"Reven går i perfekt linje – bakpotene treffer nøyaktig der frampotene var.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Rev-avføring", latin:"Vulpes vulpes", category:"🐾 Spor", description:"Pølseformet, spiss i ene enden (5-8 cm). Mørk, ofte med hår, bær eller bein-rester synlig.", habitat:"Stier, steiner, tuer", funFact:"Reven legger avføring på synlige steder for å markere territorium.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Harespor", latin:"Lepus timidus", category:"🐾 Spor", description:"Karakteristisk Y-mønster i snø. Store bakpoter (12-15 cm) foran de små framføttene.", habitat:"Fjell, skog, vidder", funFact:"Haren lander med bakføttene FORAN framføttene – derfor ser sporet 'baklengs' ut.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Gaupespor", latin:"Lynx lynx", category:"🐾 Spor", description:"Rundt kattespor uten klomerker (7-8 cm). Stort – mye større enn vanlig katt.", habitat:"Skog, fjellskog", funFact:"Gaupen trekker inn klørne når den går – derfor ingen klomerker i sporet.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Bevergnag", latin:"Castor fiber", category:"🐾 Spor", description:"Tydelige tannmerker på trær. Timeglassform der beveren har gnagd. Spon på bakken.", habitat:"Elver, innsjøer, bekker", funFact:"En bever kan felle et tre med 15 cm diameter på under 30 minutter.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Oterspor", latin:"Lutra lutra", category:"🐾 Spor", description:"5 tydelige tær med svømmehud-avtrykk. Ca. 6-7 cm bredt. Ofte glidemønstre i snø/gjørme.", habitat:"Elver, innsjøer, kyst", funFact:"Oteren glir på magen ned bakker og snøflater – sporene viser tydelig sklimønster.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Grevlingspor", latin:"Meles meles", category:"🐾 Spor", description:"Bredt spor (6-7 cm) med 5 tær og tydelige klomerker. Ligner en liten bjørnepote.", habitat:"Løvskog, jordbruksland", funFact:"Grevlingen har egne 'do-groper' – grunne hull der hele familiegruppen gjør fra seg.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
+    { name:"Fuglespor i snø", latin:"Diverse", category:"🐾 Spor", description:"Varierer fra små meise-spor (2 cm) til store orrfugl-spor (8 cm). Ser etter antall tær og mønster.", habitat:"Over hele Norge", funFact:"Ryper graver seg ned i snøen for å sove – du kan se hull der de dykket ned og kom opp.", rarity:"Svært vanlig", edible:false, season:"Okt–Apr" },
+    { name:"Bjørnespor", latin:"Ursus arctos", category:"🐾 Spor", description:"Enormt spor (15-20 cm) med 5 tær og klomerker. Bakpoten ligner et menneskefotspor.", habitat:"Finnmark, Troms, indre Hedmark", funFact:"Norge har kun ca. 175 bjørner – å finne bjørnespor er ekstremt sjeldent!", rarity:"Svært sjelden", edible:false, season:"Apr–Okt" },
   ]
 };
-const CAT_NAMES = { flowers:"Blomster", trees:"Trær", berries:"Bær", mushrooms:"Sopp", marine:"Fisk", shellfish:"Skalldyr", shells:"Skjell", seaweed:"Tang & Tare", other:"Havliv", birds:"Fugler", animals:"Dyr", insects:"Insekter" };
+const CAT_NAMES = { flowers:"Blomster", trees:"Trær", berries:"Bær", mushrooms:"Sopp", marine:"Fisk", shellfish:"Skalldyr", shells:"Skjell", seaweed:"Tang & Tare", other:"Havliv", birds:"Fugler", animals:"Dyr", insects:"Insekter", tracks:"Dyrespor & Avføring" };
 
 // ============================================================
 // STATE
@@ -392,6 +409,10 @@ HVA DU SKAL IDENTIFISERE (vær ivrig!):
 - Alle levende organismer: dyr, fugler, fisk, krabber, skalldyr, skjell, insekter, edderkopper, snegler, sjødyr, pattedyr, reptiler
 - Alle planter: blomster, trær, busker, gress, mose, lav, sopp, bær, tang, tare, alger
 - Også døde/tørkede naturlige organismer (f.eks. skjell på stranda, tørt sjøgress)
+- DYRESPOR: fotspor/klover i snø, gjørme eller sand – identifiser HVILKET DYR som laget sporet
+- AVFØRING/EKSKREMENTER: identifiser HVILKET DYR avføringen kommer fra basert på form, størrelse og innhold
+- GNAGMERKER: bevergnag på trær, barkgnag fra elg/hjort, pinnekvist-biting fra rådyr
+- FJÆR: løse fjær på bakken – identifiser hvilken fugl de tilhører
 
 HVA DU SKAL IGNORERE (ikke identifiser disse):
 - Menneskeskapte objekter: emballasje, produkter, møbler, bygninger, klær, tekst, logoer
@@ -406,7 +427,7 @@ For HVER art du identifiserer (maks 3), gi følgende i et JSON-array:
   {
     "name": "Norsk navn",
     "latin": "Latinsk artsnavn",
-    "category": "Bruk en av: 🌸 Blomst, 🌳 Tre, 🍇 Bær, 🍄 Sopp, 🐟 Fisk, 🦀 Skalldyr, 🐚 Skjell, 🌿 Tang/Tare, ⭐ Havliv, 🦭 Sjøpattedyr, 🦅 Fugl, 🦌 Dyr, 🌱 Plante, 🪨 Mose/Lav, 🐛 Insekt",
+    "category": "Bruk en av: 🌸 Blomst, 🌳 Tre, 🍇 Bær, 🍄 Sopp, 🐟 Fisk, 🦀 Skalldyr, 🐚 Skjell, 🌿 Tang/Tare, ⭐ Havliv, 🦭 Sjøpattedyr, 🦅 Fugl, 🦌 Dyr, 🌱 Plante, 🪨 Mose/Lav, 🐛 Insekt, 🐾 Spor",
     "confidence": 85,
     "description": "Kort beskrivelse på norsk (1-2 setninger)",
     "habitat": "Hvor den finnes i Norge",
