@@ -100,8 +100,12 @@ body::before {
 .result-card.top { border-left: 3px solid var(--gold); border-color: var(--sand); border-left-color: var(--gold); }
 .result-card-inner { padding: 14px 16px; }
 .result-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.species-thumb { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--warm); }
-.species-thumb-placeholder { width: 56px; height: 56px; border-radius: 6px; flex-shrink: 0; background: var(--warm); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.species-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--warm); cursor: zoom-in; }
+.species-thumb-placeholder { width: 80px; height: 80px; border-radius: 8px; flex-shrink: 0; background: var(--warm); display: flex; align-items: center; justify-content: center; font-size: 30px; }
+.img-zoom-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.img-zoom-overlay img { max-width: 92vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
+.img-zoom-close { position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 28px; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.img-zoom-name { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 0; right: 0; text-align: center; color: white; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 .result-category { font-size: 10px; color: var(--ghost); font-weight: 500; display: flex; align-items: center; gap: 5px; margin-bottom: 3px; letter-spacing: 0.8px; text-transform: uppercase; }
 .result-name { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 1px; }
 .result-card.top .result-name { font-size: 21px; }
@@ -180,6 +184,17 @@ body::before {
 .section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
 .cat-title { font-size: 10px; font-weight: 600; color: var(--ghost); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
 .hidden { display: none !important; }
+/* Precache banner */
+.precache-banner { position: fixed; bottom: 0; left: 0; right: 0; background: var(--forest); color: var(--paper); padding: 12px 20px; z-index: 1500; display: flex; align-items: center; gap: 12px; transition: transform 0.4s ease; }
+.precache-banner.done { transform: translateY(100%); }
+.precache-progress { flex: 1; }
+.precache-label { font-size: 11px; color: var(--mist); margin-bottom: 4px; letter-spacing: 0.3px; }
+.precache-bar { height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
+.precache-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.3s ease; width: 0%; }
+.precache-close { background: none; border: none; color: var(--mist); font-size: 18px; cursor: pointer; padding: 4px; }
+/* Image fade-in */
+@keyframes imgFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.species-thumb { animation: imgFadeIn 0.3s ease; }
 .ai-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--leaf); color: white; padding: 2px 7px; border-radius: 3px; font-size: 9px; font-weight: 600; letter-spacing: 0.8px; margin-left: 8px; text-transform: uppercase; }
 .error-box { background: rgba(176,92,58,0.06); border: 1px solid rgba(176,92,58,0.2); border-radius: 8px; padding: 16px; margin-top: 16px; }
 .error-box h4 { color: var(--rust); font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 400; margin-bottom: 6px; }
@@ -225,7 +240,7 @@ body::before {
     </button>
     <div id="resultsArea"></div>
     <div id="exploreArea" style="margin-top:24px">
-      <div class="explore-title">Utforsk arter</div>
+      <div class="explore-title" id="exploreTitle">Utforsk arter</div>
       <input type="search" class="collection-search" id="dbSearch" placeholder="Søk i artsdatabasen – f.eks. kantarell, bjørk, havørn..." oninput="searchDatabase(this.value)">
       <div id="dbSearchResults" class="hidden" style="margin-bottom:16px"></div>
       <div class="explore-grid" id="exploreGrid">
@@ -1112,7 +1127,7 @@ function speciesCardHTML(species, rank, showConfidence) {
   speciesStore[id] = species;
   const imgId = 'img-' + id;
   const emoji = species.category ? species.category.split(' ')[0] : '🌿';
-  queueImage(species.latin, imgId, emoji);
+  queueImage(species.latin, imgId, emoji, species.name);
 
   return '<div class="result-card ' + (isTop ? 'top' : '') + '" onclick="toggleDetails(\'' + id + '\')">' +
     '<div class="result-card-inner">' +
@@ -1202,6 +1217,7 @@ function showHome() {
   if (dbS) dbS.value = '';
   if (dbR) { dbR.classList.add('hidden'); dbR.innerHTML = ''; }
   if (grid) grid.style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function browseCategory(key) {
@@ -1213,8 +1229,10 @@ function browseCategory(key) {
   const species = SPECIES_DB[key] || [];
   bv.innerHTML = '<button class="back-btn" onclick="showHome()">← Tilbake</button>' +
     '<div class="section-title">' + (CAT_NAMES[key] || key) + '</div>' +
+    '<div style="font-size:12px;color:var(--ghost);margin:-10px 0 14px">' + species.length + ' arter i databasen</div>' +
     species.map((sp, i) => speciesCardHTML(sp, -1, false)).join('');
   setTimeout(flushImageQueue, 50);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 let collectionFilter = 'all';
@@ -1248,7 +1266,8 @@ async function getSpeciesImageUrl(latin) {
     const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(searchName));
     if (resp.ok) {
       const data = await resp.json();
-      const url = data.thumbnail ? data.thumbnail.source : null;
+      const rawUrl = data.thumbnail ? data.thumbnail.source : null;
+      const url = rawUrl ? rawUrl.replace(/\/\d+px-/, '/320px-') : null;
       imgMemCache[latin] = url;
       await imgCacheSet(latin, url);
       return url;
@@ -1291,28 +1310,104 @@ async function imgCacheSet(key, val) {
   } catch(e) {}
 }
 
+// ============================================================
+// PRECACHE – last ned alle artsbilder i bakgrunnen
+// ============================================================
+async function precacheAllImages() {
+  // Collect all latin names
+  const allSpecies = [];
+  for (const [key, species] of Object.entries(SPECIES_DB)) {
+    for (const sp of species) {
+      if (sp.latin) allSpecies.push(sp.latin);
+    }
+  }
+  // Check how many are already cached
+  let cached = 0;
+  for (const latin of allSpecies) {
+    if (imgMemCache[latin] !== undefined) { cached++; continue; }
+    const c = await imgCacheGet(latin);
+    if (c !== undefined) { imgMemCache[latin] = c; cached++; }
+  }
+  const toFetch = allSpecies.filter(l => imgMemCache[l] === undefined);
+  if (toFetch.length === 0) return; // Already fully cached
+
+  // Show progress banner
+  const banner = document.createElement('div');
+  banner.className = 'precache-banner';
+  banner.id = 'precacheBanner';
+  banner.innerHTML = '<div class="precache-progress">' +
+    '<div class="precache-label" id="precacheLabel">Laster artsbilder for offline-bruk...</div>' +
+    '<div class="precache-bar"><div class="precache-bar-fill" id="precacheBar"></div></div>' +
+    '</div>' +
+    '<button class="precache-close" onclick="dismissPrecache()">✕</button>';
+  document.body.appendChild(banner);
+
+  const bar = document.getElementById('precacheBar');
+  const label = document.getElementById('precacheLabel');
+  let done = 0;
+  const total = toFetch.length;
+
+  // Fetch in batches of 4 to avoid overwhelming the browser
+  for (let i = 0; i < toFetch.length; i += 4) {
+    if (window._precacheDismissed) break;
+    const batch = toFetch.slice(i, i + 4);
+    await Promise.allSettled(batch.map(latin => getSpeciesImageUrl(latin)));
+    done += batch.length;
+    const pct = Math.round((done / total) * 100);
+    if (bar) bar.style.width = pct + '%';
+    if (label) label.textContent = 'Laster artsbilder... ' + done + '/' + total;
+  }
+
+  if (label && !window._precacheDismissed) label.textContent = '✅ Alle ' + allSpecies.length + ' artsbilder klare for offline!';
+  setTimeout(() => {
+    const b = document.getElementById('precacheBanner');
+    if (b) { b.classList.add('done'); setTimeout(() => b.remove(), 500); }
+  }, 2500);
+  localStorage.setItem('nk_images_cached', '1');
+}
+
+window._precacheDismissed = false;
+function dismissPrecache() {
+  window._precacheDismissed = true;
+  const b = document.getElementById('precacheBanner');
+  if (b) { b.classList.add('done'); setTimeout(() => b.remove(), 500); }
+}
+
 const imgQueue = [];
 
-function queueImage(latin, imgId, emoji) {
-  imgQueue.push({ latin, imgId, emoji });
+function queueImage(latin, imgId, emoji, name) {
+  imgQueue.push({ latin, imgId, emoji, name });
 }
 
 function flushImageQueue() {
   const batch = imgQueue.splice(0);
-  batch.forEach(({ latin, imgId, emoji }) => {
+  batch.forEach(({ latin, imgId, emoji, name }) => {
     getSpeciesImageUrl(latin).then(url => {
       const el = document.getElementById(imgId);
       if (el && url) {
         const img = document.createElement('img');
         img.className = 'species-thumb';
         img.src = url;
-        img.alt = '';
+        img.alt = name || '';
         img.loading = 'lazy';
+        img.setAttribute('data-full', url.replace(/\/\d+px-/, '/800px-'));
+        img.setAttribute('data-name', name || '');
+        img.onclick = function(e) { e.stopPropagation(); zoomImage(this.getAttribute('data-full'), this.getAttribute('data-name')); };
         img.onerror = function() { this.outerHTML = '<div class="species-thumb-placeholder">' + emoji + '</div>'; };
         el.replaceWith(img);
       }
     });
   });
+}
+
+function zoomImage(src, name) {
+  const overlay = document.createElement('div');
+  overlay.className = 'img-zoom-overlay';
+  overlay.onclick = () => overlay.remove();
+  overlay.innerHTML = '<button class="img-zoom-close" onclick="this.parentElement.remove()">✕</button>' +
+    '<img src="' + src + '" alt="' + (name || '') + '">' +
+    (name ? '<div class="img-zoom-name">' + name + '</div>' : '');
+  document.body.appendChild(overlay);
 }
 
 // DATABASE SEARCH
@@ -1400,6 +1495,7 @@ function showCollection() {
   currentView = 'collection';
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('browseView').classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   const cv = document.getElementById('collectionView');
   cv.classList.remove('hidden');
   document.getElementById('navHome').classList.remove('active');
@@ -1575,10 +1671,21 @@ if ('serviceWorker' in navigator) {
 // Init
 renderApiStatus();
 updateSeasonGuide();
+// Show total species count
+(function(){
+  let total = 0;
+  for (const k in SPECIES_DB) total += SPECIES_DB[k].length;
+  const t = document.getElementById('exploreTitle');
+  if (t) t.textContent = 'Utforsk ' + total + ' arter';
+})();
 (async () => {
   await migrateFromLocalStorage();
   collection = await dbGetAll();
   updateCollectionCount();
+  // Auto-precache images after short delay (don't block UI)
+  setTimeout(() => {
+    precacheAllImages();
+  }, 2000);
 })();
 </script>
 </body>
