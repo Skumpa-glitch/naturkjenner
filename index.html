@@ -486,7 +486,7 @@ function safetyWarningHTML(species) {
 // ============================================================
 // STATE
 // ============================================================
-let collection = [];
+let collection = JSON.parse(localStorage.getItem('naturkjenner_collection') || '[]');
 let currentView = 'home';
 
 // ============================================================
@@ -674,9 +674,11 @@ async function handleFile(e) {
 // RENDER
 // ============================================================
 function isSaved(name) { return collection.some(s => s.name === name); }
+function saveCollection() { localStorage.setItem('naturkjenner_collection', JSON.stringify(collection)); }
 function toggleSave(species) {
   if (isSaved(species.name)) collection = collection.filter(s => s.name !== species.name);
   else collection.push(species);
+  saveCollection();
   updateCollectionCount();
 }
 function updateCollectionCount() { document.getElementById('collectionCount').textContent = collection.length; }
@@ -828,6 +830,7 @@ function showCollection() {
 
 function removeFromCollection(name) {
   collection = collection.filter(s => s.name !== name);
+  saveCollection();
   updateCollectionCount();
   showCollection();
 }
@@ -861,6 +864,7 @@ function updateSeasonGuide() {
 // Init
 renderApiStatus();
 updateSeasonGuide();
+updateCollectionCount();
 </script>
 </body>
 </html>
