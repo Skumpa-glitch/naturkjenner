@@ -99,7 +99,9 @@ body::before {
 .result-card { background: white; border-radius: 8px; overflow: hidden; border: 1px solid var(--sand); margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
 .result-card.top { border-left: 3px solid var(--gold); border-color: var(--sand); border-left-color: var(--gold); }
 .result-card-inner { padding: 14px 16px; }
-.result-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.result-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.species-thumb { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--warm); }
+.species-thumb-placeholder { width: 56px; height: 56px; border-radius: 6px; flex-shrink: 0; background: var(--warm); display: flex; align-items: center; justify-content: center; font-size: 24px; }
 .result-category { font-size: 10px; color: var(--ghost); font-weight: 500; display: flex; align-items: center; gap: 5px; margin-bottom: 3px; letter-spacing: 0.8px; text-transform: uppercase; }
 .result-name { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 1px; }
 .result-card.top .result-name { font-size: 21px; }
@@ -172,6 +174,9 @@ body::before {
 .save-event-btn:active { transform: scale(0.98); }
 .save-event-btn.saved { background: var(--forest); color: var(--paper); border-color: var(--forest); pointer-events: none; }
 .event-detail { border-top: 1px solid var(--sand); }
+.collection-search { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid var(--sand); border-radius: 6px; font-size: 13px; font-family: 'Outfit', sans-serif; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a7060' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center; color: var(--ink); margin-bottom: 10px; -webkit-appearance: none; }
+.collection-search:focus { outline: none; border-color: var(--leaf); }
+.collection-search::placeholder { color: var(--ghost); }
 .section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
 .cat-title { font-size: 10px; font-weight: 600; color: var(--ghost); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
 .hidden { display: none !important; }
@@ -221,7 +226,9 @@ body::before {
     <div id="resultsArea"></div>
     <div id="exploreArea" style="margin-top:24px">
       <div class="explore-title">Utforsk arter</div>
-      <div class="explore-grid">
+      <input type="search" class="collection-search" id="dbSearch" placeholder="Søk i artsdatabasen – f.eks. kantarell, bjørk, havørn..." oninput="searchDatabase(this.value)">
+      <div id="dbSearchResults" class="hidden" style="margin-bottom:16px"></div>
+      <div class="explore-grid" id="exploreGrid">
         <button class="explore-btn" onclick="browseCategory('flowers')"><div class="explore-icon">🌸</div><div class="explore-label">Blomster</div></button>
         <button class="explore-btn" onclick="browseCategory('trees')"><div class="explore-icon">🌳</div><div class="explore-label">Trær</div></button>
         <button class="explore-btn" onclick="browseCategory('berries')"><div class="explore-icon">🍇</div><div class="explore-label">Bær</div></button>
@@ -301,6 +308,43 @@ const SPECIES_DB = {
     { name:"Røsslyng", latin:"Calluna vulgaris", category:"🌸 Blomst", description:"Norges nasjonalblomst! Farger heia lilla om høsten.", habitat:"Lyngheier, åpen mark", funFact:"Lynghonung er en eksklusiv honningtype laget fra røsslyng.", rarity:"Svært vanlig", edible:false, season:"August–September" },
     { name:"Ballblom", latin:"Trollius europaeus", category:"🌸 Blomst", description:"Rund, gul blomst som lyser opp fuktige fjellenger.", habitat:"Fuktige enger, fjellsider", funFact:"Kalles også 'solei' eller 'engkulla' i ulike dialekter.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
     { name:"Skogstjerne", latin:"Trientalis europaea", category:"🌸 Blomst", description:"Liten, hvit stjerneformet blomst i barskogen.", habitat:"Barskog, blandingsskog", funFact:"Har alltid 7 kronblader – et uvanlig tall i planteverdenen.", rarity:"Vanlig", edible:false, season:"Mai–Juli" },
+    { name:"Ramsløk", latin:"Allium ursinum", category:"🌸 Blomst", description:"Hvite blomster med sterk løklukt. Spiselig og populær vårmat.", habitat:"Fuktige løvskoger, bekkesletter", funFact:"Løklukte forsvinner når blomstene tørker og lages til pesto.", rarity:"Vanlig", edible:true, season:"April–Mai" },
+    { name:"Liljekonvall", latin:"Convallaria majalis", category:"🌸 Blomst", description:"Små hvite klokkeformede blomster. Deilig duft. ⚠️ Giftig hvis spist.", habitat:"Løvskoger, hager", funFact:"Brukes i many parfymer. Alle deler av planten er giftig.", rarity:"Vanlig", edible:false, season:"Mai–Juni" },
+    { name:"Blåveis", latin:"Veronica chamaedrys", category:"🌸 Blomst", description:"Små lyseblå blomster med hvite striper. Prydelig kavet plante.", habitat:"Enger, gräsmark, veikanter", funFact:"Blomstene åpner seg bare på solskintimer.", rarity:"Svært vanlig", edible:false, season:"Mai–Juli" },
+    { name:"Hestehov", latin:"Tussilago farfara", category:"🌸 Blomst", description:"Gule blomster på nøt stengel. Kommer før bladene. Påkalles når snøen smeltier.", habitat:"Våte steder, bekker, rasmark", funFact:"Gamle navn 'hundehusten' fordi den ble brukt mot hoste.", rarity:"Vanlig", edible:false, season:"Mars–April" },
+    { name:"Marikåpe", latin:"Alchemilla mollis", category:"🌸 Blomst", description:"Tiny gule blomster i skyld klaser. Gulgrønn farge. Dekorativ.", habitat:"Fuktige enger, skoger, hager", funFact:"Bladene samler duggdråper som funkler i solen – magisk syn.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Gullris", latin:"Solidago virgaurea", category:"🌸 Blomst", description:"Høye gule blomsterknipper. Høstblomst. Lys og luftig.", habitat:"Skogkanter, heier, urteenger", funFact:"Gamle tre var tro på at gullris kunne avsløre metalldepoer.", rarity:"Vanlig", edible:false, season:"Juli–September" },
+    { name:"Storkenebb", latin:"Geranium maculatum", category:"🌸 Blomst", description:"Vakre rosa-lilla blomster. Lange, spisse frøhus som ligner storkesnebb.", habitat:"Fukte enger, løvskoger, veikanter", funFact:"Frøhusene spretter og kaster frøene langt når de blir tørre.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Fjellsyre", latin:"Rumex acetosa", category:"🌸 Blomst", description:"Små rødlige blomster. Sprø, syrlig smak. Norges mikro-grønnsak.", habitat:"Fjellsider, enger, dyrket mark", funFact:"En av de første grønnsakene etter vinteren. Høy i C-vitamin.", rarity:"Vanlig", edible:true, season:"Mai–Juni" },
+    { name:"Jåblom", latin:"Narthecium ossifragum", category:"🌸 Blomst", description:"Små gule blomster på slank stengel. Myrvekster.", habitat:"Våt myr, sumpskoger", funFact:"Inneholder giftstoff som svaknet dyrene – derav gammelt navn 'bendbane'.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Orkide (flekkmarihand)", latin:"Dactylorhiza maculata", category:"🌸 Blomst", description:"Vakker rosa-lilla orkide med mørke flekker på blomstene.", habitat:"Fuktige enger, myrer", funFact:"Norges hyppigste villorkide. Hver blomst pollineres av egen insekt-type.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Nyseryllik", latin:"Achillea ptarmica", category:"🌸 Blomst", description:"Små hvite blomster i korymb. Høstblomst. Aristokratisk.", habitat:"Fuktige enger, sumpskoger", funFact:"Navnet kommer av at blomsterstøvet framkalte nys hos folk.", rarity:"Vanlig", edible:false, season:"Juli–September" },
+    { name:"Mjødurt", latin:"Filipendula ulmaria", category:"🌸 Blomst", description:"Deilig duftende gule blomster. Blomstene lager mjød og te.", habitat:"Fuktige enger, bekkesletter, mosehogder", funFact:"Brukt i hundrevis av år til å smaker mjød - derav navnet.", rarity:"Vanlig", edible:true, season:"Juni–Juli" },
+    { name:"Blåknapp", latin:"Centaurea cyanus", category:"🌸 Blomst", description:"Vakre kornblå blomster med fyrkantet form. En gang vanlig i kornåkrer.", habitat:"Åkrer, veikanter, sommerkulturer", funFact:"Blomsten var en gang truet av pesticider men er nå gjenstand for restaurering.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Engsoleie", latin:"Pulsatilla vulgaris", category:"🌸 Blomst", description:"Silkefin blomst i lilla-blå farge. Blant sjeldne villblomster i Norge.", habitat:"Tørre bakkesider, kalkrikt jord", funFact:"Hele planten er dekket av silkesoften på blomsten og frøene.", rarity:"Sjelden", edible:false, season:"April–Mai" },
+    { name:"Engsmelle", latin:"Silene vulgaris", category:"🌸 Blomst", description:"Hvite blomster som ligner små ballonger. Bladene er blågrønne.", habitat:"Fuktige enger, veikanter", funFact:"De hvite blomstene åpner seg bare om kvelden og lukkes på dagen.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Korsknapp", latin:"Knautia arvensis", category:"🌸 Blomst", description:"Purpurrosa blomster med karakteristisk korsammensetning.", habitat:"Enger, veikanter, tørre steder", funFact:"Blomsten er favorittplass for sangfluer og sommerfugler.", rarity:"Vanlig", edible:false, season:"Juni–September" },
+    { name:"Turt", latin:"Saxifraga aizoides", category:"🌸 Blomst", description:"Små gullfarger blomster på røde stilker. Varig fjellplante.", habitat:"Bergvegger, fuktige fjellsteder", funFact:"Gjør det godt i alpine trinn og steingjordet, blomstrer hele sommeren.", rarity:"Vanlig", edible:false, season:"Juni–September" },
+    { name:"Fiol", latin:"Viola odorata", category:"🌸 Blomst", description:"Små dype blå-lilla blomster med kraftig, deilig duft.", habitat:"Løvskoger, hager, steinkanter", funFact:"Duft brukes i klassiske parfymer som Chanel No. 5.", rarity:"Vanlig", edible:true, season:"Mars–Mai" },
+    { name:"Bergfrue", latin:"Pseudofumaria alba", category:"🌸 Blomst", description:"Fintfingrte hvite blomster. Delikat fjellvekst fra middelhavet.", habitat:"Bergvegger, steingjordet, nordvendt", funFact:"Blomstenes form ligner små gåsefotteknepper.", rarity:"Uvanlig", edible:false, season:"Mai–Juli" },
+    { name:"Kattefot", latin:"Antennaria dioica", category:"🌸 Blomst", description:"Små lysrosa eller hvite bomullsaktige blomsterhodet.", habitat:"Tørre enger, steingrunn, heier", funFact:"Blomstene holder seg tørre og holder fargen som tørkede blomster.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Geitrams", latin:"Geranium sylvaticum", category:"🌸 Blomst", description:"Vakre blåviolett blomster i klynger. Høy og delikat.", habitat:"Løvskoger, edelløvskog, bekkesletter", funFact:"Plantens stronke lukter sterkt når den blir knust.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Stemorsblomst", latin:"Viola tricolor", category:"🌸 Blomst", description:"Blomster i gult, blått og fiolett som kullører på et ansikt.", habitat:"Åkrer, veikanter, dyrket mark", funFact:"Blomsten ble dyrket som dekorativ pryd helt til moderkultivar Hornviol.", rarity:"Vanlig", edible:true, season:"Juni–September" },
+    { name:"Harerug", latin:"Lagurus ovatus", category:"🌸 Blomst", description:"Søte hvite bomullsaktige blomsteraks. Dekorative og ørrete.", habitat:"Varme, tørre steder, sandmark", funFact:"Blomsterstanden likner en harefrykt – derav navnet.", rarity:"Uvanlig", edible:false, season:"Juni–August" },
+    { name:"Tepperot", latin:"Veronica officinalis", category:"🌸 Blomst", description:"Små lyseblå blomster i tettsittende stilk. Lav-vekst.", habitat:"Heier, tørre enger, steinmark", funFact:"Brukt tradisjonelt til urte-te som ble kalt 'te av tepperot'.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Fjellpryd", latin:"Silene acaulis", category:"🌸 Blomst", description:"Liten og kompakt med små rosa blomster. Mossaktig vekstform.", habitat:"Høyfjellet, steinige områder, alpine turer", funFact:"En av Norges minste blomstende planter, kun 1-2 cm høy.", rarity:"Vanlig", edible:false, season:"Juli–August" },
+    { name:"Reinrose", latin:"Dryas octopetala", category:"🌸 Blomst", description:"Hvite åttalobete blomster. Vedvarende fjell- og grunnvekst.", habitat:"Fjellsider, arktiske områder, kalkberg", funFact:"Fossile frø av reinrose finnes fra istiden og brukes til datering.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Musøre", latin:"Myosotis arvensis", category:"🌸 Blomst", description:"Mikroskopisk små lyseblå blomster som øyne.", habitat:"Åkrer, enger, veikanter", funFact:"Blomsten er europeisk symbol for 'Glem meg ikke'.", rarity:"Vanlig", edible:false, season:"Mai–Juli" },
+    { name:"Fjelltjæreblom", latin:"Silene rupestris", category:"🌸 Blomst", description:"Små hvite blomster på fjellstein. Robust alpinplante.", habitat:"Bergvegger, steinmark, høyfjellet", funFact:"Blomsten er tilpasset ekstremalt tørre forhold og kort vekstsesong.", rarity:"Vanlig", edible:false, season:"Juli–August" },
+    { name:"Marinøkkel", latin:"Herniaria glabra", category:"🌸 Blomst", description:"Mikroskopisk små grønnligul blomster. Kryplant.", habitat:"Sandig og gravigmark, tørre steder", funFact:"Planten brukes tradisjonelt som homøopatisk legemiddel.", rarity:"Uvanlig", edible:false, season:"Juni–September" },
+    { name:"Rødkløver", latin:"Trifolium pratense", category:"🌸 Blomst", description:"Røde kulerunde blomsterhodet. En av beflingsplantene i Norge.", habitat:"Enger, hager, kulturmark", funFact:"Kløveren gir honningen en rødlig farge og honningen er svært etterspurt.", rarity:"Svært vanlig", edible:true, season:"Juni–August" },
+    { name:"Hvitkløver", latin:"Trifolium repens", category:"🌸 Blomst", description:"Hvite blomsterhodet som blir rosa. Krylant i plenene.", habitat:"Enger, hager, veikanter, plener", funFact:"En av de viktigste beiteplantene og honningplantene i Norge.", rarity:"Svært vanlig", edible:true, season:"Juni–September" },
+    { name:"Smørbukk", latin:"Ranunculus acris", category:"🌸 Blomst", description:"Glinsende gule blomster som smørfarge. Høye stilker.", habitat:"Fuktige og tørre enger, beitemarker", funFact:"Alle Ranunculus-arter har blank blomsterfarge av en spesiell vokslak.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Kvitsoleie", latin:"Anemone ranunculoides", category:"🌸 Blomst", description:"Små hvite blomster på fine stilker. Tidlig vårblomst.", habitat:"Løvskoger, hager, bekkesletter", funFact:"Blomsten åpner seg kun i sollys og lukkes igjen når det blir skyet.", rarity:"Vanlig", edible:false, season:"April–Mai" },
+    { name:"Solblom", latin:"Arnica montana", category:"🌸 Blomst", description:"Gule blomster med praktfullt utseende. Bergvekst fra fjellene.", habitat:"Fjellsider, alpine enger, kalkriktjord", funFact:"Brukes i naturmedisin og kremer for skader – 'King of Bruise Remedy'.", rarity:"Uvanlig", edible:false, season:"Juni–August" },
+    { name:"Mogop", latin:"Papaver rhoeas", category:"🌸 Blomst", description:"Deilig røde blomster med svarte dotteprikker. Flyktig skjønnhet.", habitat:"Åkrer, kornmark, veikanter", funFact:"Blomsten blir brukt til å dekorere kaker, honning og andre retter.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Fjellvalmue", latin:"Papaver radicatum", category:"🌸 Blomst", description:"Små gule blomster på arktiske marker. Alpinvalmue.", habitat:"Høyfjellet, arktiske områder, steinmark", funFact:"Frøene kan ligge i jorda i over 100 år før de spirer.", rarity:"Vanlig", edible:false, season:"Juli–August" },
+    { name:"Issoleie", latin:"Anemone hepatica", category:"🌸 Blomst", description:"Vakre blå-lilla blomster på fine stilker. Vintervakner tidlig.", habitat:"Løvskoger, edelløvskog, steinkanter", funFact:"Bladene ligger på planten hele vinteren og blir grønn til våren.", rarity:"Vanlig", edible:false, season:"Mars–April" },
   ],
   trees: [
     { name:"Bjørk", latin:"Betula pubescens", category:"🌳 Tre", description:"Norges vanligste treslag.", habitat:"Overalt i Norge", funFact:"Bjørkesevje ble tradisjonelt tappet om våren som helsedrikk.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
@@ -312,6 +356,22 @@ const SPECIES_DB = {
     { name:"Selje", latin:"Salix caprea", category:"🌳 Tre", description:"Vårens budbringer med myke 'gåsunger'.", habitat:"Fuktige skoger, bekkekanter", funFact:"Gåsungene er viktig mat for bier tidlig om våren.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Lind", latin:"Tilia cordata", category:"🌳 Tre", description:"Vakkert løvtre med hjerteformede blad.", habitat:"Edelløvskog, Sør-Norge", funFact:"Lindblomst-te har vært brukt som beroligende i hundrevis av år.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Lønn", latin:"Acer platanoides", category:"🌳 Tre", description:"Stort løvtre med vakre høstfarger i gult og rødt.", habitat:"Edelløvskog, parker", funFact:"Frøene har 'helikoptervinger' som spinner ned fra treet.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Hassel", latin:"Corylus avellana", category:"🌳 Tre", description:"Busklignende tre med vaniljefargede blomster om våren. Hasselnøtter i høst.", habitat:"Løvskoger, krattmark", funFact:"Hasselkvist brukes til å søke etter vann – en tradisjonell praktikk.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Alm", latin:"Ulmus glabra", category:"🌳 Tre", description:"Majestets løvtre. Blader som oppblåste. Gult høstslutning.", habitat:"Edelløvskog, bekkesletter", funFact:"Almeskallen er en alvorlig sykdom som dreper almetrær i hele Europa.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Ask", latin:"Fraxinus excelsior", category:"🌳 Tre", description:"Høyt løvtre med sammensatte blad. Sorte blomsterknipper.", habitat:"Edelløvskog, bekkesletter", funFact:"Ask har spesielle luftrøter som ånder selv når røttene står i vann.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Hegg", latin:"Prunus padus", category:"🌳 Tre", description:"Hvite blomster i lange klasar. Sorte bær som fuglene elske.", habitat:"Fuktige løvskoger, bekkesletter", funFact:"Heggsaften kan lages til svartebær-lignende drikke.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Barlind", latin:"Rhamnus cathartica", category:"🌳 Tre", description:"Busklignende tre. Små gule blomster. Sorte bær. ⚠️ Bærene kan virke dårlig på magen.", habitat:"Løvskoger, kratt", funFact:"Brinene var tradisjonelt brukt som naturlig avføringsmiddel.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Kristtorn", latin:"Ilex aquifolium", category:"🌳 Tre", description:"Evergreen busklignende tre med pigger. Røde bær. Klassisk julepynt.", habitat:"Vestlandsfjorder, edelløvskog", funFact:"Kun hunnetrærne har røde bær – hannene lager ikke frukter.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Or/Svartor", latin:"Alnus glutinosa", category:"🌳 Tre", description:"Fuktig-elsker tre. Små brune kongler. Røtter holder fast i bløt jord.", habitat:"Våtemark, brekker, sumpskoger", funFact:"Or-røtter fikser nitrogen fra luften og gjør jord næringsrik.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Gråor", latin:"Alnus incana", category:"🌳 Tre", description:"Finere utgave av sort or. Grå bark og små kongler.", habitat:"Nordlige områder, fjellsider, fuktig mark", funFact:"Spres lettere enn sort or og er viktig for gjenvekst etter hogst.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Bøk", latin:"Fagus sylvatica", category:"🌳 Tre", description:"Elegant løvtre med glatt grå bark og breie blad.", habitat:"Edelløvskog, Sør-Norge", funFact:"Gamle bøkeskoger kan være over 500 år og er biosfærereservater.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Agnbøk", latin:"Carpinus betulus", category:"🌳 Tre", description:"Lite løvtre med riflet bark og små bladformede frøer.", habitat:"Edelløvskog, sydlige Norge", funFact:"Har vært brukt til mekaniske deler som hammer-hoveder på grunn av hardhet.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Einer", latin:"Juniperus communis", category:"🌳 Tre", description:"Lav busklignende bartre med blågrå bær. Aromatisk.", habitat:"Tørre heier, kalkmark, fjellsider", funFact:"Einerberries brukes til å smaksette akevitt og brennevin.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Vier", latin:"Salix alba", category:"🌳 Tre", description:"Høyt tre med lange, smale blad. Trives ved vann.", habitat:"Bekkekanter, sumpskoger, fuktig mark", funFact:"Historisk brukt til å lage fletter, kurver og båter.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Pil", latin:"Salix pentandra", category:"🌳 Tre", description:"Velluktende småbladete tre. Blomstre om våren.", habitat:"Bekkesletter, fuktige områder", funFact:"Blomstrer før de fleste andre trær og er viktig honningkilde.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Asal", latin:"Sorbus aria", category:"🌳 Tre", description:"Lite løvtre med hvitfiltrete blad og røde bær.", habitat:"Fjellsider, bergvegger, kalkjord", funFact:"Bladene er hvite under og glinsende grønne over – oppseende ved vindkast.", rarity:"Uvanlig", edible:true, season:"Hele året" },
+    { name:"Spisslønn", latin:"Acer platanoides subsp. acuminatum", category:"🌳 Tre", description:"Variant av lønn med spissere blad. Vakre høstfarger.", habitat:"Edelløvskog, Sør-Norge", funFact:"Saften kan tappe til lønnesirup på samme måte som canadisk lønn.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Svartor", latin:"Alnus glutinosa", category:"🌳 Tre", description:"Fuktighetselskende tre. Sorte kongler. Røtter fikser nitrogen.", habitat:"Våtmark, bekkekanter, sumpskoger", funFact:"Svartoroots produserer nitrogen som gjør at det kan vokse på dårlig jord.", rarity:"Vanlig", edible:false, season:"Hele året" },
   ],
   berries: [
     { name:"Blåbær", latin:"Vaccinium myrtillus", category:"🍇 Bær", description:"Norges mest populære skogsbær.", habitat:"Barskog, fjellskog", funFact:"Norge produserer ca. 100 mill. kilo blåbær årlig.", rarity:"Svært vanlig", edible:true, season:"Juli–September" },
@@ -322,6 +382,28 @@ const SPECIES_DB = {
     { name:"Krekling", latin:"Empetrum nigrum", category:"🍇 Bær", description:"Små, svarte bær på lav busk.", habitat:"Fjellvidder, lyngheier", funFact:"Viktig matplante for ryper og andre fjellarter.", rarity:"Svært vanlig", edible:true, season:"Aug–Sept" },
     { name:"Bjørnebær", latin:"Rubus fruticosus", category:"🍇 Bær", description:"Store, mørke bær på tornete busker.", habitat:"Skogkanter, hager, Sør-Norge", funFact:"Modner sist av alle norske bær.", rarity:"Vanlig", edible:true, season:"Aug–Okt" },
     { name:"Tranebær", latin:"Vaccinium oxycoccos", category:"🍇 Bær", description:"Små, røde bær på myr.", habitat:"Myrer, våtmark", funFact:"Plukkes best etter første frost – da blir de søtere.", rarity:"Vanlig", edible:true, season:"Sept–Okt" },
+    { name:"Slåpetorn", latin:"Prunus spinosa", category:"🍇 Bær", description:"Små, blå-svarte bær på tornete busker. Meget sur, må trylleis.", habitat:"Kratt, hekker, skogkanter", funFact:"Slåpebær lagde tradisjonell 'sloe gin' i England.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Hagebær/Nyper", latin:"Rosa canina", category:"🍇 Bær", description:"Røde, frynset bær fra hundsrosen. Ekstremt rik på C-vitamin.", habitat:"Hekker, kratt, skogkanter", funFact:"Rosehypene har 20 ganger mer C-vitamin enn appelsin.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Einer (bær)", latin:"Juniperus communis", category:"🍇 Bær", description:"Små blå-sorte bær på enerbusk. Brukt som krydder i brennevin.", habitat:"Lyngheier, fjellsider, tørre områder", funFact:"Hengeløs brennevin er laget av enerbær – de tar 2-3 år å modne.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Rogn (bær)", latin:"Sorbus aucuparia", category:"🍇 Bær", description:"Røde bær på høyttarende rognetrær. Søte og saftige.", habitat:"Skoger, bergområder", funFact:"Fuglene elsker rognebærene og spreifer dem over hele fjellene.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Teiebær", latin:"Cornus suecica", category:"🍇 Bær", description:"Små røde bær på lavt kryp. Sjeldne og eksklusiv.", habitat:"Fuktige bergmater, myrer", funFact:"Teiebæret er relativt sjelden i Norge og meget søt.", rarity:"Uvanlig", edible:true, season:"August–September" },
+    { name:"Måltrost-bær (Viburnum)", latin:"Viburnum opulus", category:"🍇 Bær", description:"Røde, glinsende bær på snøballbusk. Meget sur før fryse.", habitat:"Fuktige skog, myrer", funFact:"Mjølbærene ble brukt i tradisjonell medisin mot forkjølelse.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Trollbær", latin:"Rubus arcticus", category:"🍇 Bær", description:"Små, kraftig oransje-røde bær. Eksklusiv delikatessse fra fjellen.", habitat:"Fuktige bergmater, myrer", funFact:"Svenske trollbær-marmeladen koster hundrevis av kroner per liter.", rarity:"Sjelden", edible:true, season:"Juli–August" },
+    { name:"Rips", latin:"Ribes rubrum", category:"🍇 Bær", description:"Små røde eller hvite gjærbær i klasar. Syrlig smak.", habitat:"Hager, kulturmark, naturlig sjelden", funFact:"Ribs er en av de rikeste kildene til vitamin C blant norske bær.", rarity:"Vanlig", edible:true, season:"Juni–Juli" },
+    { name:"Solbær", latin:"Ribes nigrum", category:"🍇 Bær", description:"Dype sorte bær med karakteristisk smak. Høy i næringsstoffer.", habitat:"Hager, kulturmark", funFact:"Solbærtroll var en bok som gjorde solbær populær blant barn.", rarity:"Vanlig", edible:true, season:"Juli–August" },
+    { name:"Stikkelsbær", latin:"Ribes uva-crispa", category:"🍇 Bær", description:"Grønne eller røde bær på tornete busker. Syrlig-søt smak.", habitat:"Hager, kulturmark", funFact:"Engelsk stikkelsbærpudding er en klassisk dessert.", rarity:"Vanlig", edible:true, season:"Juni–Juli" },
+    { name:"Hagtorn", latin:"Crataegus monogyna", category:"🍇 Bær", description:"Små røde bær fra en busklignende tre. Brukt i medisin.", habitat:"Hekker, krattmark", funFact:"Hagtorn-te brukes tradisjonelt for hjerteregulering.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Mispel", latin:"Mespilus germanica", category:"🍇 Bær", description:"Brunlige frukter som blir spiselige etter frost.", habitat:"Hager, sydlige Norge", funFact:"Mispel må 'nifle' (bli overtrykt av frost) før den blir spiselig.", rarity:"Uvanlig", edible:true, season:"Oktober–November" },
+    { name:"Hegg-bær", latin:"Prunus padus", category:"🍇 Bær", description:"Små sorte bær fra heggtreeet. Astringent smak.", habitat:"Løvskoger, bekkesletter", funFact:"Heggen blomstrer før bladene kommer - derav navn 'hvit blomstring'.", rarity:"Vanlig", edible:true, season:"Juli–August" },
+    { name:"Tindved", latin:"Euonymus europaeus", category:"🍇 Bær", description:"Små orange bær med rosa frøhylster. Dekorativ.", habitat:"Løvskoger, hekker", funFact:"Bladene blir dypt røde på høsten – meget dekorativt.", rarity:"Vanlig", edible:false, season:"September–Oktober" },
+    { name:"Søtmispel", latin:"Amelanchier lamarckii", category:"🍇 Bær", description:"Små sorte bær med søt smak. Japansk opprinnelse.", habitat:"Hager, parker", funFact:"Frøene av søtmispel inneholder små mengder cyanid når umodne.", rarity:"Vanlig", edible:true, season:"Juni–Juli" },
+    { name:"Berberis", latin:"Berberis vulgaris", category:"🍇 Bær", description:"Små røde elliptiske bær. Ekstrem syrlig smak. ⚠️ Giftig rå.", habitat:"Hekker, kulturmark", funFact:"Berberis bør ikke spises rå – kan virke på magen.", rarity:"Uvanlig", edible:false, season:"September–Oktober" },
+    { name:"Duftskjærsmin", latin:"Ribes odoratum", category:"🍇 Bær", description:"Sorte bær med duftende blomster. Aromatisk.", habitat:"Hager, parker", funFact:"Blomstene lukter kraftig – navnet kommer fra denne duften.", rarity:"Uvanlig", edible:true, season:"Juli–August" },
+    { name:"Kristtorn-bær", latin:"Ilex aquifolium", category:"🍇 Bær", description:"Røde bær fra kristtornbusken. Dekorativ.", habitat:"Vestlandsfjorder, kulturmark", funFact:"Kun hunnetrærne fruktsetter – hannene produserer bare pollen.", rarity:"Vanlig", edible:false, season:"September–November" },
+    { name:"Tysbast", latin:"Daphne mezereum", category:"🍇 Bær", description:"Røde giftge bær. Mørkrød blomster før bladene. ⚠️ Giftig.", habitat:"Løvskoger, hekker", funFact:"All deler av tysbast er svært giftig – kan dødelig dyr og mennesker.", rarity:"Vanlig", edible:false, season:"August–September" },
+    { name:"Blåhegg", latin:"Ilex crenata", category:"🍇 Bær", description:"Små sorte bær fra små hollyleaf-busker.", habitat:"Hager, parker", funFact:"Japansk opprinnelse, har blitt populær i norske hager.", rarity:"Uvanlig", edible:false, season:"September–Oktober" },
+    { name:"Skogsjordbær", latin:"Fragaria moschata", category:"🍇 Bær", description:"Større og mer duftende enn markjordbær. Deilig smak.", habitat:"Løvskoger, naturlig sjelden", funFact:"Skogsjordbærene er mer aromatisk enn alle andre jordbær.", rarity:"Sjelden", edible:true, season:"Juni–Juli" },
+    { name:"Piggbringebær", latin:"Rubus plicatus", category:"🍇 Bær", description:"Større og mer tornete enn vanlig bringebær. Søtere.", habitat:"Krattmark, vill-områder, Sør-Norge", funFact:"Piggbringebæren er mer søt enn vanlig bringebær men vanskeligsti å plukke.", rarity:"Uvanlig", edible:true, season:"Juli–August" },
   ],
   mushrooms: [
     { name:"Kantarell", latin:"Cantharellus cibarius", category:"🍄 Sopp", description:"Gullfarget matsopp. Norges mest populære.", habitat:"Blandingsskog, bjørkeskog", funFact:"Kan ikke dyrkes – lever i symbiose med trær.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
@@ -337,6 +419,38 @@ const SPECIES_DB = {
     { name:"Svart trompetsopp", latin:"Craterellus cornucopioides", category:"🍄 Sopp", description:"Mørk, traktformet delikatesse. Kalles 'den svarte trompeten'.", habitat:"Løvskog, bøkeskog", funFact:"Ingen giftige forvekslingsarter – helt trygg å plukke!", rarity:"Uvanlig", edible:true, season:"Aug–Nov" },
     { name:"Krepling", latin:"Albatrellus ovinus", category:"🍄 Sopp", description:"Hvit til gulhvit matsopp med ujevn hattoverflate.", habitat:"Barskog, mosegrod grunn", funFact:"En norsk favoritt! Perfekt stekt i smør med salt og pepper.", rarity:"Vanlig", edible:true, season:"Aug–Okt" },
     { name:"Blek kremle", latin:"Russula claroflava", category:"🍄 Sopp", description:"Gul matsopp med mild smak. Sprø konsistens.", habitat:"Bjørkeskog, myrskog", funFact:"Kremler som smaker mildt er som regel spiselige. Skarpe/brennende = vekk!", rarity:"Vanlig", edible:true, season:"Jul–Okt" },
+    { name:"Matblekksopp", latin:"Sepia officinalis", category:"🍄 Sopp", description:"Mørkgrønn matsopp. Kjempe-utgaven av traktkantarell. Saftig og velsmaknde.", habitat:"Barskog, furuskog", funFact:"Kan lages til både stekt og suppe. En av Norges beste matsopper.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
+    { name:"Honningsopp", latin:"Armillaria mellea", category:"🍄 Sopp", description:"Gul til brun sopp med ring på stilken. Vokser i klaser på trær.", habitat:"Barskog, stubber, død ved", funFact:"Kalles 'honningsopp' fordi honning av honningsoppen er lysegul.", rarity:"Vanlig", edible:true, season:"August–November" },
+    { name:"Rødskrubb", latin:"Xerocomelus chrysenteron", category:"🍄 Sopp", description:"Liten rødbraun matsopp med gule porer. Mild og delikat.", habitat:"Barskog, blandingsskog", funFact:"Rødscrubben er enkel å gjenkjenne – bare gule porer under hatten.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Brunskrubb", latin:"Boletaceae (diverse)", category:"🍄 Sopp", description:"Brune soppesorter med små porer under hatten. Saftig kjøtt.", habitat:"Barskog, furuskog", funFact:"Brunskribbene kan fryses eller tørkes til senere bruk.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Sjampinjong (skog-)", latin:"Agaricus silvicola", category:"🍄 Sopp", description:"Hvit skogssjampinjong med rosa lameller. Delikat og deilig duftende.", habitat:"Gräsmatter, lyst skog, hager", funFact:"Skogssjampinjongen er mindre enn marksjampinjongen men finere i smak.", rarity:"Vanlig", edible:true, season:"September–Oktober" },
+    { name:"Granpiggsopp", latin:"Hydnum rufescens", category:"🍄 Sopp", description:"Gul-oransje pigg-sopp med mild smak. Vokser under grantrær.", habitat:"Barskog", funFact:"Pigg-soppen har pigger istedenfor lameller under hatten.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Fåresopp", latin:"Albatrellus ovina", category:"🍄 Sopp", description:"Hvit til brun pigg-sopp. Stor og solid. Veldig delikat.", habitat:"Barskog, furuskog", funFact:"'Fåresoppen' fant det sitt navn fordi får gjæmte seg under den for å hvile.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Musserongsopp", latin:"Boletus erythropus", category:"🍄 Sopp", description:"Rød-oransje sopp med røde porer. Ligner en iøynefallende blomst.", habitat:"Barskog, blandingsskog", funFact:"Rødt kjøtt hvis du koker dem - de blir ikke giftig av koking.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Rimsopp", latin:"Hohenbuehelia geogenia", category:"🍄 Sopp", description:"Små hvite til grå soppeformer på død ved. Delikat smak.", habitat:"Gamle trær, stubber, død ved", funFact:"Rimsoppen tilhører familien av oyster-soppesorter og er veldig næringsrik.", rarity:"Vanlig", edible:true, season:"April–November" },
+    { name:"Birkekjuke", latin:"Piptoporus betulinus", category:"🍄 Sopp", description:"Hvit kake-sopp som vokser på bjørkestammer. Medisinsk.", habitat:"Bjørkestammer, død ved", funFact:"Brukt i folkemedisin som avføringsmiddel og immunstyrker.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Rynkehatt", latin:"Albatrellus confluens", category:"🍄 Sopp", description:"Brun sopp med rynkete overflate. Spiselig.", habitat:"Furuskog, barskog", funFact:"Har små porer under hetten i stedet for gill - sjelden funnet i Norge.", rarity:"Uvanlig", edible:true, season:"August–Oktober" },
+    { name:"Tåresopp", latin:"Psathyrella candolleana", category:"🍄 Sopp", description:"Små hvite til grå soppeformer med fuktig utseende.", habitat:"Mort ved, stammer, stubbland", funFact:"Navnet kommer av at den ser ut til å dryppe fuktighet.", rarity:"Vanlig", edible:false, season:"Juni–Oktober" },
+    { name:"Blekksopp (grå)", latin:"Coprinellus disseminatus", category:"🍄 Sopp", description:"Små grå soppeformer. Ikke spiselig.", habitat:"Stammer, død ved, mosekledde steiner", funFact:"Gir svart blekk hvis den blir håndtert – derav navnet.", rarity:"Vanlig", edible:false, season:"Mai–Oktober" },
+    { name:"Parasollsopp", latin:"Macrolepiota procera", category:"🍄 Sopp", description:"Stor sopp som ligner parasoll. Søt smak. Spiselig.", habitat:"Tørre enger, graskanter", funFact:"Kan bli over 20 cm i diameter – en av Norges største soppearter.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Pluggsopp", latin:"Xerocomelus chrysenteron", category:"🍄 Sopp", description:"Liten brunaktig sopp med rødt under hetten.", habitat:"Lav barskog, mosekledde steder", funFact:"Veldig liten – ofte bare 2-4 cm i diameter.", rarity:"Uvanlig", edible:false, season:"Juli–Oktober" },
+    { name:"Bjørkeriske", latin:"Boletus erythropus", category:"🍄 Sopp", description:"Stor rødbrun sopp. Orange/røde porer under hetten. Spiselig.", habitat:"Bjørkeskog, blandet skog", funFact:"Må kokes godt før spising fordi den inneholder små giftmengder rå.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
+    { name:"Furusopp", latin:"Suillus variegatus", category:"🍄 Sopp", description:"Brun sopp med gul porer under hetten. Bitter smak.", habitat:"Furuskog", funFact:"Lever i symbiose med furutrær - finnes aldri langt fra furu.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
+    { name:"Blekkjuke", latin:"Cerioporus squamosus", category:"🍄 Sopp", description:"Vakker hvit og svartprikket sopp på død ved. Delikat.", habitat:"Død ved, gamle trær, stubber", funFact:"Er en av de første kjukene som dukker opp om våren.", rarity:"Vanlig", edible:true, season:"April–Juni" },
+    { name:"Oksetungesopp", latin:"Fistulina hepatica", category:"🍄 Sopp", description:"Rødbrun sopp som ligner tungemat. Syrlig smak.", habitat:"Eik og kastanje-trær", funFact:"Inneholder røde cellekjerner som farger hendene røde når du håndterer den.", rarity:"Uvanlig", edible:true, season:"August–Oktober" },
+    { name:"Morkler", latin:"Morchella esculenta", category:"🍄 Sopp", description:"Vakre honningkakete soppeformer. Delikat deilig smak. Spiselig.", habitat:"Fuktige skoger, bekkesletter", funFact:"Morlene kan aldri dyrkes kommersielt - bare vill-samlet.", rarity:"Sjelden", edible:true, season:"April–Juni" },
+    { name:"Blomkålsopp", latin:"Sparassis crispa", category:"🍄 Sopp", description:"Stor kremet blomkål-lignende sopp. Delikat smak. Spiselig.", habitat:"Barskog, død ved fra furu", funFact:"En av Norges vakreste og mest etterspurte soppearter.", rarity:"Uvanlig", edible:true, season:"August–Oktober" },
+    { name:"Matriske", latin:"Matsutake", category:"🍄 Sopp", description:"Japansk sopp, nå funnet i Norge også. Deilig aroma.", habitat:"Barskog, særlig under furu", funFact:"I Japan er matsutake sopp dyrere enn trøfler - en delikatessse.", rarity:"Sjelden", edible:true, season:"August–Oktober" },
+    { name:"Gul trompetsopp", latin:"Cantharellus lutescens", category:"🍄 Sopp", description:"Høy gul eller grå trompetformet sopp. Delikat smak.", habitat:"Furuskog, barskog", funFact:"Kan være vanskelig å skille fra falsk kantarell.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
+    { name:"Vokssopp", latin:"Cerioporus olearius", category:"🍄 Sopp", description:"Liten gul sopp som vokser i klynger. Mild smak.", habitat:"Død ved, older ved", funFact:"Vokssoppen lysner under UV-lys - helt unikt blandt sopper.", rarity:"Vanlig", edible:true, season:"Mai–Oktober" },
+    { name:"Riddermusseron", latin:"Agaricus arvensis", category:"🍄 Sopp", description:"Høy hvit sopp. Anise-lignende lukt. Spiselig.", habitat:"Enger, tørre steder", funFact:"Løkken på stengelen er karakteristisk og særpreger arten.", rarity:"Vanlig", edible:true, season:"August–Oktober" },
+    { name:"Grønnsåpsopp", latin:"Tricholoma equestre", category:"🍄 Sopp", description:"Grønngul sopp fra furu. Bitter, giftig. ⚠️ Giftig.", habitat:"Furuskog", funFact:"Kan tolme flere timer etter spising - meget giftig.", rarity:"Vanlig", edible:false, season:"August–Oktober" },
+    { name:"Rosenrødkremle", latin:"Russula mairei", category:"🍄 Sopp", description:"Vakker rosenrød kremle. Bitter. ⚠️ Giftig.", habitat:"Barskog, blandet skog", funFact:"Kremler er vanskelige å identifisere - mange er giftig.", rarity:"Vanlig", edible:false, season:"Juli–Oktober" },
+    { name:"Svovelriske", latin:"Hypomyces aurantius", category:"🍄 Sopp", description:"Sopp som parasiterer på andre sopper. Giftig. ⚠️ Giftig.", habitat:"På matblekksopp og lignende", funFact:"Er en parasittisk sopp som infiserer og deformerer andre soppearter.", rarity:"Vanlig", edible:false, season:"Juli–Oktober" },
+    { name:"Smørsopp", latin:"Suillus luteus", category:"🍄 Sopp", description:"Brun glatt sopp med sviskelig overflate. Spiselig.", habitat:"Furuskog, især der det er furu", funFact:"Den glatte overflaten kommer av en spesiell hinne under hetten.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
+    { name:"Gasstoll", latin:"Lycoperdon perlatum", category:"🍄 Sopp", description:"Småkuleformet gasssopp. Gir røyksky når trykt. Spiselig når hvit.", habitat:"Enger, veikanter, friland", funFact:"Når gasstollen blir eldre, åpner den seg og slipper ut milliarder sporer.", rarity:"Vanlig", edible:true, season:"Juli–Oktober" },
+    { name:"Grønnkremle", latin:"Russula heterophylla", category:"🍄 Sopp", description:"Vakker grønn kremle med hvite prikker. Bitter. Giftig.", habitat:"Barskog, blandet skog", funFact:"Som andre kremler er den giftig hvis den spises rå.", rarity:"Vanlig", edible:false, season:"Juli–Oktober" },
+    { name:"Lakksopp", latin:"Ganoderma lucidum", category:"🍄 Sopp", description:"Rød-brun sopp med glansete overflate. Medisinsk i Asia.", habitat:"Gamle trær, stammer", funFact:"Kjent som 'soppen av udødelighet' i tradisjonell østasiatisk medisin.", rarity:"Sjelden", edible:false, season:"Hele året" },
   ],
   marine: [
     { name:"Torsk", latin:"Gadus morhua", category:"🐟 Fisk", description:"Norges viktigste fisk gjennom historien.", habitat:"Nordsjøen, Barentshavet", funFact:"Lofotfisket har pågått i over 1000 år.", rarity:"Vanlig", edible:true, season:"Hele året" },
@@ -348,6 +462,32 @@ const SPECIES_DB = {
     { name:"Hyse", latin:"Melanogrammus aeglefinus", category:"🐟 Fisk", description:"Viktig matfisk med mørk flekk bak gjellene.", habitat:"Nordsjøen, Barentshavet", funFact:"Kalles 'kolje' i Nord-Norge. Perfekt til fish & chips.", rarity:"Vanlig", edible:true, season:"Hele året" },
     { name:"Breiflabb", latin:"Lophius piscatorius", category:"🐟 Fisk", description:"Stygg fisk med fantastisk kjøtt.", habitat:"Havbunn langs kysten", funFact:"Lokker byttedyr med en 'fiskestang' på hodet.", rarity:"Uvanlig", edible:true, season:"Hele året" },
     { name:"Rødspette", latin:"Pleuronectes platessa", category:"🐟 Fisk", description:"Flatfisk med oransje flekker.", habitat:"Sandbunn langs kysten", funFact:"Begge øynene sitter på samme side av hodet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Berggylt", latin:"Symphodus melops", category:"🐟 Fisk", description:"Fargerik fisk med duse farger. Små tenner for å knuse skallene.", habitat:"Stengrunn, klippereef langs kysten", funFact:"Berggyltene lager 'nesting' av små steiner hvor de legger egg.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Lyr", latin:"Ctenolabrus rupestris", category:"🐟 Fisk", description:"Mindre utgave av berggylt. Mørkblå fiskeliten. Rask og alert.", habitat:"Klippereef, stengrunn", funFact:"Lyrfisken er aggressiv overfor større fisker - veldig territorial.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Berggylte", latin:"Coris julis", category:"🐟 Fisk", description:"Striket, fargerik liten fisk. Hunn oransje-rød, hann blå og grønn.", habitat:"Klippereef, steingrunn", funFact:"Hanner og hunner har helt ulike farger - de ser ut som helt ulike arter.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Steinbit", latin:"Anarhichas lupus", category:"🐟 Fisk", description:"Stor, mørk fisk med kraftige tenner. Knuser krepsdyr og sjøpølser.", habitat:"Stengrunn, dypt vann", funFact:"Steinbittenner er så sterke at de knuser både kamskjell og taskekrabbe.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Uer", latin:"Microstomus kitt", category:"🐟 Fisk", description:"Flatfisk som ligner hyse, gul-brun på oversiden. Hvit under.", habitat:"Sandbunn, mudderbunn langs kysten", funFact:"Ueren lever på større dyp enn rødspetten - opp til 300 meter.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Sild", latin:"Clupea harengus", category:"🐟 Fisk", description:"Liten, silver-blå fisk i store stimer. Økonomisk viktig fisk.", habitat:"Norskekysten, Nordsjøen", funFact:"En sildefisk har over 3000 små ben - må spise den forsiktig!", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Piggvar", latin:"Psetta maxima", category:"🐟 Fisk", description:"Stor, flat fisk med pigger på oversiden. Finere smak enn hyse.", habitat:"Sandbunn, mudderbunn", funFact:"Piggvaren kan bli over 50 cm og veier opptil 7 kg.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Sjøørret", latin:"Salmo trutta", category:"🐟 Fisk", description:"Ørret som vandrer til havet. Sølvfarget i sjøen.", habitat:"Elver og fjorder, bekkesletter", funFact:"Sjøørreter er større enn bækvørreter - kan bli over 10 kg.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Røye", latin:"Salvelinus alpinus", category:"🐟 Fisk", description:"Liten rødbrun eller rosa fisk. Delikat smak.", habitat:"Fjellsjøer, alpine vann", funFact:"Røyen var tidligere viktigt ferskvannsresurs før gjødslingen økte.", rarity:"Vanlig", edible:true, season:"Juli–August" },
+    { name:"Sik", latin:"Coregonus lavaretus", category:"🐟 Fisk", description:"Sølvfarget fisk med små skaler. Søt smak.", habitat:"Dype sjøer, fjellvann", funFact:"Sikken i stort format kalles 'ising' og er en delikatessse.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Abbor", latin:"Perca fluviatilis", category:"🐟 Fisk", description:"Grønn og gul striped fisk. Bitter galle må fjernes.", habitat:"Elver, sjøer, brakkvann", funFact:"Abboren kan bli over 50 år gammel i kaldt vann.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Gjedde", latin:"Esox lucius", category:"🐟 Fisk", description:"Stor rovfisk. Prøvehale. Lyst kjøtt. Musky.", habitat:"Elver, sjøer, store brakkvannsystemer", funFact:"Gjedde kan bli over 1 meter lang og veie over 35 kg.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Harr", latin:"Thymallus thymallus", category:"🐟 Fisk", description:"Vakker fisk med stor seilformet ryggfinne. Timianlukt.", habitat:"Rennende vann, alpine elver", funFact:"Harren har karakteristisk lukt av timian når den er fersk.", rarity:"Vanlig", edible:true, season:"Mai–Juni" },
+    { name:"Horngjel", latin:"Agonus cataphractus", category:"🐟 Fisk", description:"Liten bunnfisk med panserliknende skaler.", habitat:"Fjorder, brakkvann", funFact:"Horngjel er en av få fiskene som kan overleve i nesten ferskvann.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Hvitting", latin:"Gadus ogac", category:"🐟 Fisk", description:"Liten vittig fisk slik som liten torsk. Delikat.", habitat:"Fjorder, kystnære områder", funFact:"Hvitting ble en gourmet-fisk først på 1990-tallet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Lange", latin:"Molva molva", category:"🐟 Fisk", description:"Lang, smalere fisk lignende småtorsk. Delikat smak.", habitat:"Dype fjorder, vestlige områder", funFact:"Lange finnes bare på vestlandskysten og var lenge ukjent.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Brosme", latin:"Brosme brosme", category:"🐟 Fisk", description:"Gylden brun fisk slik som lange. Søt smak.", habitat:"Fjorder, dype områder", funFact:"Brosme lever på bunnen og er nattaktiv.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Blålange", latin:"Molva dipterygia", category:"🐟 Fisk", description:"Blågrå lange fisk. Rar smak.", habitat:"Dype fjorder, vestlige Norge", funFact:"Blålange lever i stor dybde - opptil 400 meter.", rarity:"Uvanlig", edible:true, season:"Hele året" },
+    { name:"Lysing", latin:"Pollachius virens", category:"🐟 Fisk", description:"Mørkegrønn fisk slik som torsk. Fastere kjøtt.", habitat:"Fjelordene, vestlandskysten", funFact:"Lysing ble først brukt til klippfisk på 1700-tallet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Sandflyndre", latin:"Hippoglossoides platessoides", category:"🐟 Fisk", description:"Grå flat fisk. Delikat smak. Søte øyne.", habitat:"Sandbunn, få meter dybde", funFact:"Sandflyndre har begge øyne på høyre side slik som andre flyndrer.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Skrei", latin:"Gadus morhua morhua", category:"🐟 Fisk", description:"Stor torskebestand som vandrer til Lofoten på våren.", habitat:"Barentshavet, Nordsjøen", funFact:"Lofotfisket på skrei er verdensfamøs og pågår siden vikingtiden.", rarity:"Vanlig", edible:true, season:"Januar–April" },
+    { name:"Fjordtorsk", latin:"Gadus morhua callarias", category:"🐟 Fisk", description:"Liten stationær torskebestand i fjordene.", habitat:"Dype fjorder, rennende strøm", funFact:"Fjordtorsken er mindre enn stortorsken men rikere på smak.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Kolmule", latin:"Micromesistius poutassou", category:"🐟 Fisk", description:"Liten gylden torsk-lignende fisk. Billig og delikat.", habitat:"Dypere sjølag, kysten", funFact:"Kolmule ble brukt som laksefôr men er nå selv spiselig fisk.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Lodde", latin:"Mallotus villosus", category:"🐟 Fisk", description:"Liten sølvfarget fisk. Kaviarlignende innmat.", habitat:"Barentshavet, kystnære områder", funFact:"Lodda er viktigste fôrfisk for torsk og andre rovfisk.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Stingsild", latin:"Scomber scombrus", category:"🐟 Fisk", description:"Blågrønn fisk med striper. Fetsaltig kjøtt. Sterk smak.", habitat:"Vestlandskysten, åpne hav", funFact:"Stingsild må ikke lagres for lenge - kjøttet blir rankt fort.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Lagesild", latin:"Clupea harengus", category:"🐟 Fisk", description:"Stor silde med sildig kjøtt. Saltet eller røket.", habitat:"Nordsjøen, barentshavet", funFact:"Sildefisket ga Norge stor rikdom på 1600-1800 tallet.", rarity:"Vanlig", edible:true, season:"Juli–September" },
   ],
   shellfish: [
     { name:"Taskekrabbe", latin:"Cancer pagurus", category:"🦀 Skalldyr", description:"Norges vanligste spisekrabbe.", habitat:"Klippekyst, fjorder", funFact:"Klørne knuser med 50 kg trykk!", rarity:"Vanlig", edible:true, season:"Aug–Okt" },
@@ -357,6 +497,19 @@ const SPECIES_DB = {
     { name:"Sjøkreps", latin:"Nephrops norvegicus", category:"🦐 Reke", description:"Elegant med lange klør.", habitat:"Bløtbunn i fjorder", funFact:"Mest aktiv om natten.", rarity:"Uvanlig", edible:true, season:"Apr–Okt" },
     { name:"Trollkrabbe", latin:"Lithodes maja", category:"🦀 Skalldyr", description:"Stor krabbe med pigger over hele kroppen.", habitat:"Dypt vann langs kysten", funFact:"Ser ut som en minikongekrabbe, men er en egen art.", rarity:"Uvanlig", edible:true, season:"Hele året" },
     { name:"Strandkrabbe", latin:"Carcinus maenas", category:"🦀 Skalldyr", description:"Liten, grønn krabbe i fjæra. Barnas favoritt!", habitat:"Fjæresonen, hele kysten", funFact:"En av verdens mest invasive arter – finnes nå på alle kontinenter.", rarity:"Svært vanlig", edible:true, season:"Hele året" },
+    { name:"Strandreke", latin:"Crangon crangon", category:"🦐 Reke", description:"Små grårøde reker langs fjæren. Søte og delikate. Pigg i ryggen.", habitat:"Grunne fjæresoner, sandbunn", funFact:"Strandrekene blir fargeløse når de koker - de blir hvite med rødt spott.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Springkreps", latin:"Palaemon serratus", category:"🦐 Reke", description:"Større reke enn dypvannsreken. Tydelige hvite striper på buken.", habitat:"Grunne områder langs kysten, tangskoger", funFact:"Springkrepsen kan hoppe høyt - kan springe flere meter på korall.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Porseleneskrabbe", latin:"Porcellana platycheles", category:"🦀 Skalldyr", description:"Liten, flattrykt krabbe som gjemmer seg under steiner. Likner porselen.", habitat:"Klippekyst, fjæresonen", funFact:"Porselenekrabben ser ut som en miniatyrversjon av strandkrabben.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Trollhummer", latin:"Nephrops norvegicus", category:"🦀 Skalldyr", description:"Stor lilla-rød hummeraktig liten skalldyr. Deilig kjøtt.", habitat:"Dype fjorder, dyp sandbunn", funFact:"Trollhummer lever på 100-400 meters dybde og ble først fisket industrielt på 1960-tallet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Bokstavhummer", latin:"Homarus gammarus", category:"🦀 Skalldyr", description:"Mindre utgave av hummer. Rød-brun farge.", habitat:"Dype fjordområder, vest-norge", funFact:"Er ikke en egen art men en mindre variant av lommehummer.", rarity:"Uvanlig", edible:true, season:"September–Mars" },
+    { name:"Hestereke", latin:"Crangon crangon", category:"🦀 Skalldyr", description:"Liten grå reke. Søt smak. Delikat.", habitat:"Sandbunn i fjorden, grunt vann", funFact:"Hestereken var tidligere tatt for små og kastet tilbake, nå gourmetfisk.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Pepperkrabbe", latin:"Xantho hydrophilus", category:"🦀 Skalldyr", description:"Liten rødaktig krabbe. Krydret smak.", habitat:"Klippekyst, fjæresonen", funFact:"Pepperkrabben ble som gourmetmat først på 1990-tallet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Svømmekrabbe", latin:"Liocarcinus holsatus", category:"🦀 Skalldyr", description:"Liten blågrønn krabbe som kan svømme. Delikat.", habitat:"Fjorder, grunne områder", funFact:"Svømmekrabben har breie bein som fungerer som ører når den svømmer.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Eremitkrabbe", latin:"Pagurus bernhardus", category:"🦀 Skalldyr", description:"Krabbe som bor i tomme skjell. Komisk oppførsel.", habitat:"Klippekyst, fjæresonen, grunne områder", funFact:"Eremitkrabben må finne større og større skjell etter hvert som den vokser.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Keiserhummer", latin:"Scyllarus arctus", category:"🦀 Skalldyr", description:"Platt hummer-lignende skalldyr. Rød-brun.", habitat:"Dype fjorder, grunne områder", funFact:"Keiserhummeren har breie antennaler som fungerer som håndtak.", rarity:"Uvanlig", edible:true, season:"Juni–Oktober" },
+    { name:"Blåkrabbe", latin:"Carcinus maenas", category:"🦀 Skalldyr", description:"Blågrønn krabbe. Fryktelig predator. Invasiv art.", habitat:"Fjæresonen, overalt ved kysten", funFact:"Blåkrabben er invasiv art fra Atlanterhavet og er nu overalt i Norge.", rarity:"Svært vanlig", edible:true, season:"Hele året" },
+    { name:"Edderkopp-krabbe", latin:"Maia squinado", category:"🦀 Skalldyr", description:"Stor krabbe med lange spenslige ben. Gjemmer seg under alger.", habitat:"Dypere fjordområder, vestlandskysten", funFact:"Edderkopp-krabben dekker seg selv med alger for kamuflasje.", rarity:"Uvanlig", edible:true, season:"Hele året" },
+    { name:"Snøkrabbe", latin:"Hyas araneus", category:"🦀 Skalldyr", description:"Stor hvit-rød krabbe med pigg på ryggen. Digg utseende.", habitat:"Dypere områder, vestlandskysten", funFact:"Snøkrabben ble første gang fanget kommersielt på 1950-tallet.", rarity:"Vanlig", edible:true, season:"Mai–Oktober" },
   ],
   shells: [
     { name:"Blåskjell", latin:"Mytilus edulis", category:"🐚 Skjell", description:"Norges vanligste skjell.", habitat:"Fjæresonen", funFact:"Filtrerer opptil 50 liter sjøvann per dag!", rarity:"Svært vanlig", edible:true, season:"Sept–Apr" },
@@ -366,6 +519,24 @@ const SPECIES_DB = {
     { name:"Hjerteskjell", latin:"Cerastoderma edule", category:"🐚 Skjell", description:"Lite skjell med ribber – hjerteformet fra siden.", habitat:"Sandbunn i grunne viker", funFact:"Kan hoppe langs bunnen med foten sin.", rarity:"Vanlig", edible:true, season:"Hele året" },
     { name:"Sandskjell", latin:"Mya arenaria", category:"🐚 Skjell", description:"Stort skjell som graver seg ned i sanden.", habitat:"Sand/mudderbunn, fjæresonen", funFact:"Kan grave seg ned til 30 cm dybde.", rarity:"Vanlig", edible:true, season:"Hele året" },
     { name:"Kongesnegl", latin:"Buccinum undatum", category:"🐚 Skjell", description:"Stor havsnegl med spiralformet skall.", habitat:"Havbunn langs kysten", funFact:"Eggkapslene kalles 'sjømannssåpe' – de skummer når man gnir dem.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Kuskjell", latin:"Arca noae", category:"🐚 Skjell", description:"Lite skjell med strie. Rett kant. Brukt som dekorasjon siden oldtiden.", habitat:"Klippereef, steinbunn", funFact:"Kuskjellen er nær besøkt av antikvariske samlere - finnes i museer verden over.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Knivskjell", latin:"Ensis ensis", category:"🐚 Skjell", description:"Langt, smalt skjell som ligner en knivblad. Graver seg ned i sand.", habitat:"Sandbunn, dyp vann", funFact:"Knivskjellen kan grave seg ned flere desimeter når det trues.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"O-skjell", latin:"Astarte borealis", category:"🐚 Skjell", description:"Lite, tykt skjell. Mandarinfarget. Kalles også 'mandarskjell'.", habitat:"Dypt vann, mudderbunn", funFact:"O-skjellen er vanlig i paleontologisk forskning - finnes i fossiler.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Albuskjell", latin:"Abra alba", category:"🐚 Skjell", description:"Lite hvitmalet skjell. Tynnt og fragilt. Viktig for bunns-økosystemet.", habitat:"Dypt vann, mudderbunn", funFact:"Albuskjellen filtrerer næring og er kilde for større fiskers diett.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Rur", latin:"Modiolus modiolus", category:"🐚 Skjell", description:"Lite, brunt muslinglignende skjell. Lager bissuströder for å feste seg.", habitat:"Klippereef, steingrunn", funFact:"Rurene produserer silkaktige bånd som holder dem fast på bergene.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Oskjell", latin:"Ostrea edulis", category:"🐚 Skjell", description:"Stor, flat østers. Gourmet delikatessse. Sjelden i Norge.", habitat:"Fjordbunn, sandbunn", funFact:"Gamle østers-dammer i Norge er 400+ år gamle.", rarity:"Sjelden", edible:true, season:"September–April" },
+    { name:"Haneskjell", latin:"Aequipecten opercularis", category:"🐚 Skjell", description:"Lite kamskjell med radiell stripet mønster. Spiselig.", habitat:"Sandbunn, grunne områder", funFact:"Haneskjellen beveger seg ved å klappe på skallene som et dyr.", rarity:"Vanlig", edible:true, season:"Juni–Oktober" },
+    { name:"Peppermusling", latin:"Venerupis corrugata", category:"🐚 Skjell", description:"Liten sterk falt musling. Lite kjøtt.", habitat:"Klippekyst, fjæresonen", funFact:"Peppermuslingen måtte mates mens den var levende fordi den er så liten.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Teppeskjell", latin:"Leptosynapta bergensis", category:"🐚 Skjell", description:"Langstrakt solemusling. Lav og glatt.", habitat:"Sandbunn, dypere områder", funFact:"Teppeskjellen er så liten at den var ikke verdt å fiske før 1900-tallet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Purpursnegl", latin:"Nucella lapillus", category:"🐚 Skjell", description:"Liten rødlig eller hvit snegl. Giftig sekresjon. ⚠️ Giftig.", habitat:"Klippekyst, fjæresonen", funFact:"Purpursneglen brukes til å lage purpurfarging - den var vel kjent i antikken.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Toppsnegl", latin:"Gibbula tumida", category:"🐚 Skjell", description:"Liten grå snegl med skrå ribber. Delikat.", habitat:"Klippekyst, lavtiden", funFact:"Toppsneglene samlet seg på natt og spredes på dagen.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Nettsnegl", latin:"Ocenebra erinacea", category:"🐚 Skjell", description:"Liten brun snegl med nett-mønster. Lite kjøtt.", habitat:"Klippekyst, eksponert kyst", funFact:"Nettsnegl spiser blåskjell ved å bore hull i skallet.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Vårsnegl", latin:"Patella vulgata", category:"🐚 Skjell", description:"Liten grå snegl som suger seg fast på stein. Delikat.", habitat:"Klippekyst, fjæresonen", funFact:"Vårsnegl kan gripe fast så hardt at det tar en hammer for å løsne den.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Trompetsnegl", latin:"Buccinum undatum", category:"🐚 Skjell", description:"Stor spiralsnegl. Hvit eller brunlig. Sjømat.", habitat:"Sandbunn, dypere områder", funFact:"Trompetsneglene ble fisket kommersielt helt til 1990-tallet.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Flodperlemusling", latin:"Margaritifera margaritifera", category:"🐚 Skjell", description:"Stor brunsvart musling. Dårlig dagens. Sjelden. ⚠️ Sjelden.", habitat:"Klare elver, bergige områder", funFact:"Flodperlemuslingen kan bli over 100 år og produsere perler.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Elvemusling", latin:"Unio pictorum", category:"🐚 Skjell", description:"Liten brun musling. Lever i stille elver.", habitat:"Elver, stillestående områder", funFact:"Elvemuslingen lever på myk bunn og filtrerer næring fra vannet.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Svartskjell", latin:"Mytilus galloprovincialis", category:"🐚 Skjell", description:"Stor variant av blåskjell. Mørkere farge. Spiselig.", habitat:"Fjorder, kystlinjer", funFact:"Svartskjellen er invasiv art fra Middelhavet og vinner terreng i Norge.", rarity:"Vanlig", edible:true, season:"Juni–Oktober" },
+    { name:"Østerssnegl", latin:"Rapana venosa", category:"🐚 Skjell", description:"Stor rødaktig snegl. Invasiv fra Asien. Giftig. ⚠️ Potensielt giftig.", habitat:"Fjordbunn, kystlinjer", funFact:"Østerssnegl kom til Norge fra Asia på 1980-tallet og spiser all blåskjell.", rarity:"Uvanlig", edible:false, season:"Hele året" },
   ],
   seaweed: [
     { name:"Sukkertare", latin:"Saccharina latissima", category:"🌿 Tang/Tare", description:"Stor, brun tare. Viktig for økosystemet.", habitat:"Ned til 30 meter", funFact:"Kan vokse 5 cm per dag!", rarity:"Vanlig", edible:true, season:"Hele året" },
@@ -377,6 +548,12 @@ const SPECIES_DB = {
     { name:"Krusflik", latin:"Chondrus crispus", category:"🌿 Tang/Tare", description:"Rødlig, krusete tang. Kalles 'Irish moss'.", habitat:"Fjæresonen, klippekysten", funFact:"Inneholder carrageenan som brukes som fortykningsmiddel i mat – du spiser sannsynligvis dette ukentlig uten å vite det!", rarity:"Vanlig", edible:true, season:"Hele året" },
     { name:"Havsalat", latin:"Ulva lactuca", category:"🌿 Tang/Tare", description:"Tynn, grønn tang som ligner salat. Vanlig i fjæra.", habitat:"Fjæresonen, brygger, steiner", funFact:"Kan spises rå som salat eller tørkes til snacks. Rik på jern og vitamin C.", rarity:"Svært vanlig", edible:true, season:"Mai–Okt" },
     { name:"Stortare", latin:"Laminaria hyperborea", category:"🌿 Tang/Tare", description:"Norges største tang – kan bli 3 meter. Danner undervannsskog.", habitat:"Eksponert kyst ned til 30 meter", funFact:"Tareskogene langs norskekysten er blant verdens mest produktive økosystemer.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Rødalge", latin:"Palmaria palmata", category:"🌿 Tang/Tare", description:"Dyprod alge. Delikat smak. Søtalge.", habitat:"Fjæresonen, grunt vann", funFact:"Rødalgen inneholder alle aminosyrer som mennesker trenger.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Vorteflik", latin:"Pelvetia canaliculata", category:"🌿 Tang/Tare", description:"Liten grønnbrun alge med kantet stengel. Kryplant.", habitat:"Høyeste del av fjæresonen", funFact:"Vorteflikken er den mest salt-tolerant algen langs norske kyster.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Sauetang", latin:"Chondrus crispus", category:"🌿 Tang/Tare", description:"Lilla-rød alge med krøllet form. Gelé.", habitat:"Eksponer kyst, fjæresonen", funFact:"Sauetangen brukes til å lage agar og gelering stoff i mat.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Martaum", latin:"Marattia flexuosa", category:"🌿 Tang/Tare", description:"Mørkerød alge med lang stilk. Sjelden.", habitat:"Dypere områder, grunne områder", funFact:"Martaum finnes kun på enkelte lokaliteter langs norskekysten.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Remtang", latin:"Saccorhiza polyschides", category:"🌿 Tang/Tare", description:"Stor slimete tang. Oppsvulmete bladform.", habitat:"Eksponert kyst, 2-5 meter dybde", funFact:"Remtangen kan bli over 2 meter lang og danner store tett bestander.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Japansk drivtang", latin:"Undaria pinnatifida", category:"🌿 Tang/Tare", description:"Invasiv japansk tang. Finere fibre enn norsk tang. Spiselig.", habitat:"Vestlandskysten, fjordmunninger", funFact:"Japansk drivtang kom til Norge på 1990-tallet og sprer seg raskt.", rarity:"Vanlig", edible:true, season:"Hele året" },
   ],
   other: [
     { name:"Sjøstjerne", latin:"Asterias rubens", category:"⭐ Havliv", description:"Rød/oransje med 5 armer.", habitat:"Fjæresonen", funFact:"Kan regenerere en tapt arm!", rarity:"Vanlig", edible:false, season:"Hele året" },
@@ -386,6 +563,19 @@ const SPECIES_DB = {
     { name:"Sjøanemone", latin:"Actinia equina", category:"⭐ Havliv", description:"Rød, blomsterlignende sjødyr i fjæra.", habitat:"Fjæresonen, klipper", funFact:"Trekker seg sammen til en rød klump ved lavvann.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Eremittkreps", latin:"Pagurus bernhardus", category:"⭐ Havliv", description:"Kreps som bor i tomme sneglehus.", habitat:"Fjæresonen, grunt vann", funFact:"Bytter skall etter hvert som den vokser – husløs innimellom!", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Korstroll", latin:"Asterias rubens", category:"⭐ Havliv", description:"Vanlig sjøstjerne med fem armer.", habitat:"Hele norskekysten", funFact:"Vrenger magen ut for å spise blåskjell utenpå skallet.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Hoggorm", latin:"Vipera berus", category:"🦎 Reptil", description:"Norges eneste giftige slange. Giftig! ⚠️ Giftig.", habitat:"Heier, steinmark, åpne områder", funFact:"Hoggormen hisser av seg som advarsel før den biter.", rarity:"Vanlig", edible:false, season:"April–September" },
+    { name:"Buorm", latin:"Coronella austriaca", category:"🦎 Reptil", description:"Liten, ufarlig brun slange. Sjelden. Ikke giftig.", habitat:"Varme steder, steinmark, sydlige Norge", funFact:"Buormen er Norges minste slange – kun 30-50 cm.", rarity:"Sjelden", edible:false, season:"April–September" },
+    { name:"Stålorm", latin:"Natrix natrix", category:"🦎 Reptil", description:"Grønn/grå slange. Ufarlig. Kan spille død.", habitat:"Våte områder, elver, søer", funFact:"Stålorm kan bli over 1 meter lang og jakter fisk.", rarity:"Vanlig", edible:false, season:"April–September" },
+    { name:"Vanlig firfisle", latin:"Lacerta agilis", category:"🦎 Reptil", description:"Liten brun eller grønn firfisle. Sprø. Sjelden i Norge.", habitat:"Tørre heier, steinmark, sydlige områder", funFact:"Firfislen kan kaste halen som avtrekking hvis fanget.", rarity:"Sjelden", edible:false, season:"April–September" },
+    { name:"Vanlig frosk", latin:"Rana temporaria", category:"🐸 Amfibie", description:"Stor grønnaktig frosk. Hopper og quacker. Vanlig.", habitat:"Skoger, enger, søer, vann", funFact:"Froskene kehopes av lyder som brukes til pairing.", rarity:"Svært vanlig", edible:false, season:"März–Oktober" },
+    { name:"Spissnutefrosk", latin:"Rana arvalis", category:"🐸 Amfibie", description:"Mindre frosk med spissere snute. Rar lyd. Sjelden.", habitat:"Våte områder, skoger, høytliggende områder", funFact:"Spissnutefrosk er mer nordlig og høytliggende enn vanlig frosk.", rarity:"Uvanlig", edible:false, season:"April–August" },
+    { name:"Padde", latin:"Bufo bufo", category:"🐸 Amfibie", description:"Stor brun padde. Giftge kilder. Lumbrig.", habitat:"Skoger, hager, overalt", funFact:"Padden skiller gift fra nakkhuden som forsvarer seg.", rarity:"Vanlig", edible:false, season:"Mars–Oktober" },
+    { name:"Liten salamander", latin:"Triturus vulgaris", category:"🐸 Amfibie", description:"Liten gul-oransje salamander med prikker.", habitat:"Våte områder, små søer, sumpskoger", funFact:"Salamanderen går fra land til vann for å parring.", rarity:"Uvanlig", edible:false, season:"Mars–Oktober" },
+    { name:"Stor salamander", latin:"Triturus cristatus", category:"🐸 Amfibie", description:"Større salamander med rustningen på hannen. Sjelden.", habitat:"Større søer, fuktige områder", funFact:"Stor salamander var tidligere vanlig i lavlandet men er nå sjelden.", rarity:"Sjelden", edible:false, season:"Mars–Oktober" },
+    { name:"Sjøpølse", latin:"Holothuroidea", category:"⭐ Havliv", description:"Liten fleksibel havdyr som ligner pølse. Sjøkuker.", habitat:"Sandbunn, grunne områder", funFact:"Sjøpølsen kan dø ut innvoller som forsvarsmekanisme.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Sjøliljer", latin:"Crinoidea", category:"⭐ Havliv", description:"Uvanlig dyr med lange armer. Ligner blomster. Sjelden.", habitat:"Dypere områder, fjorder", funFact:"Sjøliljene ble trodd å være utdødde før de ble funnet i nyere tid.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Dødmannshånd (sjøkopp)", latin:"Medusa", category:"⭐ Havliv", description:"Sjøkopp, manet lignende. Halv-gjennomsiktig. Giftge nål. ⚠️ Giftig.", habitat:"Hele kysten, fjorder", funFact:"Sjøkopp stammer fra de eldste dyregrupper som finnes.", rarity:"Vanlig", edible:false, season:"Mai–September" },
+    { name:"Nakensnegel", latin:"Nudibranchia", category:"⭐ Havliv", description:"Fargerike små snegler uten skjell. Dekorative. Sjeldne arter.", habitat:"Fjæresonen, på alger", funFact:"Nakensnegler er hermafroditter og kan både gi og motta sæd.", rarity:"Uvanlig", edible:false, season:"Hele året" },
   ],
   birds: [
     { name:"Havørn", latin:"Haliaeetus albicilla", category:"🦅 Fugl", description:"Europas største rovfugl med vingespenn på opptil 2,5 meter.", habitat:"Kysten, fjorder", funFact:"Var nesten utryddet i Norge – nå over 3000 par!", rarity:"Vanlig", edible:false, season:"Hele året" },
@@ -401,6 +591,43 @@ const SPECIES_DB = {
     { name:"Svartmeis", latin:"Periparus ater", category:"🦅 Fugl", description:"Minste meisen i Norge med svart hode og hvit nakkeflekk.", habitat:"Barskog, hager", funFact:"Hamstrer frø i barksprekker for vinteren.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Flaggspett", latin:"Dendrocopos major", category:"🦅 Fugl", description:"Svart-hvit spett med rød undergump. Trommer høylytt på trær.", habitat:"Skog, hager, parker", funFact:"Trommer opptil 20 slag per sekund – hjernen er spesialdesignet for å tåle støtene.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Kongeørn", latin:"Aquila chrysaetos", category:"🦅 Fugl", description:"Majestetisk rovfugl med vingespenn opptil 2.2 meter.", habitat:"Fjell, vidder, innland", funFact:"Kan dykke med 300 km/t etter bytte. Ca. 1000 par i Norge.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Orrfugl", latin:"Tetrao urogallus", category:"🦅 Fugl", description:"Norges største skogsfugl. Hann helt sort med lyrformet hale.", habitat:"Barskog, furuskog", funFact:"Orren fremfører en imponerende 'spilledans' om våren med lyd fra halespissene.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Storfugl/Tiur", latin:"Tetrao tetrix", category:"🦅 Fugl", description:"Stor mørk fugl litt mindre enn orren. Hann sort, hunn brun.", habitat:"Barskog, lyngheier", funFact:"Tiurene danser sammen på såkalte 'lekplasser' om våren.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Jerpe", latin:"Lyrurus mlokosiewiczi", category:"🦅 Fugl", description:"Liten fugl av tiur-familien. Hann sort, hunn brun-mørk.", habitat:"Fjellbjørkeskog, barskog", funFact:"Jerpen er mindre enn tiuren og kalles også 'fjelltiur'.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Rype (lirype)", latin:"Lagopus mutus", category:"🦅 Fugl", description:"Fugl som blir hvit om vinteren, brun om sommeren. Fjellbeboer.", habitat:"Fjellvidder, høyfjell", funFact:"Rypebeinen er tettet med fjær - de fungerer som snøsko.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Fjellrype", latin:"Lagopus lagopus", category:"🦅 Fugl", description:"Større utgave av fjellrype. Hvit vinter, brun sommer. Høyere enn lirype.", habitat:"Fjellvidder, lavlandet", funFact:"Fjellrypen vandrer lange distanser - over 500 km fra sør til nord.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Svarttrost", latin:"Turdus merula", category:"🦅 Fugl", description:"Hann helt svart, hunn brun. Vakker og melodiøs sang.", habitat:"Skog, hager, parker", funFact:"Svarttrosten er en av Norges vakreste sangere - synger fra høye topper.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Gråtrost", latin:"Turdus pilaris", category:"🦅 Fugl", description:"Større trost med grå rygg og sorte på bryst. Kalles også ringtrost.", habitat:"Skog, hager, parker", funFact:"Gråtrostene bygger reirhekker i kolonier - flere reir i samme tre.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Nøtteskrike", latin:"Nucifraga caryocatactes", category:"🦅 Fugl", description:"Mørk fugl med hvite prikker. Sterkt hokeformet nebb for å knuste nøtter.", habitat:"Barskog, furuskog", funFact:"Nøtteskrta gjemmer tusenvis av nøtter for vinteren - glemmer mange.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Skjære", latin:"Somateria mollissima", category:"🦅 Fugl", description:"Stor sjøfugl. Hann hvit og sort, hunn brun. Populær i litteratur.", habitat:"Kyst, fjorder, holmer", funFact:"Skjæren bygger reirhekker av sitt eget dun - dun fra skjær brukes i dyner.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Kråke", latin:"Corvus corone", category:"🦅 Fugl", description:"Helt sort fugl. Intelligent og sosial fugl. Høylytt grep-grep-grep.", habitat:"Over hele Norge", funFact:"Kråker kan lære å bruke verktøy og huske menneskers ansikter.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Gjøk", latin:"Cuculus canorus", category:"🦅 Fugl", description:"Fugl som legger egg i andres reirhekker. Kjent for sin karakteristiske sang.", habitat:"Skog, hager, kratt", funFact:"Gjøken legger egg i en annen fugls reir - uggen klekkes og blir matet av fostermor.", rarity:"Vanlig", edible:false, season:"April–August" },
+    { name:"Dvergfalk", latin:"Falco columbarius", category:"🦅 Fugl", description:"Liten rovfugl som jakter småfugler. Rask og bewegelig.", habitat:"Åpen mark, fjellvidder", funFact:"Dvergefalken er en av Norges minste rovfugler - bare 25-30 cm lang.", rarity:"Uvanlig", edible:false, season:"Mai–Oktober" },
+    { name:"Gråspurv", latin:"Passer domesticus", category:"🦅 Fugl", description:"Grå-hvit spurv. Vanlig i byer og på landsbygden.", habitat:"Overalt hvor mennesker bor", funFact:"Gråspurven er verdens mest utbredt fugleartkul.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Bokfink", latin:"Fringilla coelebs", category:"🦅 Fugl", description:"Fargerik fink med blå og rosa. Søt fuglekall.", habitat:"Skoger, hager, park", funFact:"Bokfinken er en av Norges hyppigste fuglers i byer.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Grønnfink", latin:"Carduelis chloris", category:"🦅 Fugl", description:"Gul og grønn fink. Nystet blikk. Søt lyd.", habitat:"Hager, parker, veikanter", funFact:"Grønnfinken ble senere etablert i Norge fra Tyskland på 1970-tallet.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Tornirisk", latin:"Acanthis cannabina", category:"🦅 Fugl", description:"Brun fink med rødt bryst. Liten og elegant.", habitat:"Tørre enger, heier", funFact:"Tornirisk holder samlet i flokker om vinteren.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Sisik", latin:"Carduelis spinus", category:"🦅 Fugl", description:"Grønn og gul liten fink. Akrobat på frøhodet.", habitat:"Granskog, hageer", funFact:"Sisiken er nord-europeisk og kommer til Norge hver vinter.", rarity:"Vanlig", edible:false, season:"August–April" },
+    { name:"Dompap", latin:"Pyrrhula pyrrhula", category:"🦅 Fugl", description:"Tykk rød og svart fink. Stillfarget. Hunkøn grå.", habitat:"Skog, buskpass, hager", funFact:"Dompapen er nordlig art som spreder seg sydover i milde vintre.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Trekryper", latin:"Certhia familiaris", category:"🦅 Fugl", description:"Liten grå fugl som kryper på trestammer. Svak.", habitat:"Skoger overalt", funFact:"Trekryperen kan løpe oppover og nedover treestammer.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Spettmeis", latin:"Lophophanes cristatus", category:"🦅 Fugl", description:"Liten meis med topplokk. Frisk lyd.", habitat:"Granskog, bjørkeskog", funFact:"Spettmeisen er nordlig art som spreader seg sydover.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Gjerdesmett", latin:"Panurus biarmicus", category:"🦅 Fugl", description:"Liten brun fugl med lange haler. Skjul i siv.", habitat:"Sivsumper, våtmark", funFact:"Gjerdesmetten er ekstrem sjelden i Norge.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Ringdue", latin:"Columba palumbus", category:"🦅 Fugl", description:"Stor grå due med hvit flekk på halsen. Hvirkle-lyd.", habitat:"Skoger, hager, parker", funFact:"Ringduen lager sitt simplest redeir av smågrener.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Musvåk", latin:"Buteo buteo", category:"🦅 Fugl", description:"Brun rovfugl som sitter på stolper. Hyles over marker.", habitat:"Åpen mark, skogskanter", funFact:"Musvåken er der mest vanlig norske rovfuglen.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Spurvehauk", latin:"Accipiter nisus", category:"🦅 Fugl", description:"Liten snartendig rovfugl. Jakter spurver og småfugler.", habitat:"Skoger overalt", funFact:"Spurvehauken angripers fugleskarene av mindre fugler.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Dvergspett", latin:"Dendrocopus minor", category:"🦅 Fugl", description:"Minste norsk spett. Hvit og svart. Piing.", habitat:"Skoger med gamle trær", funFact:"Dvergspetten er svært liten - bare 15 cm lang.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Vendehals", latin:"Jynx torquilla", category:"🦅 Fugl", description:"Myk beige spett-lignende fugl. Vendehals oppførsel. Sjelden.", habitat:"Åpne skoger, park, hager", funFact:"Vendehals kan vri halsen 180 grader - derav navnet.", rarity:"Sjelden", edible:false, season:"Mai–August" },
+    { name:"Grønnspett", latin:"Picus viridis", category:"🦅 Fugl", description:"Stor grønn spett med rød panne. Rare lyder.", habitat:"Løvskoger, åpne områder", funFact:"Grønnspetten er norges eneste store grønne spett.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Munk", latin:"Tachycineta bicolor", category:"🦅 Fugl", description:"Liten blå og hvit fugl. Rare luftakrobatikk.", habitat:"Åpne områder, vannkilder", funFact:"Munken ble første gang registrert i Norge på 1970-tallet.", rarity:"Sjelden", edible:false, season:"April–August" },
+    { name:"Hagesanger", latin:"Sylvia borin", category:"🦅 Fugl", description:"Liten grå-brun sangfugl. Herlig sang. Trekk-fugl.", habitat:"Busker, hager, skoger", funFact:"Hagesangeren kommer fra Afrika hver sommer.", rarity:"Vanlig", edible:false, season:"Mai–August" },
+    { name:"Løvsanger", latin:"Phylloscopus trochilus", category:"🦅 Fugl", description:"Liten grønn sangfugl. Fin sang. Trekk-fugl.", habitat:"Løvskoger, bjørkeskoger", funFact:"Løvsangeren er en av Norges mest tallrike trekkfugler.", rarity:"Svært vanlig", edible:false, season:"April–August" },
+    { name:"Gransanger", latin:"Phylloscopus collybita", category:"🦅 Fugl", description:"Liten grønn sangfugl. Enkel sang. Trekk-fugl.", habitat:"Granskog, blandingsskog", funFact:"Gransangeren er nordlig arter som kommer sent om våren.", rarity:"Vanlig", edible:false, season:"Mai–August" },
+    { name:"Rødstjert", latin:"Phoenicurus ochruros", category:"🦅 Fugl", description:"Liten fugl med rødt stjertfjedre. Vakker.", habitat:"Bergvegg, murrer, byhus", funFact:"Rødstjert var første gang etablert i Norge rundt 1900-tallet.", rarity:"Vanlig", edible:false, season:"April–Oktober" },
+    { name:"Steinskvett", latin:"Oenanthe oenanthe", category:"🦅 Fugl", description:"Liten steinaktig fugl. Hvit på halen.", habitat:"Stein, heier, fjellet", funFact:"Steinskvetten kommer fra Afrika hver mai.", rarity:"Vanlig", edible:false, season:"Mai–August" },
+    { name:"Gulerle", latin:"Motacilla flava", category:"🦅 Fugl", description:"Liten gul og grønn fugl. Dansende gang.", habitat:"Våte områder, enger", funFact:"Gulerlen er en av de første gjøkfuglene som kommer om våren.", rarity:"Vanlig", edible:false, season:"April–August" },
+    { name:"Linerle", latin:"Motacilla alba", category:"🦅 Fugl", description:"Liten hvit og svart fugl. Hoppende gang. Talende.", habitat:"Bygninger, bekker", funFact:"Linerlen er en av Norges vanligste fugler ved mennesker.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Stær", latin:"Sturnus vulgaris", category:"🦅 Fugl", description:"Sort fugl med blankende fjær. Bullrende lyd.", habitat:"Overalt hvor mennesker bor", funFact:"Stæren danner store flokker på høsten som kalles 'stæreim'.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Tårnseiler", latin:"Apus apus", category:"🦅 Fugl", description:"Sort fugl som bare er i luften. Kvitrende lyder.", habitat:"Høye bygninger, klipper", funFact:"Tårnseilen kan sove og mate avkom mens den flyr.", rarity:"Vanlig", edible:false, season:"Mai–August" },
   ],
   animals: [
     { name:"Elg", latin:"Alces alces", category:"🦌 Dyr", description:"Nordens største landdyr – kan veie over 500 kg.", habitat:"Skog over hele Norge", funFact:"Kan svømme opptil 10 km og dykke 5 meter ned.", rarity:"Vanlig", edible:true, season:"Hele året" },
@@ -416,6 +643,23 @@ const SPECIES_DB = {
     { name:"Jerv", latin:"Gulo gulo", category:"🦌 Dyr", description:"Nordens sterkeste rovdyr i forhold til størrelsen. Mørk, kraftig kropp.", habitat:"Fjellområder, Nord-Norge", funFact:"Kan ta ned byttedyr 5 ganger sin egen vekt. Kun ~350 jerv i Norge.", rarity:"Sjelden", edible:false, season:"Hele året" },
     { name:"Fjellrev", latin:"Vulpes lagopus", category:"🦌 Dyr", description:"Kritisk truet i Norge. Hvit vinterpels, grå sommerpels.", habitat:"Fjellvidder, høyfjell", funFact:"Kun ca. 300 voksne fjellrev i Norge – en av landets mest truede arter.", rarity:"Svært sjelden", edible:false, season:"Hele året" },
     { name:"Bever", latin:"Castor fiber", category:"🦌 Dyr", description:"Europas største gnager. Bygger demninger og hytter.", habitat:"Elver, innsjøer, bekker", funFact:"En beverfamilie kan felle over 200 trær på ett år. Norge har ca. 70 000 bevere.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Gaupe", latin:"Lynx lynx", category:"🦌 Dyr", description:"Norges største katt. Kraftig, med tufter på øra. Sjelden synlig.", habitat:"Barskog, innland", funFact:"Gaupen var nesten utryddet men kommer tilbake. Ca. 350 gauper i Norge nå.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Mink", latin:"Neovison vison", category:"🦌 Dyr", description:"Liten, mørk rovdyr i vannet. Likt oter men mindre.", habitat:"Bekker, småelver, kysten", funFact:"Minken er en invasiv art som skader fuglekylling langs norskekysten.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Mår", latin:"Martes martes", category:"🦌 Dyr", description:"Liten rovdyr i trær. Beige/gul brystflekk. Litt større enn mink.", habitat:"Løvskog, blandingsskog", funFact:"Måren har veldig lang kropp og kan rane på fuglereir høyt opp i trærne.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Røyskatt", latin:"Vulpes lagopus", category:"🦌 Dyr", description:"Som fjellreven men mindre. Hvit om vinter, brun-blå om sommer.", habitat:"Fjellvidder, høyfjell", funFact:"Røyskatten er kritisk truet - færre enn 200 igjen i Norge.", rarity:"Svært sjelden", edible:false, season:"Hele året" },
+    { name:"Spissmus", latin:"Sorex araneus", category:"🦌 Dyr", description:"Mindre mus med spiss snute. Insektetende. Høyt stoffskifte.", habitat:"Fuktig skog, kratt, hager", funFact:"Spissmusa besvimer av frykt - kan ligge bevisstløs i timesvis.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Flaggermus", latin:"Myotis daubentonii", category:"🦌 Dyr", description:"Nattaktivt pattedyr som jakter insekter. Veskeaktig hud mellom bein.", habitat:"Byer, parker, ved vann", funFact:"Norske flaggermus er små - bare 5-7 cm lang. Jakter insekter på vannflaten.", rarity:"Vanlig", edible:false, season:"April–Oktober" },
+    { name:"Lemen (snømus)", latin:"Dicrostonyx torquatus", category:"🦌 Dyr", description:"Liten gnager med hvit vinterdrakt. Lever på fjellvidder. Populasjon svinger enormt.", habitat:"Fjellvidder, myr, tundra", funFact:"Lemenen har kraftige kløer som blir større om vinteren - fungerer som snøsko.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Brunbjørn", latin:"Ursus arctos", category:"🦌 Dyr", description:"Stor brunlig bjørn. Sjelden i Norge nå, kommer fra Sverige. Farlig.", habitat:"Nordlige skoger, fjellområder", funFact:"Brunbjørnen var utdød i Norge men kommer tilbake fra Sverige.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Ulv", latin:"Canis lupus", category:"🦌 Dyr", description:"Stor grå rovdyr. Svært sjelden. Kommet fra Sverige. Utdannet. ⚠️ Farlig.", habitat:"Nordlige og østlige skoger", funFact:"Ulven var utryddet i Norge rundt 1850 men kommer tilbake fra Sverige.", rarity:"Svært sjelden", edible:false, season:"Hele året" },
+    { name:"Ilder", latin:"Mustela erminea", category:"🦌 Dyr", description:"Liten smal rovdyr. Hvit om vinteren. Hurtig og dyktig.", habitat:"Overalt hvor det er gnagere", funFact:"Ilderet kan løpe inn i kaninerhuler som er for små for enn andre rovdyr.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Markmus", latin:"Apodemus agrarius", category:"🦌 Dyr", description:"Liten grå gnager. Striping på ryggen. Svær populasjon.", habitat:"Åkrer, veikanter, dyrket mark", funFact:"Markmusen er en av Norges mest vanlige gnagere.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Vånd", latin:"Ondatra zibethica", category:"🦌 Dyr", description:"Stor vanngnager. Flat hale. Bygger dammer.", habitat:"Søer, elver, våtmark", funFact:"Vånden ble innført fra Nord-Amerika for pelsens skyld.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Klatremus", latin:"Sciurus vulgaris", category:"🦌 Dyr", description:"Rødlig ekornaktig dyr. Lange ører. Klatre på trær.", habitat:"Skoger overalt", funFact:"Klateremsen bygger boler av smågreiner og hår fra dyr.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Vaktel", latin:"Coturnix coturnix", category:"🦌 Dyr", description:"Liten fugel i lokkekallet 'vaktel vaktel'. Trekk-fugl.", habitat:"Kornåkrer, åpne områder", funFact:"Vaktelen kommer til Norge fra Afrika hver mai.", rarity:"Sjelden", edible:false, season:"Mai–August" },
+    { name:"Gemse", latin:"Rupicapra rupicapra", category:"🦌 Dyr", description:"Liten hornete berghvert. Svart-hvitt. Sjelden i Norge.", habitat:"Fjellsider, bergvegg", funFact:"Gemsen ble innført til Norge fra Sør-Europa rundt 1900.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Bismuttering", latin:"Mustela nivalis", category:"🦌 Dyr", description:"Minste norske rovdyr. Hvit eller grå. Dyktig på små gnagere.", habitat:"Åkrer, steingjordet, krattmark", funFact:"Bismutteringen er så liten at den kan forfølge gnagere inn i deres hull.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Lirype", latin:"Lagopus muta", category:"🦌 Dyr", description:"Liten bergfugl. Hvit om vinteren, brun om sommeren.", habitat:"Høyfjellet, alpine områder", funFact:"Lirypene bytter farge med årstidene og er perfekt kamuflert året rundt.", rarity:"Vanlig", edible:false, season:"Hele året" },
   ],
   insects: [
     { name:"Humle", latin:"Bombus terrestris", category:"🐛 Insekt", description:"Stor, lodden bie viktig for pollinering.", habitat:"Hager, enger, skog", funFact:"Kan fly selv i 5°C – mye hardførere enn honningbier.", rarity:"Svært vanlig", edible:false, season:"Apr–Sept" },
@@ -429,6 +673,30 @@ const SPECIES_DB = {
     { name:"Veps", latin:"Vespula vulgaris", category:"🐛 Insekt", description:"Gul-svart stripet insekt. Kan stikke gjentatte ganger.", habitat:"Hager, skog, bygninger", funFact:"Veps spiser skadedyr og pollinerer – de er faktisk nyttige, bare irriterende i august.", rarity:"Svært vanlig", edible:false, season:"Mai–Okt" },
     { name:"Neslesommerfugl", latin:"Aglais urticae", category:"🐛 Insekt", description:"Oransje-svart sommerfugl. En av de første om våren.", habitat:"Hager, enger, veikanter", funFact:"Larvene lever kun på brennesle – derav navnet.", rarity:"Svært vanlig", edible:false, season:"Mar–Okt" },
     { name:"Skogsmaur", latin:"Formica rufa", category:"🐛 Insekt", description:"Bygger store maurtuer av barnåler i skogen.", habitat:"Barskog", funFact:"En stor maurtue kan inneholde over 500 000 maur og regulerer temperaturen selv.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
+    { name:"Ildflue/St.Hans-orm", latin:"Photinus pyralis", category:"🐛 Insekt", description:"Beetulose insekt som lyser i mørket - sommer blikk av gult lys.", habitat:"Enger, fukt mark, hager", funFact:"Ildfluen produserer sitt eget lys gjennom en kjemisk reaksjon i magen.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
+    { name:"Barkbille", latin:"Dendroctonus micans", category:"🐛 Insekt", description:"Liten bille som borer i bark på trær. Skaper mønstre under barken.", habitat:"Gran, furu, barskog", funFact:"Barkbillene kan ødelegge hele trær - de eter kanaler under barken.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Humleflue", latin:"Bombylius major", category:"🐛 Insekt", description:"Flueart som ligner humle men er en parasitt av bikuber.", habitat:"Enger, veikanter, blomsterfelt", funFact:"Humleflyen legger egg ved bikuber - larvene blir parasitter.", rarity:"Vanlig", edible:false, season:"April–Juni" },
+    { name:"Sølvkre", latin:"Lepisma saccharina", category:"🐛 Insekt", description:"Liten sølvfarge insekt. Kryper rundt i hus. Spiser stivelse.", habitat:"Hus, køkkener, biblioteker", funFact:"Sølvkreia er primitive insekter som har levd uendret i 300 millioner år.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Trekkmaur", latin:"Atta cephalotes", category:"🐛 Insekt", description:"Tropisk maur som organiserer store trekkkolonner. Ikke i Norge men kjent fra litteratur.", habitat:"Tropisk skog", funFact:"Trekkmurane bærer bladfragmenter som de bruker til å lage soppdyrking.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Gresshoppe", latin:"Tettigonia viridissima", category:"🐛 Insekt", description:"Grønn insekt som stridvar ved høy temperatur. Sanger på nett.", habitat:"Enger, kratt, hager", funFact:"Gresshoppene har ører på beinet sitt - ikke på hodet som mennesker.", rarity:"Vanlig", edible:false, season:"Juli–Oktober" },
+    { name:"Guldsmed (libelle)", latin:"Odonata (diverse)", category:"🐛 Insekt", description:"Glimrende libeller med metallglans. Små og meget behendige.", habitat:"Innsjøer, dammer, myrer", funFact:"Guldsmeder kan fly baklengs, sidlengs, og helt stille - perfekte jegere.", rarity:"Vanlig", edible:false, season:"Juni–September" },
+    { name:"Birøkter (Honningbie)", latin:"Apis mellifera", category:"🐛 Insekt", description:"Gyllen bie. Produserer honning og bivoks. Viktig for pollinering.", habitat:"Hager, parker, åpen mark", funFact:"Honningbiene danser for å kommunisere plasseringen av blomster.", rarity:"Vanlig", edible:false, season:"April–Oktober" },
+    { name:"Jordhumle", latin:"Bombus terrestris", category:"🐛 Insekt", description:"Stor gul og svart humle. Bygger rede i jord. Viktig for pollinering.", habitat:"Hager, enger, skoger", funFact:"Jordhumlen kan temperaturregulere på myske dagen ved å skviske muskler.", rarity:"Vanlig", edible:false, season:"April–Oktober" },
+    { name:"Steinhumle", latin:"Bombus lapidarius", category:"🐛 Insekt", description:"Stor rød og svart humle. Bygger rede under steiner. Putrende lyd.", habitat:"Steder med steiner, heier", funFact:"Steinhumlen er nordisk art som trives i kaldt klima.", rarity:"Vanlig", edible:false, season:"April–Oktober" },
+    { name:"Trehumle", latin:"Bombus pratorum", category:"🐛 Insekt", description:"Mindre humle. Rødgul og svart. Bygger rede i trær.", habitat:"Skoger, buskpass, hager", funFact:"Trehumlen kommer tidlig på våren og er ofte første humlearten.", rarity:"Vanlig", edible:false, season:"April–Oktober" },
+    { name:"Husflue", latin:"Musca domestica", category:"🐛 Insekt", description:"Grå liten flue. Irriterende og smittefarlig. Sommerkvalme.", habitat:"Menneskehabital overalt", funFact:"Husfluen har magutskilning på alle undersøkte mat - helt virussmitte.", rarity:"Svært vanlig", edible:false, season:"Mai–Oktober" },
+    { name:"Klegg", latin:"Tabanidae", category:"🐛 Insekt", description:"Stor, robust, brunaktig flue. Bitende og plagsom.", habitat:"Våte områder, ved vann", funFact:"Kun hunnskleggen biter - hannene lever på plantenektar.", rarity:"Svært vanlig", edible:false, season:"Juni–August" },
+    { name:"Mygg", latin:"Culicidae", category:"🐛 Insekt", description:"Små flyer. Bitende og plagsom, spesielt ved vann.", habitat:"Våte områder, myr", funFact:"Mygg kan ha korte livssykler - fra egg til voksen på bare 7-10 dager.", rarity:"Svært vanlig", edible:false, season:"Mai–Oktober" },
+    { name:"Middagsflue", latin:"Anisopodidae", category:"🐛 Insekt", description:"Liten flue som danser i solen. Uskadelig og dekorativ.", habitat:"Varme, solrike steder", funFact:"Middagsfluene danser i svermeleik - hundrevis sammen.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Gulbåndveps", latin:"Vespa crabro", category:"🐛 Insekt", description:"Stor rød og gul veps. Bygger papirrede. Stikk giftig.", habitat:"Gamle trær, vegg, hus", funFact:"Gulbåndvepsen jakter på andre insekter og er ikke spesielt aggressiv.", rarity:"Vanlig", edible:false, season:"Juni–Oktober" },
+    { name:"Skogveps", latin:"Dolichovespula sylvestris", category:"🐛 Insekt", description:"Mindre veps. Grå og gul. Papirrede i vegetasjon. Aggressiv.", habitat:"Skoger, busker, hager", funFact:"Skogvepsen er betydelig mindre enn gulbåndvepsen men mer aggressiv.", rarity:"Vanlig", edible:false, season:"Juni–Oktober" },
+    { name:"Eikegallveps", latin:"Cynips quercusfolii", category:"🐛 Insekt", description:"Mikroskopisk liten veps. Årsakar galleromantikk på eikblader.", habitat:"Eik-trær, skoger", funFact:"Eikegallvepsen danner karakteristiske galler som kalles 'eikeballer'.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Bille (skarabé)", latin:"Scarabaeus sacer", category:"🐛 Insekt", description:"Stor gylden grønn bille. Rull gjødsel til kuler.", habitat:"Tørre steder, dyrket mark", funFact:"Skarabæen ble ansett som hellig i det gamle Egypt.", rarity:"Uvanlig", edible:false, season:"Juli–Oktober" },
+    { name:"Askegrå lyngmåler", latin:"Xanthorhoe fluctuata", category:"🐛 Insekt", description:"Liten grå sommerfugl med flekker. Unauffällig.", habitat:"Lyngheier, åpen mark", funFact:"Lyngmåleren er veldig vanlig men ofte uberømt.", rarity:"Vanlig", edible:false, season:"Juli–September" },
+    { name:"Bjørnemøll", latin:"Erebidae", category:"🐛 Insekt", description:"Stor møll. Mørkbrun eller grayish. Nattaktiv.", habitat:"Skoger, parker, hager", funFact:"Bjørnemøl har behårete stadier som ser ut som små bjørner.", rarity:"Vanlig", edible:false, season:"Juni–August" },
+    { name:"Engblåvinge", latin:"Polyommatus icarus", category:"🐛 Insekt", description:"Liten blå sommerfugl. Hankøn blå, hunkøn brun.", habitat:"Tørre enger, veikanter", funFact:"Engblåvingen er en av Norges vanligste sommerfugler.", rarity:"Svært vanlig", edible:false, season:"Juni–August" },
+    { name:"Svalestjert", latin:"Papilio machaon", category:"🐛 Insekt", description:"Stor gul og svart sommerfugl. Kjente tanner på vingeene.", habitat:"Værk, varme steder, frukthager", funFact:"Svalestjerten er en av Europas vakreste sommerfugler.", rarity:"Uvanlig", edible:false, season:"Juni–August" },
+    { name:"Ospeminérmøll", latin:"Yponomeuta evonymella", category:"🐛 Insekt", description:"Liten hvit møll. Larvene danser 'web' på ospplanter.", habitat:"Osp-trær, busker", funFact:"Ospeminér-larver kan defoliere hele osptrær på kort tid.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
   ],
   tracks: [
     { name:"Elgspor", latin:"Alces alces", category:"🐾 Spor", description:"Store, avlange klover (12-16 cm). To tydelige halvmåner. Ofte dype avtrykk i bløt mark.", habitat:"Skog over hele Norge", funFact:"Elg har biklover som vises i dyp snø – ser ut som fire merker.", rarity:"Vanlig", edible:false, season:"Hele året" },
@@ -445,6 +713,17 @@ const SPECIES_DB = {
     { name:"Grevlingspor", latin:"Meles meles", category:"🐾 Spor", description:"Bredt spor (6-7 cm) med 5 tær og tydelige klomerker. Ligner en liten bjørnepote.", habitat:"Løvskog, jordbruksland", funFact:"Grevlingen har egne 'do-groper' – grunne hull der hele familiegruppen gjør fra seg.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
     { name:"Fuglespor i snø", latin:"Diverse", category:"🐾 Spor", description:"Varierer fra små meise-spor (2 cm) til store orrfugl-spor (8 cm). Ser etter antall tær og mønster.", habitat:"Over hele Norge", funFact:"Ryper graver seg ned i snøen for å sove – du kan se hull der de dykket ned og kom opp.", rarity:"Svært vanlig", edible:false, season:"Okt–Apr" },
     { name:"Bjørnespor", latin:"Ursus arctos", category:"🐾 Spor", description:"Enormt spor (15-20 cm) med 5 tær og klomerker. Bakpoten ligner et menneskefotspor.", habitat:"Finnmark, Troms, indre Hedmark", funFact:"Norge har kun ca. 175 bjørner – å finne bjørnespor er ekstremt sjeldent!", rarity:"Svært sjelden", edible:false, season:"Apr–Okt" },
+    { name:"Mårspor", latin:"Martes martes", category:"🐾 Spor", description:"Liten, sprøtt spor (3 cm). Langstrakt avtrykk i snø - 'telemark' hoppgang.", habitat:"Barskog, blandingsskog", funFact:"Måren hopper i spor - etterlater lange groper i snøen.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Minkspor", latin:"Neovison vison", category:"🐾 Spor", description:"Liten spor (3 cm) med svømmehudspor. Ofte langs bekker og bredder.", habitat:"Bekker, småelver, kysten", funFact:"Minkesporet er mindre og mer rundere enn oterens spor.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Villreinspor", latin:"Rangifer tarandus", category:"🐾 Spor", description:"Stort spor (8-10 cm) som elgspor men litt mindre. Tydelig bredform.", habitat:"Hardangervidda, fjellvidder", funFact:"Villreinens spor er bredt som et snøsko - perfekt tilpasset snøen.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Villsvinspor", latin:"Sus scrofa", category:"🐾 Spor", description:"Rundlikt klovespor (3-4 cm) ofte i grupper. Grøfter fra rotvålting synlig.", habitat:"Løvskog, jordbruksland, Sør-Norge", funFact:"Villsvinet vålter seg i leire for å kvitte seg med parasitter - danner karakteristiske grøfter.", rarity:"Vanlig", edible:true, season:"Hele året" },
+    { name:"Ulvespor", latin:"Canis lupus", category:"🐾 Spor", description:"Stort rundlikt spor (5-7 cm) i rett linje. Sjelden i Norge.", habitat:"Nordlige og østlige skoger, snø", funFact:"Ulven setter footene helt eksakt i hverandres spor - 'trail by trail'.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Villsvinavføring", latin:"Sus scrofa", category:"🐾 Spor", description:"Irregulært formet avføring, ofte med plantestoff synlig.", habitat:"Løvskog, jordbruksland", funFact:"Villsvins avføring er større og messier enn husdyrs avføring.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Ekornspor", latin:"Sciurus vulgaris", category:"🐾 Spor", description:"Små spor i pairs eller 'gruppe' - både bakerste og fremmere hender synlig.", habitat:"Skoger overalt", funFact:"Ekorn hopper i rette linjer og spar markerer nærvær med små oppholdssteder.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Pinnsvinhull", latin:"Erinaceus europaeus", category:"🐾 Spor", description:"Lite rundt eller ovalt hull i bakken med jordansamling. Pinnsvinkjøp.", habitat:"Kulturmark, hager, parker", funFact:"Pinnsvinen graver underjordske hull hvor det hviler og oppbevarer mat.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Harespor-sommar", latin:"Lepus europaeus", category:"🐾 Spor", description:"Langstrakt spor fra bakpotene foran frempotene - asymmetrisk pattern.", habitat:"Åpne marker, engsletter", funFact:"Harens asymmetriske sporat kommer av at den hopper i zigzag mønster.", rarity:"Vanlig", edible:true, season:"Juni–Oktober" },
+    { name:"Beverdam", latin:"Castor fiber", category:"🐾 Spor", description:"Konstruksjoner av grener laget i vann. Også gnagespor på trær.", habitat:"Elver, søer med birk og asp", funFact:"Beaverens dammer kan blitt 1 meter høye og 100 meter lange.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Mågespor", latin:"Larus argentatus", category:"🐾 Spor", description:"Tretallig webbed spor (5-6 cm) i sand eller mud. Gjerne i grupper.", habitat:"Strender, sandbanker, kystklipper", funFact:"Måke spor viser ofte i grupper når de samles for å gyte.", rarity:"Vanlig", edible:false, season:"Hele året" },
   ]
 };
 const CAT_NAMES = { flowers:"Blomster", trees:"Trær", berries:"Bær", mushrooms:"Sopp", marine:"Fisk", shellfish:"Skalldyr", shells:"Skjell", seaweed:"Tang & Tare", other:"Havliv", birds:"Fugler", animals:"Dyr", insects:"Insekter", tracks:"Dyrespor & Avføring" };
@@ -831,10 +1110,15 @@ function speciesCardHTML(species, rank, showConfidence) {
   const isTop = rank === 0 && showConfidence;
   const id = 'card-' + Math.random().toString(36).substr(2, 8);
   speciesStore[id] = species;
+  const imgId = 'img-' + id;
+  const emoji = species.category ? species.category.split(' ')[0] : '🌿';
+  queueImage(species.latin, imgId, emoji);
 
   return '<div class="result-card ' + (isTop ? 'top' : '') + '" onclick="toggleDetails(\'' + id + '\')">' +
     '<div class="result-card-inner">' +
-      '<div class="result-header"><div style="flex:1">' +
+      '<div class="result-header">' +
+        '<div class="species-thumb-placeholder" id="' + imgId + '">' + emoji + '</div>' +
+        '<div style="flex:1">' +
         '<div class="result-category">' + (isTop ? '🏆 ' : '') + species.category + '</div>' +
         '<div class="result-name">' + species.name + '</div>' +
         '<div class="result-latin">' + species.latin + '</div>' +
@@ -899,6 +1183,7 @@ function showResults(imageData, results, errorMsg) {
       '<div style="font-size:16px;font-weight:600;color:#555">AI-en klarte ikke å identifisere noe</div>' +
       '<div style="font-size:13px;color:#888;margin-top:4px">Prøv et tydeligere bilde med bedre lys</div></div></div>';
   }
+  setTimeout(flushImageQueue, 50);
 }
 
 function showHome() {
@@ -910,6 +1195,13 @@ function showHome() {
   document.getElementById('exploreArea').classList.remove('hidden');
   document.getElementById('navHome').classList.add('active');
   document.getElementById('navCollection').classList.remove('active');
+  // Reset database search
+  const dbS = document.getElementById('dbSearch');
+  const dbR = document.getElementById('dbSearchResults');
+  const grid = document.getElementById('exploreGrid');
+  if (dbS) dbS.value = '';
+  if (dbR) { dbR.classList.add('hidden'); dbR.innerHTML = ''; }
+  if (grid) grid.style.display = '';
 }
 
 function browseCategory(key) {
@@ -922,6 +1214,7 @@ function browseCategory(key) {
   bv.innerHTML = '<button class="back-btn" onclick="showHome()">← Tilbake</button>' +
     '<div class="section-title">' + (CAT_NAMES[key] || key) + '</div>' +
     species.map((sp, i) => speciesCardHTML(sp, -1, false)).join('');
+  setTimeout(flushImageQueue, 50);
 }
 
 let collectionFilter = 'all';
@@ -935,6 +1228,130 @@ function formatDate(ts) {
   return day + '. ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + h + ':' + m;
 }
 
+// ============================================================
+// ============================================================
+// SPECIES IMAGE SYSTEM – Wikipedia thumbnails with local cache
+// ============================================================
+const IMG_CACHE_NAME = 'nk-species-img';
+const imgMemCache = {};
+
+async function getSpeciesImageUrl(latin) {
+  if (!latin) return null;
+  // Check memory cache first
+  if (imgMemCache[latin] !== undefined) return imgMemCache[latin];
+  // Check IndexedDB cache
+  const cached = await imgCacheGet(latin);
+  if (cached !== undefined) { imgMemCache[latin] = cached; return cached; }
+  // Fetch from Wikipedia API
+  try {
+    const searchName = latin.replace(/\s+/g, '_');
+    const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(searchName));
+    if (resp.ok) {
+      const data = await resp.json();
+      const url = data.thumbnail ? data.thumbnail.source : null;
+      imgMemCache[latin] = url;
+      await imgCacheSet(latin, url);
+      return url;
+    }
+  } catch(e) {}
+  imgMemCache[latin] = null;
+  await imgCacheSet(latin, null);
+  return null;
+}
+
+function openImgCacheDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('nk-imgcache', 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('images')) db.createObjectStore('images');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function imgCacheGet(key) {
+  try {
+    const db = await openImgCacheDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction('images', 'readonly');
+      const req = tx.objectStore('images').get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(undefined);
+    });
+  } catch(e) { return undefined; }
+}
+
+async function imgCacheSet(key, val) {
+  try {
+    const db = await openImgCacheDB();
+    const tx = db.transaction('images', 'readwrite');
+    tx.objectStore('images').put(val, key);
+  } catch(e) {}
+}
+
+const imgQueue = [];
+
+function queueImage(latin, imgId, emoji) {
+  imgQueue.push({ latin, imgId, emoji });
+}
+
+function flushImageQueue() {
+  const batch = imgQueue.splice(0);
+  batch.forEach(({ latin, imgId, emoji }) => {
+    getSpeciesImageUrl(latin).then(url => {
+      const el = document.getElementById(imgId);
+      if (el && url) {
+        const img = document.createElement('img');
+        img.className = 'species-thumb';
+        img.src = url;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onerror = function() { this.outerHTML = '<div class="species-thumb-placeholder">' + emoji + '</div>'; };
+        el.replaceWith(img);
+      }
+    });
+  });
+}
+
+// DATABASE SEARCH
+// ============================================================
+let dbSearchTimer = null;
+function searchDatabase(val) {
+  clearTimeout(dbSearchTimer);
+  dbSearchTimer = setTimeout(() => doDbSearch(val), 200);
+}
+
+function doDbSearch(query) {
+  const container = document.getElementById('dbSearchResults');
+  const grid = document.getElementById('exploreGrid');
+  if (!query || query.length < 2) {
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    if (grid) grid.style.display = '';
+    return;
+  }
+  const q = query.toLowerCase();
+  const matches = [];
+  for (const [key, species] of Object.entries(SPECIES_DB)) {
+    for (const sp of species) {
+      if (sp.name.toLowerCase().includes(q) || sp.latin.toLowerCase().includes(q) || sp.description.toLowerCase().includes(q) || sp.habitat.toLowerCase().includes(q)) {
+        matches.push(sp);
+      }
+    }
+  }
+  if (grid) grid.style.display = matches.length > 0 || query.length >= 2 ? 'none' : '';
+  container.classList.remove('hidden');
+  if (matches.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ghost);font-size:13px">Ingen treff på «' + query + '» i databasen</div>';
+    return;
+  }
+  container.innerHTML = '<div style="font-size:11px;color:var(--ghost);margin-bottom:8px">' + matches.length + ' treff</div>' +
+    matches.slice(0, 20).map((sp, i) => speciesCardHTML(sp, -1, false)).join('');
+  setTimeout(flushImageQueue, 50);
+}
+
 function getAllCategories() {
   const cats = new Set();
   collection.forEach(evt => {
@@ -944,10 +1361,39 @@ function getAllCategories() {
   return [...cats].sort();
 }
 
+let collectionSearch = '';
+
 function eventMatchesFilter(evt, filter) {
   if (filter === 'all') return true;
   if (evt.categories) return evt.categories.includes(filter);
   return evt.primaryCategory === filter;
+}
+
+function eventMatchesSearch(evt, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const results = evt.results || [];
+  // Search in species names, latin names, descriptions, categories
+  if (evt.primaryName && evt.primaryName.toLowerCase().includes(q)) return true;
+  for (const r of results) {
+    if (r.name && r.name.toLowerCase().includes(q)) return true;
+    if (r.latin && r.latin.toLowerCase().includes(q)) return true;
+    if (r.description && r.description.toLowerCase().includes(q)) return true;
+    if (r.category && r.category.toLowerCase().includes(q)) return true;
+    if (r.habitat && r.habitat.toLowerCase().includes(q)) return true;
+  }
+  return false;
+}
+
+let searchTimer = null;
+function searchCollection(val) {
+  collectionSearch = val;
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    showCollection();
+    const input = document.querySelector('.collection-search');
+    if (input) { input.focus(); input.setSelectionRange(val.length, val.length); }
+  }, 200);
 }
 
 function showCollection() {
@@ -966,7 +1412,7 @@ function showCollection() {
   }
 
   const cats = getAllCategories();
-  const filtered = collection.filter(evt => eventMatchesFilter(evt, collectionFilter));
+  const filtered = collection.filter(evt => eventMatchesFilter(evt, collectionFilter) && eventMatchesSearch(evt, collectionSearch));
   const sorted = [...filtered].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   // Count total species across all events
@@ -979,6 +1425,7 @@ function showCollection() {
       '<div class="collection-stat"><div class="collection-stat-num">' + totalSpecies + '</div><div class="collection-stat-label">Arter</div></div>' +
       '<div class="collection-stat"><div class="collection-stat-num">' + cats.length + '</div><div class="collection-stat-label">Kategorier</div></div>' +
     '</div>' +
+    '<input type="search" class="collection-search" placeholder="Søk i samlingen – f.eks. ekorn, kantarell..." value="' + (collectionSearch || '') + '" oninput="searchCollection(this.value)">' +
     '<div class="collection-filter">' +
       '<select id="catFilter" onchange="filterCollection(this.value)">' +
         '<option value="all"' + (collectionFilter === 'all' ? ' selected' : '') + '>Se alle (' + collection.length + ')</option>' +
@@ -988,6 +1435,7 @@ function showCollection() {
         }).join('') +
       '</select>' +
     '</div>' +
+    (filtered.length === 0 && collectionSearch ? '<div style="text-align:center;padding:30px;color:var(--ghost)">Ingen treff på «' + collectionSearch + '»</div>' :
     (sorted.length === 0 ? '<div style="text-align:center;padding:30px;color:var(--ghost)">Ingen hendelser i denne kategorien</div>' :
     sorted.map(evt => {
       const dateStr = evt.timestamp ? formatDate(evt.timestamp) : '';
@@ -1044,7 +1492,7 @@ function showCollection() {
           '</div>' +
         '</div>' +
       '</div>';
-    }).join(''));
+    }).join('')));
 }
 
 function toggleEventDetail(evtId) {
@@ -1088,6 +1536,40 @@ function updateSeasonGuide() {
   const s = seasons[month] || seasons[0];
   el.innerHTML = '<div style="font-family:Playfair Display,Georgia,serif;font-size:15px;font-weight:600;color:var(--forest);margin-bottom:6px">' + s.emoji + ' ' + s.title + '</div>' +
     '<div style="font-size:12.5px;color:#555;line-height:1.65">' + s.tips + '</div>';
+}
+
+// ============================================================
+// SERVICE WORKER – Offline support
+// ============================================================
+if ('serviceWorker' in navigator) {
+  const SW_VERSION = 'nk-v3';
+  const swCode = `
+    const CACHE_NAME = '${SW_VERSION}';
+    const OFFLINE_URLS = ['/'];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(OFFLINE_URLS)).then(() => self.skipWaiting()));
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      const url = new URL(e.request.url);
+      if (url.origin !== location.origin && !url.hostname.includes('fonts.googleapis.com') && !url.hostname.includes('fonts.gstatic.com')) return;
+      e.respondWith(
+        fetch(e.request).then(resp => {
+          if (resp && resp.status === 200) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+          }
+          return resp;
+        }).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, { scope: '/' }).catch(() => {});
 }
 
 // Init
