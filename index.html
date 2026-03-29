@@ -114,6 +114,18 @@ body::before {
 .detail-value { font-size: 12px; font-weight: 600; color: var(--ink); }
 .fun-fact { background: var(--warm); border-radius: 6px; padding: 10px 14px; display: flex; gap: 8px; align-items: flex-start; }
 .fun-fact span { font-size: 13px; color: #6a4a20; line-height: 1.55; }
+/* Safety warnings */
+.safety-warning { background: #fde8e8; border: 2px solid #c0392b; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; }
+.safety-warning.caution { background: #fef3e2; border-color: #c9923a; }
+.safety-warning .sw-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.safety-warning .sw-text { font-size: 12px; line-height: 1.5; color: #5a1a1a; font-weight: 500; }
+.safety-warning.caution .sw-text { color: #5a3a0a; }
+.confidence-bar { height: 4px; border-radius: 2px; background: var(--sand); margin-top: 6px; overflow: hidden; }
+.confidence-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.confidence-bar-fill.high { background: var(--leaf); }
+.confidence-bar-fill.medium { background: var(--gold); }
+.confidence-bar-fill.low { background: var(--rust); }
+.disclaimer-bar { background: var(--forest); color: var(--mist); font-size: 10px; text-align: center; padding: 8px 16px; letter-spacing: 0.3px; line-height: 1.5; }
 .toggle-hint { text-align: center; margin-top: 8px; font-size: 10px; color: var(--ghost); letter-spacing: 0.5px; text-transform: uppercase; }
 .explore-title { font-size: 10px; font-weight: 600; color: var(--ghost); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
 .explore-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -163,9 +175,11 @@ body::before {
     </div>
     <button class="collection-badge" onclick="showCollection()">
       📋 <span id="collectionCount">0</span>
+
     </button>
   </div>
 </div>
+<div class="disclaimer-bar">⚠️ Aldri spis sopp, bær eller planter kun basert på denne appen. Verifiser alltid med ekspert.</div>
 
 <div class="nav-tabs">
   <button class="nav-tab active" id="navHome" onclick="showHome()">🏠 Hjem</button>
@@ -289,6 +303,11 @@ const SPECIES_DB = {
     { name:"Sjampinjong", latin:"Agaricus campestris", category:"🍄 Sopp", description:"Hvit matsopp med rosa/brune lameller.", habitat:"Beitemarker, gressplener", funFact:"Stamfar til butikksjampinjongen vi kjøper.", rarity:"Vanlig", edible:true, season:"Aug–Okt" },
     { name:"Hvit fluesopp", latin:"Amanita virosa", category:"🍄 Sopp", description:"⚠️ Dødelig giftig! Helkvit med ring på stilken.", habitat:"Barskog, blandingsskog", funFact:"Kalles 'engledreperen' – en liten bit kan være dødelig.", rarity:"Uvanlig", edible:false, season:"Juli–Okt" },
     { name:"Sopphatt (Karl Johan)", latin:"Boletus edulis", category:"🍄 Sopp", description:"Stor, brun hatt med hvit stilk. Gourmetsopp!", habitat:"Gran- og furuskog", funFact:"Oppkalt etter kong Karl XIV Johan av Sverige-Norge.", rarity:"Vanlig", edible:true, season:"Aug–Okt" },
+    { name:"Grønn fluesopp", latin:"Amanita phalloides", category:"🍄 Sopp", description:"⚠️ Dødelig giftig! Grønnlig hatt, hvite lameller, ring og skjede.", habitat:"Løvskog, parker", funFact:"Ansvarlig for 90% av sopp-dødsfall i Europa. Finnes sjelden i Norge men sprer seg nordover.", rarity:"Sjelden", edible:false, season:"Aug–Okt" },
+    { name:"Spiss giftslørsopp", latin:"Cortinarius rubellus", category:"🍄 Sopp", description:"⚠️ Dødelig giftig! Rødoransje sopp med spiss hatt.", habitat:"Barskog, myrskog", funFact:"Giften orellanin gir nyresvikt – symptomene kommer først etter 3-14 dager!", rarity:"Uvanlig", edible:false, season:"Aug–Okt" },
+    { name:"Svart trompetsopp", latin:"Craterellus cornucopioides", category:"🍄 Sopp", description:"Mørk, traktformet delikatesse. Kalles 'den svarte trompeten'.", habitat:"Løvskog, bøkeskog", funFact:"Ingen giftige forvekslingsarter – helt trygg å plukke!", rarity:"Uvanlig", edible:true, season:"Aug–Nov" },
+    { name:"Krepling", latin:"Albatrellus ovinus", category:"🍄 Sopp", description:"Hvit til gulhvit matsopp med ujevn hattoverflate.", habitat:"Barskog, mosegrod grunn", funFact:"En norsk favoritt! Perfekt stekt i smør med salt og pepper.", rarity:"Vanlig", edible:true, season:"Aug–Okt" },
+    { name:"Blek kremle", latin:"Russula claroflava", category:"🍄 Sopp", description:"Gul matsopp med mild smak. Sprø konsistens.", habitat:"Bjørkeskog, myrskog", funFact:"Kremler som smaker mildt er som regel spiselige. Skarpe/brennende = vekk!", rarity:"Vanlig", edible:true, season:"Jul–Okt" },
   ],
   marine: [
     { name:"Torsk", latin:"Gadus morhua", category:"🐟 Fisk", description:"Norges viktigste fisk gjennom historien.", habitat:"Nordsjøen, Barentshavet", funFact:"Lofotfisket har pågått i over 1000 år.", rarity:"Vanlig", edible:true, season:"Hele året" },
@@ -346,6 +365,10 @@ const SPECIES_DB = {
     { name:"Fiskemåke", latin:"Larus canus", category:"🦅 Fugl", description:"Vanlig måke langs kysten og innlandet.", habitat:"Kysten, innsjøer, byer", funFact:"En av få fugler som trives like godt i byen som på landet.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
     { name:"Fossekall", latin:"Cinclus cinclus", category:"🦅 Fugl", description:"Norges nasjonalfugl! Dykker i elver og bekker.", habitat:"Fosser, elver, bekker", funFact:"Kan gå på bunnen av elver og jakte insekter under vann.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Haukugle", latin:"Surnia ulula", category:"🦅 Fugl", description:"Dagaktiv ugle som sitter synlig i tretoppene.", habitat:"Barskog, fjellbjørkeskog", funFact:"En av få ugler som jakter om dagen.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Blåmeis", latin:"Cyanistes caeruleus", category:"🦅 Fugl", description:"Liten, fargerik meis med blå kalott og gul buk.", habitat:"Hager, parker, løvskog", funFact:"Kan henge opp-ned på kvister for å finne mat – mer akrobatisk enn kjøttmeis.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
+    { name:"Svartmeis", latin:"Periparus ater", category:"🦅 Fugl", description:"Minste meisen i Norge med svart hode og hvit nakkeflekk.", habitat:"Barskog, hager", funFact:"Hamstrer frø i barksprekker for vinteren.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Flaggspett", latin:"Dendrocopos major", category:"🦅 Fugl", description:"Svart-hvit spett med rød undergump. Trommer høylytt på trær.", habitat:"Skog, hager, parker", funFact:"Trommer opptil 20 slag per sekund – hjernen er spesialdesignet for å tåle støtene.", rarity:"Vanlig", edible:false, season:"Hele året" },
+    { name:"Kongeørn", latin:"Aquila chrysaetos", category:"🦅 Fugl", description:"Majestetisk rovfugl med vingespenn opptil 2.2 meter.", habitat:"Fjell, vidder, innland", funFact:"Kan dykke med 300 km/t etter bytte. Ca. 1000 par i Norge.", rarity:"Uvanlig", edible:false, season:"Hele året" },
   ],
   animals: [
     { name:"Elg", latin:"Alces alces", category:"🦌 Dyr", description:"Nordens største landdyr – kan veie over 500 kg.", habitat:"Skog over hele Norge", funFact:"Kan svømme opptil 10 km og dykke 5 meter ned.", rarity:"Vanlig", edible:true, season:"Hele året" },
@@ -357,6 +380,10 @@ const SPECIES_DB = {
     { name:"Hjort", latin:"Cervus elaphus", category:"🦌 Dyr", description:"Staselig hjort med stort gevir. Vestlandets stolthet.", habitat:"Skog, fjellsider, Vestlandet", funFact:"Brøler høyt under brunsten – høres kilometersvis unna.", rarity:"Vanlig", edible:true, season:"Hele året" },
     { name:"Grevling", latin:"Meles meles", category:"🦌 Dyr", description:"Robust, nattaktivt dyr med svart-hvit ansiktstegning.", habitat:"Løvskog, jordbruksland", funFact:"Graver enorme hi-systemer som brukes i generasjoner.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Oter", latin:"Lutra lutra", category:"🦌 Dyr", description:"Leken, vannlevende rovdyr.", habitat:"Elver, innsjøer, kyst", funFact:"Sover på ryggen i vannet og holder hender med andre otere.", rarity:"Uvanlig", edible:false, season:"Hele året" },
+    { name:"Villrein", latin:"Rangifer tarandus", category:"🦌 Dyr", description:"Europas siste villrein finnes kun i Norge. Lever på fjellvidder.", habitat:"Hardangervidda, Rondane, Dovrefjell", funFact:"Norge har ansvar for hele Europas villreinstamme – ca. 25 000 dyr.", rarity:"Uvanlig", edible:true, season:"Hele året" },
+    { name:"Jerv", latin:"Gulo gulo", category:"🦌 Dyr", description:"Nordens sterkeste rovdyr i forhold til størrelsen. Mørk, kraftig kropp.", habitat:"Fjellområder, Nord-Norge", funFact:"Kan ta ned byttedyr 5 ganger sin egen vekt. Kun ~350 jerv i Norge.", rarity:"Sjelden", edible:false, season:"Hele året" },
+    { name:"Fjellrev", latin:"Vulpes lagopus", category:"🦌 Dyr", description:"Kritisk truet i Norge. Hvit vinterpels, grå sommerpels.", habitat:"Fjellvidder, høyfjell", funFact:"Kun ca. 300 voksne fjellrev i Norge – en av landets mest truede arter.", rarity:"Svært sjelden", edible:false, season:"Hele året" },
+    { name:"Bever", latin:"Castor fiber", category:"🦌 Dyr", description:"Europas største gnager. Bygger demninger og hytter.", habitat:"Elver, innsjøer, bekker", funFact:"En beverfamilie kan felle over 200 trær på ett år. Norge har ca. 70 000 bevere.", rarity:"Vanlig", edible:true, season:"Hele året" },
   ],
   insects: [
     { name:"Humle", latin:"Bombus terrestris", category:"🐛 Insekt", description:"Stor, lodden bie viktig for pollinering.", habitat:"Hager, enger, skog", funFact:"Kan fly selv i 5°C – mye hardførere enn honningbier.", rarity:"Svært vanlig", edible:false, season:"Apr–Sept" },
@@ -385,6 +412,60 @@ const SPECIES_DB = {
   ]
 };
 const CAT_NAMES = { flowers:"Blomster", trees:"Trær", berries:"Bær", mushrooms:"Sopp", marine:"Fisk", shellfish:"Skalldyr", shells:"Skjell", seaweed:"Tang & Tare", other:"Havliv", birds:"Fugler", animals:"Dyr", insects:"Insekter", tracks:"Dyrespor & Avføring" };
+
+// ============================================================
+// SAFETY SYSTEM – Rød-liste for farlige arter
+// ============================================================
+const DANGEROUS_SPECIES = {
+  // Dødelig giftige sopp
+  'hvit fluesopp': { level: 'deadly', warning: 'DØDELIG GIFTIG! Hvit fluesopp (engledreperen) er en av Norges farligste sopper. En liten bit kan være dødelig. ALDRI spis sopp som ligner denne uten verifisering fra soppkontrollør.' },
+  'grønn fluesopp': { level: 'deadly', warning: 'DØDELIG GIFTIG! Grønn fluesopp inneholder amatoksin som ødelegger leveren. Forveksles med sjampinjong. ALDRI spis uten soppkontrollør.' },
+  'flatklokkehatt': { level: 'deadly', warning: 'DØDELIG GIFTIG! Inneholder amatoksin. Liten brun sopp som lett forveksles med spiselige arter.' },
+  'spiss giftslørsopp': { level: 'deadly', warning: 'DØDELIG GIFTIG! Inneholder orellanin som gir nyresvikt etter flere dagers forsinkelse. Ekstremt farlig.' },
+  'butt giftslørsopp': { level: 'deadly', warning: 'DØDELIG GIFTIG! Ligner på spiss giftslørsopp. Gir alvorlig nyresvikt.' },
+  // Svært giftige sopp
+  'rød fluesopp': { level: 'toxic', warning: 'GIFTIG! Rød fluesopp er giftig og kan gi alvorlige symptomer. Ikke spiselig tross folkloristisk bruk.' },
+  'panterfluesopp': { level: 'toxic', warning: 'SVÆRT GIFTIG! Farligere enn rød fluesopp. Kan gi kramper og bevisstløshet.' },
+  'giftkremle': { level: 'toxic', warning: 'GIFTIG! Gir kraftig mage-tarm-forgiftning. Forveksles med spiselige kremler.' },
+  'stinksopp': { level: 'toxic', warning: 'GIFTIG når utvokst. Lukter sterkt av råtnende kjøtt. Unge eksemplarer (hekseegg) spises i noen land, men anbefales ikke.' },
+  'trevlesopp': { level: 'toxic', warning: 'GIFTIG! Inneholder muskarin. Mange arter i denne slekten er giftige.' },
+  // Giftige planter
+  'giftkjeks': { level: 'deadly', warning: 'DØDELIG GIFTIG! Selsnepe/giftkjeks er en av Norges giftigste planter. IKKE ta på eller smak.' },
+  'selsnepe': { level: 'deadly', warning: 'DØDELIG GIFTIG! Selsnepe er ekstremt giftig. Forveksles med spiselige skjermplanter. IKKE ta på.' },
+  'tyrihjelm': { level: 'deadly', warning: 'DØDELIG GIFTIG! Tyrihjelm inneholder akonitin. Gift kan absorberes gjennom huden. IKKE ta på med bare hender.' },
+  'revebjelle': { level: 'toxic', warning: 'SVÆRT GIFTIG! Revebjelle inneholder digitalis som påvirker hjertet. Alle deler av planten er giftige.' },
+  'liljekonvall': { level: 'toxic', warning: 'GIFTIG! Alle deler av liljekonvall er giftige, inkl. bærene og vannet blomstene står i.' },
+  'hundekjeks': { level: 'caution', warning: 'OBS: Forveksles med giftkjeks/selsnepe. Hundekjeks selv er ufarlig, men vær 100% sikker på ID.' },
+  'trollbær': { level: 'toxic', warning: 'GIFTIG! Svarte bær som kan friste barn. Gir mage-tarm-problemer.' },
+  // Giftige bær
+  'slåpetorn': { level: 'caution', warning: 'Bærene er svært sure rå, men kan brukes til slåpesnaps. Forveksl IKKE med trollbær.' },
+};
+
+function checkDangerousSpecies(name) {
+  const lower = name.toLowerCase().trim();
+  for (const [key, data] of Object.entries(DANGEROUS_SPECIES)) {
+    if (lower.includes(key) || key.includes(lower)) return data;
+  }
+  return null;
+}
+
+function isMushroom(species) {
+  const cat = (species.category || '').toLowerCase();
+  return cat.includes('sopp') || cat.includes('mushroom');
+}
+
+function safetyWarningHTML(species) {
+  const danger = checkDangerousSpecies(species.name);
+  if (danger) {
+    const cls = danger.level === 'deadly' ? '' : danger.level === 'toxic' ? '' : 'caution';
+    const icon = danger.level === 'deadly' ? '☠️' : danger.level === 'toxic' ? '⚠️' : '⚡';
+    return '<div class="safety-warning ' + cls + '"><span class="sw-icon">' + icon + '</span><span class="sw-text">' + danger.warning + '</span></div>';
+  }
+  if (isMushroom(species)) {
+    return '<div class="safety-warning caution"><span class="sw-icon">🍄</span><span class="sw-text">Aldri spis sopp kun basert på app-identifisering. Kontakt din lokale soppkontrollør for verifisering. Norges sopp- og nyttevekstforbund: soppognyttevekster.no</span></div>';
+  }
+  return '';
+}
 
 // ============================================================
 // STATE
@@ -586,7 +667,8 @@ function updateCollectionCount() { document.getElementById('collectionCount').te
 function confidenceHTML(conf) {
   const cls = conf >= 75 ? 'high' : conf >= 50 ? 'medium' : 'low';
   const label = conf >= 75 ? 'Høy' : conf >= 50 ? 'Middels' : 'Lav';
-  return '<span class="confidence ' + cls + '">' + conf + '% ' + label + '</span>';
+  return '<span class="confidence ' + cls + '">' + conf + '% ' + label + '</span>' +
+    '<div class="confidence-bar"><div class="confidence-bar-fill ' + cls + '" style="width:' + conf + '%"></div></div>';
 }
 
 const speciesStore = {};
@@ -607,6 +689,7 @@ function speciesCardHTML(species, rank, showConfidence) {
       '</div>' +
       '<button class="save-btn ' + (saved ? 'saved' : '') + '" id="save-' + id + '" onclick="event.stopPropagation(); doSave(\'' + id + '\')">' + (saved ? '✅' : '💾') + '</button>' +
       '</div>' +
+      safetyWarningHTML(species) +
       '<div class="details" id="details-' + id + '">' +
         '<p>' + species.description + '</p>' +
         '<div class="detail-grid">' +
@@ -662,7 +745,9 @@ function showResults(imageData, results, errorMsg) {
       '<img src="' + imageData + '" class="preview-img" alt="Ditt bilde">' +
       '<div class="explore-title">🤖 AI-identifisering (' + results.length + ' treff)</div>' +
       results.map((r, i) => '<div class="fade-in fade-in-' + i + '">' + speciesCardHTML(r, i, true) + '</div>').join('') +
-      '<div class="tip-box">💡 Drevet av Google Gemini AI. Trykk på kort for detaljer.</div></div>';
+      '<div class="tip-box">💡 Drevet av Google Gemini AI. Trykk på kort for detaljer.</div>' +
+      (results.some(r => isMushroom(r)) ? '<div class="safety-warning caution" style="margin-top:8px"><span class="sw-icon">🍄</span><span class="sw-text">Sopp-identifisering: Bruk alltid soppkontrollør for endelig verifisering før du spiser sopp. Feil kan ha alvorlige konsekvenser.</span></div>' : '') +
+      '</div>';
   } else {
     area.innerHTML = '<div class="fade-in" style="margin-top:20px">' +
       '<img src="' + imageData + '" class="preview-img" alt="Ditt bilde">' +
