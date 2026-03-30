@@ -159,6 +159,10 @@ body::before {
 .recipe-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--sand); }
 .recipe-header { font-size: 14px; font-weight: 600; color: var(--forest); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 .recipe-card { background: white; border: 1px solid var(--sand); border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; }
+.recipe-link { display: block; text-decoration: none; color: inherit; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
+.recipe-link:active { transform: scale(0.97); }
+.recipe-link:hover, .recipe-link:focus { box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-color: var(--forest); }
+.recipe-arrow { font-size: 12px; color: var(--forest); opacity: 0.5; margin-left: 4px; }
 .recipe-name { font-size: 13px; font-weight: 600; color: var(--forest); margin-bottom: 2px; }
 .recipe-desc { font-size: 12px; color: var(--ghost); line-height: 1.4; }
 .recipe-meta { display: flex; gap: 8px; margin-top: 6px; }
@@ -1225,16 +1229,17 @@ function recipeHTML(species) {
   if (!recipes || !species.edible) return '';
   return '<div class="recipe-section">' +
     '<div class="recipe-header"><span>🍳</span> Matforslag</div>' +
-    recipes.map(r =>
-      '<div class="recipe-card">' +
-        '<div class="recipe-name">' + r.dish + '</div>' +
+    recipes.map(r => {
+      const searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(r.dish + ' oppskrift');
+      return '<a href="' + searchUrl + '" target="_blank" rel="noopener" class="recipe-card recipe-link">' +
+        '<div class="recipe-name">' + r.dish + ' <span class="recipe-arrow">→</span></div>' +
         '<div class="recipe-desc">' + r.desc + '</div>' +
         '<div class="recipe-meta">' +
           '<span class="recipe-tag">' + r.difficulty + ' ' + (r.difficulty === '🟢' ? 'Enkel' : 'Middels') + '</span>' +
           '<span class="recipe-tag">⏱ ' + r.time + '</span>' +
         '</div>' +
-      '</div>'
-    ).join('') +
+      '</a>';
+    }).join('') +
   '</div>';
 }
 
@@ -1375,263 +1380,472 @@ const RECIPE_SUGGESTIONS = {
   "Kantarell": [
     { dish: "Kantarelltoast", desc: "Stek i smør med hvitløk, server på ristet surdeigsbrød med crème fraîche", difficulty: "🟢", time: "15 min" },
     { dish: "Kantarellsuppe", desc: "Fløtebasert suppe med løk, timian og litt sherry", difficulty: "🟢", time: "30 min" },
-    { dish: "Kantarellpasta", desc: "Tagliatelle med stekt kantarell, parmesan og persille", difficulty: "🟢", time: "20 min" }
+    { dish: "Kantarellpasta", desc: "Tagliatelle med stekt kantarell, parmesan og persille", difficulty: "🟢", time: "20 min" },
+    { dish: "Kantarell i fløtesaus", desc: "Stek kantareller i fløte med løk og timian, server til kjøtt", difficulty: "🟢", time: "25 min" },
+    { dish: "Tørket kantarell-pulver", desc: "Tørk og mal til fint pulver – perfekt smaksforsterker", difficulty: "🟢", time: "Tørking" }
   ],
   "Steinsopp": [
     { dish: "Risotto med steinsopp", desc: "Klassisk italiensk risotto med tørket eller fersk steinsopp", difficulty: "🟡", time: "40 min" },
     { dish: "Steinsopp i smør", desc: "Skiver stekt i smør med salt, pepper og frisk timian", difficulty: "🟢", time: "10 min" },
-    { dish: "Tørket steinsopp-pulver", desc: "Tørk og mal til pulver – perfekt smaksforsterker til sausar", difficulty: "🟢", time: "Tørking" }
+    { dish: "Tørket steinsopp-pulver", desc: "Tørk og mal til pulver – perfekt smaksforsterker til sausar", difficulty: "🟢", time: "Tørking" },
+    { dish: "Steinsopp på toast", desc: "Stek og server på varmt rugbrød med smør og salt", difficulty: "🟢", time: "15 min" },
+    { dish: "Steinsopp-gryte", desc: "Stuet i fløte med løk, timian og litt cognac", difficulty: "🟡", time: "35 min" }
   ],
   "Sopphatt (Karl Johan)": [
     { dish: "Risotto med Karl Johan", desc: "Kremete risotto med fersk eller tørket Karl Johan-sopp", difficulty: "🟡", time: "40 min" },
-    { dish: "Grillet Karl Johan", desc: "Hele hatter penslet med olivenolje, hvitløk og urter på grillen", difficulty: "🟢", time: "15 min" }
+    { dish: "Grillet Karl Johan", desc: "Hele hatter penslet med olivenolje, hvitløk og urter på grillen", difficulty: "🟢", time: "15 min" },
+    { dish: "Karl Johan i fløtesaus", desc: "Stekt med løk og fløte, server over poteter eller kjøtt", difficulty: "🟢", time: "20 min" },
+    { dish: "Tørket Karl Johan", desc: "Tørk i ovn, trekk i varm buljong før bruk i sausar", difficulty: "🟢", time: "Tørking" },
+    { dish: "Panert Karl Johan-hatt", desc: "Hele hatter dypp i egg og brødrasp, stekt som schnitzel", difficulty: "🟡", time: "25 min" }
   ],
   "Piggsopp": [
     { dish: "Stekt piggsopp", desc: "Enkelt stekt i smør med salt og pepper. Mild, nøtteaktig smak", difficulty: "🟢", time: "10 min" },
-    { dish: "Piggsoppgryte", desc: "Fløtegryte med piggsopp, bacon og timian. Server med ris", difficulty: "🟢", time: "25 min" }
+    { dish: "Piggsoppgryte", desc: "Fløtegryte med piggsopp, bacon og timian. Server med ris", difficulty: "🟢", time: "25 min" },
+    { dish: "Piggsopp på toast", desc: "Stek raskt i smør, server på ristet brød med rømme", difficulty: "🟢", time: "15 min" },
+    { dish: "Piggsopp-suppe", desc: "Fløtebasert suppe med piggsopp, løk og frisk dill", difficulty: "🟢", time: "30 min" },
+    { dish: "Tørket piggsopp", desc: "Tørk i ovn, bruk i vintergryter hele året", difficulty: "🟢", time: "Tørking" }
   ],
   "Traktkantarell": [
     { dish: "Traktkantarell på toast", desc: "Stek raskt i smør, server på ristet brød med rømme", difficulty: "🟢", time: "10 min" },
-    { dish: "Tørket traktkantarell", desc: "Tørk på snor eller i ovn – fantastisk i gryteretter hele vinteren", difficulty: "🟢", time: "Tørking" }
+    { dish: "Tørket traktkantarell", desc: "Tørk på snor eller i ovn – fantastisk i gryteretter hele vinteren", difficulty: "🟢", time: "Tørking" },
+    { dish: "Traktkantarell-suppe", desc: "Fløtesuppe med traktkantarell, potet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Traktkantarell i smør", desc: "Stek i smør med hvitløk og timian, server til kjøtt", difficulty: "🟢", time: "15 min" },
+    { dish: "Marinert traktkantarell", desc: "Stek og marinér i hvitvin, eddik og urter", difficulty: "🟢", time: "20 min" }
   ],
   "Sjampinjong": [
     { dish: "Sjampinjongsaus", desc: "Klassisk fløtesaus med stekt sjampinjong til biff eller kylling", difficulty: "🟢", time: "15 min" },
-    { dish: "Fylte sjampinjonger", desc: "Fyll med kremost, hvitløk og urter. Gratiner i ovn", difficulty: "🟢", time: "25 min" }
+    { dish: "Fylte sjampinjonger", desc: "Fyll med kremost, hvitløk og urter. Gratiner i ovn", difficulty: "🟢", time: "25 min" },
+    { dish: "Stekt sjampinjong", desc: "Hele eller halvert, stekt i smør med hvitløk og persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Sjampinjong-pizza", desc: "Server skivete sjampinjong på hjemmebakt pizzadeig med tomatsaus", difficulty: "🟡", time: "30 min" },
+    { dish: "Sjampinjong-marinert", desc: "Rå eller lett blanchert, marinér i olivenolje, hvitløk og sitron", difficulty: "🟢", time: "10 min" }
   ],
   "Svart trompetsopp": [
     { dish: "Trompetsopp-smør", desc: "Bland finrevet trompetsopp i mykt smør med salt. Fantastisk på brød", difficulty: "🟢", time: "10 min" },
-    { dish: "Pasta med trompetsopp", desc: "Fløtepasta med svart trompetsopp og parmesan", difficulty: "🟢", time: "20 min" }
+    { dish: "Pasta med trompetsopp", desc: "Fløtepasta med svart trompetsopp og parmesan", difficulty: "🟢", time: "20 min" },
+    { dish: "Trompetsopp-risotto", desc: "Kremete risotto med finhakket svart trompetsopp og hvitvin", difficulty: "🟡", time: "35 min" },
+    { dish: "Trompetsopp på toast", desc: "Stek i smør med timian, server på ristet brød med rømme", difficulty: "🟢", time: "12 min" },
+    { dish: "Tørket trompetsopp", desc: "Tørk og bruk som krydder eller kog i buljong for smak", difficulty: "🟢", time: "Tørking" }
   ],
   "Krepling": [
     { dish: "Stekt krepling", desc: "Skiv og stek i smør med salt og pepper – norsk klassiker", difficulty: "🟢", time: "10 min" },
-    { dish: "Krepling i fløtesaus", desc: "Fløtesaus med krepling, løk og timian til vilt eller biff", difficulty: "🟢", time: "20 min" }
+    { dish: "Krepling i fløtesaus", desc: "Fløtesaus med krepling, løk og timian til vilt eller biff", difficulty: "🟢", time: "20 min" },
+    { dish: "Krepling-suppe", desc: "Fløtesuppe med krepling, løk og frisk dill", difficulty: "🟢", time: "25 min" },
+    { dish: "Panert krepling", desc: "Dypp i egg og brødrasp, stek til gyllen bakside", difficulty: "🟢", time: "15 min" },
+    { dish: "Tørket krepling", desc: "Tørk hele eller i skiver for lagring og vinterbruk", difficulty: "🟢", time: "Tørking" }
   ],
   "Parasollsopp": [
-    { dish: "Panert parasollhatt", desc: "Dypp i egg og brødrasp, stek som en schnitzel. Fantastisk!", difficulty: "🟢", time: "15 min" }
+    { dish: "Panert parasollhatt", desc: "Dypp i egg og brødrasp, stek som en schnitzel. Fantastisk!", difficulty: "🟢", time: "15 min" },
+    { dish: "Parasollsopp i smør", desc: "Stekt hele hatt i smør med salt og friskkværnet peber", difficulty: "🟢", time: "12 min" },
+    { dish: "Parasollsopp-gryte", desc: "Fløtegryte med parasollsopp, løk og frisk dill", difficulty: "🟢", time: "25 min" },
+    { dish: "Stekt parasollsopp-stengel", desc: "Bruk kun stilken, stek som sparageskifer i smør", difficulty: "🟢", time: "10 min" },
+    { dish: "Marinert parasollsopp", desc: "Stek hele små hatter, marinér i hvitvin og urter", difficulty: "🟢", time: "20 min" }
   ],
   "Honningsopp": [
-    { dish: "Honningsopp-gryte", desc: "Stuet i fløte med løk, bacon og timian. Må kokes godt først!", difficulty: "🟡", time: "30 min" }
+    { dish: "Honningsopp-gryte", desc: "Stuet i fløte med løk, bacon og timian. Må kokes godt først!", difficulty: "🟡", time: "30 min" },
+    { dish: "Honningsopp i smør", desc: "Stek i smør etter grundig vasking, server til kjøtt", difficulty: "🟢", time: "20 min" },
+    { dish: "Honningsopp-suppe", desc: "Fløtesuppe med honningsopp, løk og litt hvitvin", difficulty: "🟡", time: "35 min" },
+    { dish: "Tørket honningsopp", desc: "Tørk og trekk i buljong før bruk i gryteretter", difficulty: "🟢", time: "Tørking" },
+    { dish: "Honningsopp-ragù", desc: "Lang, lav stewing med honningsopp, tomat og vilt", difficulty: "🟡", time: "1 time" }
   ],
   "Rødskrubb": [
-    { dish: "Stekt rødskrubb", desc: "Skiv og stek i smør. Blir mørk ved oppvarming – helt normalt", difficulty: "🟢", time: "10 min" }
+    { dish: "Stekt rødskrubb", desc: "Skiv og stek i smør. Blir mørk ved oppvarming – helt normalt", difficulty: "🟢", time: "10 min" },
+    { dish: "Rødskrubb-gryte", desc: "Fløtegryte med rødskrubb, løk, bacon og timian", difficulty: "🟢", time: "25 min" },
+    { dish: "Rødskrubb på toast", desc: "Stek og server på ristet brød med rømme og salt", difficulty: "🟢", time: "12 min" },
+    { dish: "Tørket rødskrubb", desc: "Tørk for senere bruk i sopper og gryteretter", difficulty: "🟢", time: "Tørking" },
+    { dish: "Rødskrubb-suppe", desc: "Fløtesuppe med rødskrubb, løk og frisk persille", difficulty: "🟢", time: "25 min" }
   ],
   "Brunskrubb": [
-    { dish: "Soppgryte med brunskrubb", desc: "Bland med andre skogssopp i en kremete gryte", difficulty: "🟢", time: "25 min" }
+    { dish: "Soppgryte med brunskrubb", desc: "Bland med andre skogssopp i en kremete gryte", difficulty: "🟢", time: "25 min" },
+    { dish: "Brunskrubb i smør", desc: "Stekt i smør med hvitløk og timian til kjøtt", difficulty: "🟢", time: "15 min" },
+    { dish: "Brunskrubb på toast", desc: "Stek raskt og server på varmt rugbrød med smør", difficulty: "🟢", time: "12 min" },
+    { dish: "Tørket brunskrubb", desc: "Tørk hele eller i skiver, bruk året rundt", difficulty: "🟢", time: "Tørking" },
+    { dish: "Brunskrubb-suppe", desc: "Fløtebasert suppe med brunskrubb og løk", difficulty: "🟢", time: "25 min" }
   ],
   "Matblekksopp": [
-    { dish: "Stekt matblekksopp", desc: "Stek raskt i smør. Spis IKKE med alkohol – gir ubehag!", difficulty: "🟡", time: "10 min" }
+    { dish: "Stekt matblekksopp", desc: "Stek raskt i smør. Spis IKKE med alkohol – gir ubehag!", difficulty: "🟡", time: "10 min" },
+    { dish: "Matblekksopp på toast", desc: "Stek og server på ristet brød med rømme", difficulty: "🟢", time: "12 min" },
+    { dish: "Matblekksopp-gryte", desc: "Fløtegryte med matblekksopp og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Tørket matblekksopp", desc: "Tørk i ovn for senere bruk uten alkoholproblemer", difficulty: "🟢", time: "Tørking" },
+    { dish: "Marinert matblekksopp", desc: "Stek kort, marinér i eddik og urter uten alkohol", difficulty: "🟢", time: "15 min" }
   ],
   "Blek kremle": [
-    { dish: "Kremle i smør", desc: "Stek i skiver med smør, salt og pepper. Sprø og god", difficulty: "🟢", time: "10 min" }
+    { dish: "Kremle i smør", desc: "Stek i skiver med smør, salt og pepper. Sprø og god", difficulty: "🟢", time: "10 min" },
+    { dish: "Kremle-gryte", desc: "Fløtegryte med kremle, løk, bacon og timian", difficulty: "🟢", time: "25 min" },
+    { dish: "Kremle på toast", desc: "Stek og server på ristet brød med rømme", difficulty: "🟢", time: "12 min" },
+    { dish: "Tørket kremle", desc: "Tørk for lagring og senere bruk hele året", difficulty: "🟢", time: "Tørking" },
+    { dish: "Kremle-suppe", desc: "Fløtesuppe med kremle, løk og frisk dill", difficulty: "🟢", time: "25 min" }
   ],
   "Granpiggsopp": [
-    { dish: "Stekt granpiggsopp", desc: "Stek i smør med hvitløk. Mild, nøtteaktig smak", difficulty: "🟢", time: "10 min" }
+    { dish: "Stekt granpiggsopp", desc: "Stek i smør med hvitløk. Mild, nøtteaktig smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Granpiggsopp i fløtesaus", desc: "Stek med løk og fløte, server til kjøtt eller potet", difficulty: "🟢", time: "20 min" },
+    { dish: "Granpiggsopp-gryte", desc: "Fløtegryte med granpiggsopp, løk og timian", difficulty: "🟢", time: "25 min" },
+    { dish: "Granpiggsopp på toast", desc: "Stek i smør og server på ristet brød", difficulty: "🟢", time: "12 min" },
+    { dish: "Tørket granpiggsopp", desc: "Tørk og bruk som kryddersopp hele året", difficulty: "🟢", time: "Tørking" }
   ],
 
   // 🍇 Bær
   "Blåbær": [
     { dish: "Blåbærpai", desc: "Klassisk pai med ferske blåbær, sukker og smør", difficulty: "🟡", time: "45 min" },
     { dish: "Blåbærsyltetøy", desc: "Kok med sukker 1:1 – holder hele vinteren", difficulty: "🟢", time: "20 min" },
-    { dish: "Blåbær med melk", desc: "Den norske klassikeren: ferske blåbær, melk og sukker", difficulty: "🟢", time: "2 min" }
+    { dish: "Blåbær med melk", desc: "Den norske klassikeren: ferske blåbær, melk og sukker", difficulty: "🟢", time: "2 min" },
+    { dish: "Blåbærmuffins", desc: "Bak deilige muffins med ferske blåbær", difficulty: "🟡", time: "35 min" },
+    { dish: "Blåbæris", desc: "Bland med kondensert melk og fløte, frys til kremete is", difficulty: "🟢", time: "Frysing" }
   ],
   "Tyttebær": [
     { dish: "Tyttebærsyltetøy (rått rørt)", desc: "Rør tyttebær med sukker – ikke kok! Perfekt til kjøttkaker", difficulty: "🟢", time: "10 min" },
-    { dish: "Tyttebærsaus", desc: "Varm saus til vilt, ribbe eller kjøttkaker", difficulty: "🟢", time: "15 min" }
+    { dish: "Tyttebærsaus", desc: "Varm saus til vilt, ribbe eller kjøttkaker", difficulty: "🟢", time: "15 min" },
+    { dish: "Tyttebær-gelé", desc: "Kok saft, sil og lag gelé med sukker og pektin", difficulty: "🟡", time: "30 min" },
+    { dish: "Marinert tyttebær", desc: "Marinér råe bær i sukker og krydder flere uker", difficulty: "🟢", time: "2 uker" },
+    { dish: "Tyttebær-smoothie", desc: "Blend med yoghurt, honning og banan", difficulty: "🟢", time: "5 min" }
   ],
   "Molte": [
     { dish: "Multekrem", desc: "Pisk fløte, bland inn multer og sukker. Norges nasjonaldessert!", difficulty: "🟢", time: "10 min" },
-    { dish: "Multesyltetøy", desc: "Kok forsiktig med sukker. Gull verdt på vafler!", difficulty: "🟢", time: "15 min" }
+    { dish: "Multesyltetøy", desc: "Kok forsiktig med sukker. Gull verdt på vafler!", difficulty: "🟢", time: "15 min" },
+    { dish: "Multeis", desc: "Bland multer med kondensert melk og fløte, frys", difficulty: "🟢", time: "Frysing" },
+    { dish: "Multepanna cotta", desc: "Kremete italiensk dessert med multer og gelatin", difficulty: "🟡", time: "25 min" },
+    { dish: "Multesirup", desc: "Kok multer med sukker og vann for drikke eller dessert", difficulty: "🟢", time: "20 min" }
   ],
   "Bringebær": [
     { dish: "Bringebærsyltetøy", desc: "Kok med sukker og litt sitronsaft. Enkelt og godt", difficulty: "🟢", time: "20 min" },
     { dish: "Bringebærsorbet", desc: "Frys med sukkerlag – perfekt sommersnack", difficulty: "🟢", time: "Frysing" },
-    { dish: "Bringebærsmoothie", desc: "Blend med yoghurt, banan og honning", difficulty: "🟢", time: "5 min" }
+    { dish: "Bringebærsmoothie", desc: "Blend med yoghurt, banan og honning", difficulty: "🟢", time: "5 min" },
+    { dish: "Bringebærmarmelade", desc: "Kok bær med sukker og gelatin for tykkere konsistens", difficulty: "🟡", time: "25 min" },
+    { dish: "Bringebær-vin", desc: "Fermentér bær med sukker og muggsopp i flere uker", difficulty: "🟡", time: "1 måned" }
   ],
   "Markjordbær": [
     { dish: "Markjordbær med fløte", desc: "Ikke gjør noe fancy – bare fløte og litt sukker!", difficulty: "🟢", time: "2 min" },
-    { dish: "Markjordbær-is", desc: "Bland med kondensert melk og fløte, frys", difficulty: "🟢", time: "Frysing" }
+    { dish: "Markjordbær-is", desc: "Bland med kondensert melk og fløte, frys", difficulty: "🟢", time: "Frysing" },
+    { dish: "Markjordbærsyltetøy", desc: "Kok med sukker – holder hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Markjordbær-dessert", desc: "Lag lagdessert med markjordbær, fløte og kaker", difficulty: "🟡", time: "25 min" },
+    { dish: "Markjordbær-smoothie", desc: "Blend med yoghurt og honning", difficulty: "🟢", time: "5 min" }
   ],
   "Bjørnebær": [
     { dish: "Bjørnebær-crumble", desc: "Ovnsbakt med havresmuldretopping og vaniljeis", difficulty: "🟢", time: "35 min" },
-    { dish: "Bjørnebærsyltetøy", desc: "Kok med sukker og litt sitron", difficulty: "🟢", time: "20 min" }
+    { dish: "Bjørnebærsyltetøy", desc: "Kok med sukker og litt sitron", difficulty: "🟢", time: "20 min" },
+    { dish: "Bjørnebær-is", desc: "Kremete is med ferske bjørnebær", difficulty: "🟡", time: "Frysing" },
+    { dish: "Bjørnebærsorbet", desc: "Frys frukt med sukkerlake for friskhet", difficulty: "🟢", time: "Frysing" },
+    { dish: "Bjørnebær-gelé", desc: "Lag gelé med bjørnebærsaft, sukker og pektin", difficulty: "🟡", time: "30 min" }
   ],
   "Krekling": [
     { dish: "Kreklinggelé", desc: "Kok saft, sil og tilsett gelatin. Flott farge!", difficulty: "🟡", time: "30 min" },
-    { dish: "Krekling med sukker", desc: "Enkelt og godt – rett fra fjellet", difficulty: "🟢", time: "2 min" }
+    { dish: "Krekling med sukker", desc: "Enkelt og godt – rett fra fjellet", difficulty: "🟢", time: "2 min" },
+    { dish: "Kreklingsirup", desc: "Kok bær med sukker for bruk i drikker", difficulty: "🟢", time: "20 min" },
+    { dish: "Krekling-marmelade", desc: "Kok med sukker til tykkere konsistens", difficulty: "🟡", time: "25 min" },
+    { dish: "Krekling-sorbet", desc: "Frys saft med sukker for frisk sommerdessert", difficulty: "🟢", time: "Frysing" }
   ],
   "Tranebær": [
     { dish: "Tranebærsaus", desc: "Kok med sukker og appelsinskall. Perfekt til vilt!", difficulty: "🟢", time: "15 min" },
-    { dish: "Tørket tranebær", desc: "Tørk i ovn på lav varme – snacks hele vinteren", difficulty: "🟢", time: "Tørking" }
+    { dish: "Tørket tranebær", desc: "Tørk i ovn på lav varme – snacks hele vinteren", difficulty: "🟢", time: "Tørking" },
+    { dish: "Tranebærsyltetøy", desc: "Kok med sukker til syltetøy for hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Tranebærgelé", desc: "Lag gelé med tranebærsaft og gelatin", difficulty: "🟡", time: "30 min" },
+    { dish: "Tranebær-likør", desc: "Legg bær i vodka med sukker i 2 måneder", difficulty: "🟢", time: "2 mnd" }
   ],
   "Slåpetorn": [
     { dish: "Slåpebærlikør", desc: "Legg bær i vodka med sukker i 3 mnd. Norsk sloe gin!", difficulty: "🟢", time: "3 mnd" },
-    { dish: "Slåpebærgelé", desc: "Kok saft og lag gelé med sukker og pektin", difficulty: "🟡", time: "30 min" }
+    { dish: "Slåpebærgelé", desc: "Kok saft og lag gelé med sukker og pektin", difficulty: "🟡", time: "30 min" },
+    { dish: "Slåpebærsyltetøy", desc: "Kok bær med sukker – holder hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Slåpebærmarmelade", desc: "Ekstratykk marmelade med sitron og sukker", difficulty: "🟡", time: "25 min" },
+    { dish: "Slåpebær-vin", desc: "Lag hjemmelaget fruktvín med gjær", difficulty: "🟡", time: "1 måned" }
   ],
   "Hagebær/Nyper": [
     { dish: "Nypesyltetøy", desc: "Del, fjern frø, kok med sukker. Rik på C-vitamin!", difficulty: "🟡", time: "45 min" },
-    { dish: "Nypete", desc: "Tørk nyper, kok som te. Vitaminbombe!", difficulty: "🟢", time: "10 min" }
+    { dish: "Nypete", desc: "Tørk nyper, kok som te. Vitaminbombe!", difficulty: "🟢", time: "10 min" },
+    { dish: "Nypersirup", desc: "Kok nyper med sukker for drikke eller dessert", difficulty: "🟢", time: "25 min" },
+    { dish: "Nyper-honning", desc: "Trekk tørre nyper i honning flere uker", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Nypegelé", desc: "Lag gelé med saft fra tørre nyper og pektin", difficulty: "🟡", time: "30 min" }
   ],
   "Rips": [
     { dish: "Ripsgelé", desc: "Kok saft med sukker – perfekt til ost og kjøtt", difficulty: "🟢", time: "20 min" },
-    { dish: "Ripssaft", desc: "Press saft, tilsett sukker. Forfriskende sommerdrikk", difficulty: "🟢", time: "15 min" }
+    { dish: "Ripssaft", desc: "Press saft, tilsett sukker. Forfriskende sommerdrikk", difficulty: "🟢", time: "15 min" },
+    { dish: "Ripssyltetøy", desc: "Kok bær med sukker hele vinteren", difficulty: "🟢", time: "20 min" },
+    { dish: "Rips-sorbet", desc: "Frys saft med sukker for frisk dessert", difficulty: "🟢", time: "Frysing" },
+    { dish: "Rips-vin", desc: "Fermentér bær til hjemmelaget fruktvín", difficulty: "🟡", time: "1 måned" }
   ],
   "Solbær": [
     { dish: "Solbærsaft", desc: "Press og kok med sukker. Rik på vitamin C", difficulty: "🟢", time: "20 min" },
-    { dish: "Solbærsorbet", desc: "Frys med sukkerlake – intens smak", difficulty: "🟢", time: "Frysing" }
+    { dish: "Solbærsorbet", desc: "Frys med sukkerlake – intens smak", difficulty: "🟢", time: "Frysing" },
+    { dish: "Solbærsyltetøy", desc: "Kok med sukker hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Solbær-vin", desc: "Lag hjemmelaget fruktvín med solbær", difficulty: "🟡", time: "1 måned" },
+    { dish: "Solbærgelé", desc: "Lag gelé med saft og pektin", difficulty: "🟡", time: "25 min" }
   ],
   "Stikkelsbær": [
     { dish: "Stikkelsbær-fool", desc: "Kok bærene, bland med pisket fløte. Engelsk klassiker", difficulty: "🟢", time: "20 min" },
-    { dish: "Stikkelsbærsyltetøy", desc: "Kok med sukker – perfekt på scones", difficulty: "🟢", time: "20 min" }
+    { dish: "Stikkelsbærsyltetøy", desc: "Kok med sukker – perfekt på scones", difficulty: "🟢", time: "20 min" },
+    { dish: "Stikkelsbær-marmelade", desc: "Ekstratykk marmelade med sukker", difficulty: "🟡", time: "25 min" },
+    { dish: "Stikkelsbær-gelé", desc: "Lag gelé med bærsaft og gelatin", difficulty: "🟡", time: "25 min" },
+    { dish: "Stikkelsbær-crumble", desc: "Ovnsbakt med havresmuldretopping", difficulty: "🟡", time: "35 min" }
   ],
   "Trollbær": [
-    { dish: "Trollbær-marmelade", desc: "Eksklusiv marmelade – kok forsiktig med sukker", difficulty: "🟡", time: "25 min" }
+    { dish: "Trollbær-marmelade", desc: "Eksklusiv marmelade – kok forsiktig med sukker", difficulty: "🟡", time: "25 min" },
+    { dish: "Trollbær med fløte", desc: "Friske trollbær med pisket fløte og sukker", difficulty: "🟢", time: "5 min" },
+    { dish: "Trollbær-is", desc: "Kremete is med ferske trollbær", difficulty: "🟡", time: "Frysing" },
+    { dish: "Trollbærsyltetøy", desc: "Kok med sukker hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Trollbær-dessert", desc: "Lag lagdessert med trollbær, fløte og kaker", difficulty: "🟡", time: "30 min" }
   ],
   "Skogsjordbær": [
-    { dish: "Skogsjordbær med fløte", desc: "La de snakke for seg selv – bare fløte og sukker", difficulty: "🟢", time: "2 min" }
+    { dish: "Skogsjordbær med fløte", desc: "La de snakke for seg selv – bare fløte og sukker", difficulty: "🟢", time: "2 min" },
+    { dish: "Skogsjordbærsyltetøy", desc: "Kok med sukker hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Skogsjordbær-is", desc: "Kremete is med ferske skogsjordbær", difficulty: "🟡", time: "Frysing" },
+    { dish: "Skogsjordbær-dessert", desc: "Lagdessert med skogsjordbær, fløte og bløtkaker", difficulty: "🟡", time: "25 min" },
+    { dish: "Skogsjordbær-smoothie", desc: "Bland med yoghurt og honning", difficulty: "🟢", time: "5 min" }
   ],
 
   // 🌸 Urter og blomster
   "Ramsløk": [
     { dish: "Ramsløkpesto", desc: "Blend med parmesan, pinjekjerner, olivenolje og salt", difficulty: "🟢", time: "10 min" },
     { dish: "Ramsløksmør", desc: "Bland finhakket ramsløk i mykt smør. Fantastisk på brød!", difficulty: "🟢", time: "5 min" },
-    { dish: "Ramsløksuppe", desc: "Fres i smør, tilsett poteter og buljong. Kjør med stavmikser", difficulty: "🟢", time: "25 min" }
+    { dish: "Ramsløksuppe", desc: "Fres i smør, tilsett poteter og buljong. Kjør med stavmikser", difficulty: "🟢", time: "25 min" },
+    { dish: "Ramsløksalat", desc: "Friske blader i salat med chevre og valnøtter", difficulty: "🟢", time: "10 min" },
+    { dish: "Ramsløk-olje", desc: "Trekk finhakket ramsløk i olivenolje flere uker", difficulty: "🟢", time: "2-3 uker" }
   ],
   "Fjellsyre": [
     { dish: "Fjellsyre-salat", desc: "Friske blader i salat – gir en deilig syrlig smak", difficulty: "🟢", time: "5 min" },
-    { dish: "Fjellsyre-dressing", desc: "Blend med olivenolje, honning og salt", difficulty: "🟢", time: "5 min" }
+    { dish: "Fjellsyre-dressing", desc: "Blend med olivenolje, honning og salt", difficulty: "🟢", time: "5 min" },
+    { dish: "Fjellsyre-suppe", desc: "Fløtesuppe med fjellsyre og potet", difficulty: "🟢", time: "20 min" },
+    { dish: "Fjellsyre i fløte", desc: "Kokt kort i fløte til grønn, deilig saus", difficulty: "🟢", time: "10 min" },
+    { dish: "Marinert fjellsyre", desc: "Unge blader i syrlig marinering", difficulty: "🟢", time: "15 min" }
   ],
   "Mjødurt": [
     { dish: "Mjødurt-te", desc: "Tørk blomstene, hell over kokende vann. Deilig honningduft", difficulty: "🟢", time: "10 min" },
-    { dish: "Mjødurt-sirup", desc: "Kok blomster med sukker og vann. Bruk i desserter", difficulty: "🟢", time: "20 min" }
+    { dish: "Mjødurt-sirup", desc: "Kok blomster med sukker og vann. Bruk i desserter", difficulty: "🟢", time: "20 min" },
+    { dish: "Mjødurt-vin", desc: "Lag hjemmelaget mead eller fruktvín med blomster", difficulty: "🟡", time: "1 måned" },
+    { dish: "Mjødurt-honning", desc: "Trekk blomster i honning flere uker for smak", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Mjødurt-likörbeskrivelse", desc: "Legg blomster i vodka med sukker i 2 måneder", difficulty: "🟢", time: "2 mnd" }
   ],
   "Rødkløver": [
-    { dish: "Kløver-te", desc: "Tørk blomstene, bruk som urtete. Mild, søtlig smak", difficulty: "🟢", time: "10 min" }
+    { dish: "Kløver-te", desc: "Tørk blomstene, bruk som urtete. Mild, søtlig smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Kløver-sirup", desc: "Kok blomster med sukker og vann for drikke", difficulty: "🟢", time: "20 min" },
+    { dish: "Kløver-infusjon", desc: "Trekk tørre blomster i olje flere uker", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Kløver-honning", desc: "Trekk blomster i honning for søt smak", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Kløver-vin", desc: "Lag hjemmelaget fruktvín med kløverblomster", difficulty: "🟡", time: "1 måned" }
   ],
   "Brennesle": [
     { dish: "Brenneslesuppe", desc: "Plukk topper, fres med løk, tilsett buljong og fløte", difficulty: "🟢", time: "20 min" },
     { dish: "Brennesle-te", desc: "Tørk og hell over kokende vann. Jernrik!", difficulty: "🟢", time: "10 min" },
-    { dish: "Brennesle-pesto", desc: "Blend med parmesan, hvitløk, pinjekjerner og olivenolje", difficulty: "🟢", time: "10 min" }
+    { dish: "Brennesle-pesto", desc: "Blend med parmesan, hvitløk, pinjekjerner og olivenolje", difficulty: "🟢", time: "10 min" },
+    { dish: "Brennesle som spinat", desc: "Kok eller fres unge skudd som spinat", difficulty: "🟢", time: "10 min" },
+    { dish: "Tørket brennesle", desc: "Tørk for te og krydder hele året", difficulty: "🟢", time: "Tørking" }
   ],
   "Geitrams": [
     { dish: "Geitrams-asparges", desc: "Unge skudd dampet som asparges med smør og sitron", difficulty: "🟢", time: "10 min" },
-    { dish: "Geitrams-te", desc: "Tørk bladene, bruk som Ivan-te (russisk tradisjon)", difficulty: "🟢", time: "10 min" }
+    { dish: "Geitrams-te", desc: "Tørk bladene, bruk som Ivan-te (russisk tradisjon)", difficulty: "🟢", time: "10 min" },
+    { dish: "Geitrams-sirup", desc: "Kok unge skudd med sukker for drikke", difficulty: "🟢", time: "20 min" },
+    { dish: "Geitrams-infusjon", desc: "Trekk i olje for medisinsk bruk", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Tørket geitrams", desc: "Tørk hele planten for te hele året", difficulty: "🟢", time: "Tørking" }
   ],
   "Skvallerkål": [
     { dish: "Skvallerkål-suppe", desc: "Fres med løk og potet, tilsett buljong. Kjør med stavmikser", difficulty: "🟢", time: "20 min" },
     { dish: "Skvallerkål-pesto", desc: "Blend med parmesan, nøtter og olivenolje. Erstatter basilikum!", difficulty: "🟢", time: "10 min" },
-    { dish: "Stekt skvallerkål", desc: "Fres raskt i smør med hvitløk. Smaker som spinat møter persille", difficulty: "🟢", time: "5 min" }
+    { dish: "Stekt skvallerkål", desc: "Fres raskt i smør med hvitløk. Smaker som spinat møter persille", difficulty: "🟢", time: "5 min" },
+    { dish: "Skvallerkål-salat", desc: "Friske blader i salat med sitronvinaigrett", difficulty: "🟢", time: "10 min" },
+    { dish: "Marinert skvallerkål", desc: "Stek og marinér i eddik og urter", difficulty: "🟢", time: "15 min" }
   ],
   "Løvetann": [
     { dish: "Løvetannsalat", desc: "Unge blader med chevre, valnøtter og honningdressing", difficulty: "🟢", time: "10 min" },
     { dish: "Løvetannsirup", desc: "Kok blomster med sukker, sitron og vann. Smaker som honning!", difficulty: "🟢", time: "30 min" },
-    { dish: "Løvetannkaffe", desc: "Tørk og rist røttene. Mal og bruk som kaffeerstatning", difficulty: "🟡", time: "Tørking + 15 min" }
+    { dish: "Løvetannkaffe", desc: "Tørk og rist røttene. Mal og bruk som kaffeerstatning", difficulty: "🟡", time: "Tørking + 15 min" },
+    { dish: "Løvetann-te", desc: "Kok rene røtter i vann for energidrikk", difficulty: "🟢", time: "15 min" },
+    { dish: "Løvetann-honning", desc: "Trekk blomster i honning for søt urtesmak", difficulty: "🟢", time: "2-3 uker" }
   ],
   "Karve": [
     { dish: "Karvebrød", desc: "Tilsett karvefrø i brøddeig. Klassisk norsk tradisjon", difficulty: "🟡", time: "2 timer" },
-    { dish: "Karve-akevitt", desc: "Legg frø i vodka med litt sukker i 2-4 uker", difficulty: "🟢", time: "2-4 uker" }
+    { dish: "Karve-akevitt", desc: "Legg frø i vodka med litt sukker i 2-4 uker", difficulty: "🟢", time: "2-4 uker" },
+    { dish: "Karve-smør", desc: "Knuse frø og bland i mykt smør til brød", difficulty: "🟢", time: "5 min" },
+    { dish: "Karve-krydder", desc: "Tørk frø og bruk som krydder til mat og gryter", difficulty: "🟢", time: "Tørking" },
+    { dish: "Karve-te", desc: "Hell kokende vann over frø for mageteelyd", difficulty: "🟢", time: "10 min" }
   ],
   "Kvann": [
     { dish: "Kandisert kvann", desc: "Kok stilker i sukkerlake. Tradisjonsrik norsk konfekt", difficulty: "🟡", time: "1 time" },
-    { dish: "Kvann-salat", desc: "Unge stilker i tynne skiver i salat. Frisk, aromatisk smak", difficulty: "🟢", time: "5 min" }
+    { dish: "Kvann-salat", desc: "Unge stilker i tynne skiver i salat. Frisk, aromatisk smak", difficulty: "🟢", time: "5 min" },
+    { dish: "Kvann-syltetøy", desc: "Kok stilker med sukker til syltetøy", difficulty: "🟡", time: "30 min" },
+    { dish: "Kvann i fløte", desc: "Kokt kort i fløte til grønn og deilig saus", difficulty: "🟢", time: "15 min" },
+    { dish: "Marinert kvann", desc: "Unge stilker marinert i eddik og urter", difficulty: "🟢", time: "20 min" }
   ],
   "Sibirløk": [
     { dish: "Som gressløk", desc: "Klipp fint over egg, potetsalat eller smørbrød", difficulty: "🟢", time: "2 min" },
-    { dish: "Gressløksmør", desc: "Bland finhakket sibirløk i mykt smør med salt", difficulty: "🟢", time: "5 min" }
+    { dish: "Gressløksmør", desc: "Bland finhakket sibirløk i mykt smør med salt", difficulty: "🟢", time: "5 min" },
+    { dish: "Sibirløk-olje", desc: "Trekk finhakket løk i olivenolje flere uker", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Sibirløk-vinaigrette", desc: "Bland finhakket løk med eddik og olje", difficulty: "🟢", time: "5 min" },
+    { dish: "Sibirløk-smørbrød", desc: "Server på smørbrød med dill og fisk", difficulty: "🟢", time: "10 min" }
   ],
   "Mynte (villmynte)": [
     { dish: "Myntte", desc: "Ferske blader i kokende vann. Perfekt etter middag", difficulty: "🟢", time: "5 min" },
-    { dish: "Myntesaus", desc: "Finhakket mynte med eddik og sukker. Klassisk til lam", difficulty: "🟢", time: "10 min" }
+    { dish: "Myntesaus", desc: "Finhakket mynte med eddik og sukker. Klassisk til lam", difficulty: "🟢", time: "10 min" },
+    { dish: "Mynte-sirup", desc: "Kok blader med sukker og vann for drikke", difficulty: "🟢", time: "15 min" },
+    { dish: "Mynte-olje", desc: "Trekk blader i olivenolje flere uker", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Tørket mynte", desc: "Tørk for te hele året", difficulty: "🟢", time: "Tørking" }
   ],
   "Timian (villtimian)": [
     { dish: "Timian-krydder", desc: "Tørk og bruk til kjøtt, fisk, saus og gryter", difficulty: "🟢", time: "Tørking" },
-    { dish: "Timian-honning", desc: "Legg villtimian i honning – trekker smak over uker", difficulty: "🟢", time: "2-4 uker" }
+    { dish: "Timian-honning", desc: "Legg villtimian i honning – trekker smak over uker", difficulty: "🟢", time: "2-4 uker" },
+    { dish: "Timian-olje", desc: "Trekk i olivenolje for matlaging", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Timian-te", desc: "Tørk blader og lag honningkaramell", difficulty: "🟢", time: "10 min" },
+    { dish: "Timian-vinaigrett", desc: "Lag dressing med timian, eddik og olje", difficulty: "🟢", time: "5 min" }
   ],
   "Oregano (kung)": [
-    { dish: "Pizza-krydder", desc: "Tørk og bruk på pizza, pasta og tomatsauser", difficulty: "🟢", time: "Tørking" }
+    { dish: "Pizza-krydder", desc: "Tørk og bruk på pizza, pasta og tomatsauser", difficulty: "🟢", time: "Tørking" },
+    { dish: "Oregano-olje", desc: "Trekk i olivenolje for matlaging", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Oregano-vinaigrett", desc: "Lag dressing med oregano, eddik og olje", difficulty: "🟢", time: "5 min" },
+    { dish: "Tørket oregano", desc: "Tørk for hele året bruk i alle middager", difficulty: "🟢", time: "Tørking" },
+    { dish: "Oregano-honning", desc: "Trekk i honning for søt urteduft", difficulty: "🟢", time: "2-3 uker" }
   ],
   "Grasstjerne (ryllik)": [
-    { dish: "Ryllik-te", desc: "Tørk blomstene. Tradisjonell urtete for magen", difficulty: "🟢", time: "10 min" }
+    { dish: "Ryllik-te", desc: "Tørk blomstene. Tradisjonell urtete for magen", difficulty: "🟢", time: "10 min" },
+    { dish: "Ryllik-olje", desc: "Trekk i olivenolje for helseeffekt", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Ryllik-sirup", desc: "Kok blomster med sukker og vann", difficulty: "🟢", time: "20 min" },
+    { dish: "Tørket ryllik", desc: "Tørk hele planten for te hele året", difficulty: "🟢", time: "Tørking" },
+    { dish: "Ryllik-honning", desc: "Trekk i honning for mageskånsom drikk", difficulty: "🟢", time: "2-3 uker" }
   ],
   "Nesle (døvnesle)": [
-    { dish: "Døvnesle som spinat", desc: "Kok eller fres bladene som spinat. Mild smak", difficulty: "🟢", time: "10 min" }
+    { dish: "Døvnesle som spinat", desc: "Kok eller fres bladene som spinat. Mild smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Døvnesle-suppe", desc: "Fløtesuppe med nesle og potet", difficulty: "🟢", time: "20 min" },
+    { dish: "Døvnesle-salat", desc: "Friske blader i salat med vinaigrett", difficulty: "🟢", time: "10 min" },
+    { dish: "Stekt døvnesle", desc: "Fres raskt i smør med hvitløk", difficulty: "🟢", time: "10 min" },
+    { dish: "Tørket døvnesle", desc: "Tørk for te hele året", difficulty: "🟢", time: "Tørking" }
   ],
   "Engsyre": [
     { dish: "Engsyre i salat", desc: "Friske blader gir syrlig kick til salater", difficulty: "🟢", time: "5 min" },
-    { dish: "Engsyresuppe", desc: "Fres med løk, tilsett buljong og fløte. Syrlig og deilig!", difficulty: "🟢", time: "20 min" }
+    { dish: "Engsyresuppe", desc: "Fres med løk, tilsett buljong og fløte. Syrlig og deilig!", difficulty: "🟢", time: "20 min" },
+    { dish: "Engsyre-salsa", desc: "Finhakket engsyre med løk og eddik", difficulty: "🟢", time: "10 min" },
+    { dish: "Engsyre-vinaigrett", desc: "Lag syrlig dressing med engsyre", difficulty: "🟢", time: "5 min" },
+    { dish: "Marinert engsyre", desc: "Marinér friske blader i eddik og urter", difficulty: "🟢", time: "15 min" }
   ],
   "Hestehov": [
-    { dish: "Hestehov-te", desc: "Tørk blomster og blader. Tradisjonell hostete", difficulty: "🟢", time: "10 min" }
+    { dish: "Hestehov-te", desc: "Tørk blomster og blader. Tradisjonell hostete", difficulty: "🟢", time: "10 min" },
+    { dish: "Hestehov-sirup", desc: "Kok blomster med sukker for hostedrikk", difficulty: "🟢", time: "20 min" },
+    { dish: "Hestehov-infusjon", desc: "Trekk blader i olje for medisinsk bruk", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Hestehov-honning", desc: "Trekk i honning for hostedrikk", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Tørket hestehov", desc: "Tørk hele planten for te hele året", difficulty: "🟢", time: "Tørking" }
   ],
 
   // 🌳 Trær med spiselige deler
   "Einer": [
     { dish: "Einerbær-krydder", desc: "Tørk bærene, bruk som krydder til vilt og sausar", difficulty: "🟢", time: "Tørking" },
-    { dish: "Einerbær-sirup", desc: "Kok med sukker og vann. Aromatisk til desserter", difficulty: "🟢", time: "20 min" }
+    { dish: "Einerbær-sirup", desc: "Kok med sukker og vann. Aromatisk til desserter", difficulty: "🟢", time: "20 min" },
+    { dish: "Einerbær-te", desc: "Kok tørre bær i vann for velsmakende drikk", difficulty: "🟢", time: "15 min" },
+    { dish: "Einerbær-olje", desc: "Trekk bær i olivenolje for krydring", difficulty: "🟢", time: "2-3 uker" },
+    { dish: "Einerbær til saus", desc: "Tilsett knus bær til viltgrytesausar", difficulty: "🟢", time: "5 min" }
   ],
   "Einer (bær)": [
     { dish: "Einerbær til viltkjøtt", desc: "Knus bær og bruk som krydder til elg, rådyr eller reinsdyr", difficulty: "🟢", time: "5 min" },
-    { dish: "Hjemmelaget akevitt", desc: "Legg einerbær i vodka med karve i 2-4 uker", difficulty: "🟢", time: "2-4 uker" }
+    { dish: "Hjemmelaget akevitt", desc: "Legg einerbær i vodka med karve i 2-4 uker", difficulty: "🟢", time: "2-4 uker" },
+    { dish: "Einerbær-likør", desc: "Legg bær i brennevin med sukker", difficulty: "🟢", time: "2 mnd" },
+    { dish: "Einerbær-sirup", desc: "Kok bær med sukker for drikke", difficulty: "🟢", time: "20 min" },
+    { dish: "Tørket einerbær", desc: "Tørk for hele året bruk i alle gryter", difficulty: "🟢", time: "Tørking" }
   ],
   "Hassel": [
     { dish: "Ristede hasselnøtter", desc: "Rist i ovn på 180°C i 10 min. Perfekt snacks!", difficulty: "🟢", time: "10 min" },
-    { dish: "Hasselnøtt-pesto", desc: "Erstatt pinjekjerner med hasselnøtter i pesto", difficulty: "🟢", time: "10 min" }
+    { dish: "Hasselnøtt-pesto", desc: "Erstatt pinjekjerner med hasselnøtter i pesto", difficulty: "🟢", time: "10 min" },
+    { dish: "Hasselnøtt-mel", desc: "Mal ristede nøtter fint for baking", difficulty: "🟢", time: "15 min" },
+    { dish: "Hasselnøtt-smør", desc: "Rist og mal til kremt smør", difficulty: "🟡", time: "20 min" },
+    { dish: "Hasselnøtt-kaker", desc: "Bak nøttekaker med ristede nøtter", difficulty: "🟡", time: "30 min" }
   ],
   "Rogn": [
-    { dish: "Rognegelé", desc: "Kok bær, sil og lag gelé med sukker. God til vilt", difficulty: "🟡", time: "40 min" }
+    { dish: "Rognegelé", desc: "Kok bær, sil og lag gelé med sukker. God til vilt", difficulty: "🟡", time: "40 min" },
+    { dish: "Rognesyltetøy", desc: "Kok bær med sukker hele året", difficulty: "🟢", time: "20 min" },
+    { dish: "Rognesaus", desc: "Varm saus til vilt og stekt kjøtt", difficulty: "🟢", time: "15 min" },
+    { dish: "Rognesorbet", desc: "Frys saft med sukker for frisk dessert", difficulty: "🟢", time: "Frysing" },
+    { dish: "Tørket rogn", desc: "Tørk bær for lagring hele året", difficulty: "🟢", time: "Tørking" }
   ],
   "Rogn (bær)": [
-    { dish: "Rognegelé", desc: "Kok bær etter frost, sil og lag gelé. Perfekt til ost", difficulty: "🟡", time: "40 min" }
+    { dish: "Rognegelé", desc: "Kok bær etter frost, sil og lag gelé. Perfekt til ost", difficulty: "🟡", time: "40 min" },
+    { dish: "Rognesyltetøy", desc: "Kok med sukker til syltetøy", difficulty: "🟢", time: "20 min" },
+    { dish: "Rognesaus", desc: "Varm saus til vilt og kjøtt", difficulty: "🟢", time: "15 min" },
+    { dish: "Rognesorbet", desc: "Frys med sukkerlake for frisk dessert", difficulty: "🟢", time: "Frysing" },
+    { dish: "Tørket rogn", desc: "Tørk for hele året bruk i gryter", difficulty: "🟢", time: "Tørking" }
   ],
   "Bøk": [
-    { dish: "Ristede bøkenøtter", desc: "Samle nøtter om høsten, rist i panne. Nøtteaktig smak", difficulty: "🟢", time: "10 min" }
+    { dish: "Ristede bøkenøtter", desc: "Samle nøtter om høsten, rist i panne. Nøtteaktig smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Bøkenøtt-mel", desc: "Mal ristede nøtter fint for baking", difficulty: "🟢", time: "15 min" },
+    { dish: "Bøkenøtt-smør", desc: "Rist og mal til kremete smør", difficulty: "🟡", time: "20 min" },
+    { dish: "Bøkenøtt-kaker", desc: "Bak kaker med ristede bøkenøtter", difficulty: "🟡", time: "30 min" },
+    { dish: "Bøkenøtt-snacks", desc: "Rist og krydre til spising eller oppbevaring", difficulty: "🟢", time: "15 min" }
   ],
 
   // 🐟 Fisk
   "Torsk": [
     { dish: "Kokt torsk med lever", desc: "Norsk klassiker: kokt torsk med lever, rogn og gulrøtter", difficulty: "🟢", time: "25 min" },
     { dish: "Fiskesuppe", desc: "Fløtebasert suppe med torsk, gulrot og persille", difficulty: "🟢", time: "30 min" },
-    { dish: "Bacalao", desc: "Portugisisk-inspirert gryte med torsk, tomat og paprika", difficulty: "🟡", time: "45 min" }
+    { dish: "Bacalao", desc: "Portugisisk-inspirert gryte med torsk, tomat og paprika", difficulty: "🟡", time: "45 min" },
+    { dish: "Torskefiskekaker", desc: "Mal torskekjøtt, bland med mel og krydder, stek", difficulty: "🟡", time: "30 min" },
+    { dish: "Stekt torsk", desc: "Frisk torskefillet stekt i smør med sitron", difficulty: "🟢", time: "15 min" }
   ],
   "Laks": [
     { dish: "Gravlaks", desc: "Salt, sukker, dill – la trekke i 48 timer. Festmat!", difficulty: "🟢", time: "48 timer" },
     { dish: "Ovnsbakt laks", desc: "Bak med sitron, dill og smør på 200°C i 20 min", difficulty: "🟢", time: "25 min" },
-    { dish: "Laksesashimi", desc: "Frys først i 24t, skjær tynt. Server med soya og wasabi", difficulty: "🟡", time: "15 min" }
+    { dish: "Laksesashimi", desc: "Frys først i 24t, skjær tynt. Server med soya og wasabi", difficulty: "🟡", time: "15 min" },
+    { dish: "Røkt laks", desc: "Røk over bjørkeved til gyllen farge", difficulty: "🟡", time: "2 timer" },
+    { dish: "Laksegryte", desc: "Fløtegryte med laksekuber, løk og timian", difficulty: "🟢", time: "25 min" }
   ],
   "Ørret": [
     { dish: "Røkt ørret", desc: "Røk over bjørkeved. Fantastisk med rømme og flatbrød", difficulty: "🟡", time: "2 timer" },
-    { dish: "Stekt ørret", desc: "Hel ørret stekt i smør med mandler og sitron", difficulty: "🟢", time: "20 min" }
+    { dish: "Stekt ørret", desc: "Hel ørret stekt i smør med mandler og sitron", difficulty: "🟢", time: "20 min" },
+    { dish: "Ovnsbakt ørret", desc: "Bak hel ørret med urter og sitron", difficulty: "🟢", time: "25 min" },
+    { dish: "Ørretsuppe", desc: "Fløtesuppe med ørretfillet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Grillet ørret", desc: "Grill hel ørret på ild med smør og dill", difficulty: "🟢", time: "20 min" }
   ],
   "Sei": [
     { dish: "Seibiff", desc: "Skiv sei tykt, stek i smør med løk og bacon", difficulty: "🟢", time: "15 min" },
-    { dish: "Seifiskekaker", desc: "Mal sei, bland med mel og krydder, stek som kaker", difficulty: "🟡", time: "30 min" }
+    { dish: "Seifiskekaker", desc: "Mal sei, bland med mel og krydder, stek som kaker", difficulty: "🟡", time: "30 min" },
+    { dish: "Stekt sei", desc: "Filét stekt i smør med sitron og persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Seisuppe", desc: "Fløtesuppe med seifillet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Seigrateng", desc: "Lag grateng med sei, fløte og ost", difficulty: "🟡", time: "35 min" }
   ],
   "Hyse": [
     { dish: "Fish and chips", desc: "Panert hyse fritert med hjemmelagde chips", difficulty: "🟡", time: "30 min" },
-    { dish: "Kokt hyse", desc: "Pocher i lettsaltet vann med smørsaus og gulrot", difficulty: "🟢", time: "20 min" }
+    { dish: "Kokt hyse", desc: "Pocher i lettsaltet vann med smørsaus og gulrot", difficulty: "🟢", time: "20 min" },
+    { dish: "Stekt hyse", desc: "Filét stekt i smør med sitron og mandler", difficulty: "🟢", time: "15 min" },
+    { dish: "Hysesuppe", desc: "Fløtesuppe med hysefillet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Hysegrateng", desc: "Bak grateng med hyse, fløte og ost", difficulty: "🟡", time: "35 min" }
   ],
   "Makrell": [
     { dish: "Stekt makrell", desc: "Fersk makrell stekt hel i panne med smør og sitron", difficulty: "🟢", time: "15 min" },
-    { dish: "Røkt makrell", desc: "Røk over alved eller bjørk. Server med brød og agurksalat", difficulty: "🟡", time: "1 time" }
+    { dish: "Røkt makrell", desc: "Røk over alved eller bjørk. Server med brød og agurksalat", difficulty: "🟡", time: "1 time" },
+    { dish: "Makrell-salat", desc: "Stekt makrell med løk og syrlig dressing", difficulty: "🟢", time: "20 min" },
+    { dish: "Gravmakrell", desc: "Mariner råe filéer med salt, sukker og dill", difficulty: "🟢", time: "24 timer" },
+    { dish: "Makrell i tomat", desc: "Stekt makrell i fløtetomatssaus", difficulty: "🟡", time: "30 min" }
   ],
   "Kveite": [
-    { dish: "Ovnsbakt kveite", desc: "Bak med urter, sitron og hvitvin på 180°C", difficulty: "🟢", time: "25 min" }
+    { dish: "Ovnsbakt kveite", desc: "Bak med urter, sitron og hvitvin på 180°C", difficulty: "🟢", time: "25 min" },
+    { dish: "Stekt kveite", desc: "Tykk filét stekt i smør med sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Kveitesuppe", desc: "Fløtesuppe med kveitefillet", difficulty: "🟢", time: "25 min" },
+    { dish: "Kveite-grateng", desc: "Lag grateng med kveite, fløte og ost", difficulty: "🟡", time: "35 min" },
+    { dish: "Grillet kveite", desc: "Grill filéer med smør, dill og sitron", difficulty: "🟢", time: "15 min" }
   ],
   "Lange": [
-    { dish: "Lutefisk av lange", desc: "Tradisjonell norsk julemat – lut, kok og server med bacon", difficulty: "🟡", time: "Flere dager" }
+    { dish: "Lutefisk av lange", desc: "Tradisjonell norsk julemat – lut, kok og server med bacon", difficulty: "🟡", time: "Flere dager" },
+    { dish: "Stekt lange", desc: "Frisk langefilét stekt i smør med sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Langesuppe", desc: "Fløtesuppe med lange og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Lange-gryte", desc: "Fløtegryte med lange, løk og timian", difficulty: "🟡", time: "30 min" },
+    { dish: "Lange-fiskekaker", desc: "Lag fiskekaker med langekjøtt og dill", difficulty: "🟡", time: "30 min" }
   ],
   "Abbor": [
-    { dish: "Stekt abbor", desc: "Filetér og stek i smør med sitron. Hvitt, fast kjøtt", difficulty: "🟢", time: "15 min" }
+    { dish: "Stekt abbor", desc: "Filetér og stek i smør med sitron. Hvitt, fast kjøtt", difficulty: "🟢", time: "15 min" },
+    { dish: "Abborsuppe", desc: "Fløtesuppe med abborfilet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Abbor-fiskekaker", desc: "Lag fiskekaker med abborkjøtt og dill", difficulty: "🟡", time: "30 min" },
+    { dish: "Ovnsbakt abbor", desc: "Bak hel abbor med urter og sitron", difficulty: "🟢", time: "25 min" },
+    { dish: "Grillet abbor", desc: "Grill hel abbor med smør og dill", difficulty: "🟢", time: "15 min" }
   ],
   "Gjedde": [
-    { dish: "Gjeddefiskekaker", desc: "Mal kjøttet og lag fiskekaker med dill og pepper", difficulty: "🟡", time: "30 min" }
+    { dish: "Gjeddefiskekaker", desc: "Mal kjøttet og lag fiskekaker med dill og pepper", difficulty: "🟡", time: "30 min" },
+    { dish: "Stekt gjedde", desc: "Filetér og stek i smør med sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Gjedde-suppe", desc: "Fløtesuppe med gjeddefilet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Ovnsbakt gjedde", desc: "Bak hel gjedde med urter og sitron", difficulty: "🟢", time: "25 min" },
+    { dish: "Grillet gjedde", desc: "Grill hel gjedde på ild med smør og dill", difficulty: "🟢", time: "20 min" }
   ],
   "Røye": [
     { dish: "Røkt røye", desc: "Røk over bjørkeved – norsk delikatesse fra fjellvann", difficulty: "🟡", time: "2 timer" },
-    { dish: "Stekt røye", desc: "Filet stekt i smør med mandler og persille", difficulty: "🟢", time: "15 min" }
+    { dish: "Stekt røye", desc: "Filet stekt i smør med mandler og persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Røye-suppe", desc: "Fløtesuppe med røyefilet og løk", difficulty: "🟢", time: "25 min" },
+    { dish: "Ovnsbakt røye", desc: "Bak hel røye med urter og sitron", difficulty: "🟢", time: "25 min" },
+    { dish: "Grillet røye", desc: "Grill hel røye med smør, dill og sitron", difficulty: "🟢", time: "15 min" }
   ],
   "Sild": [
     { dish: "Spekesild", desc: "Salt og krydder – tradisjonell norsk matskatt", difficulty: "🟡", time: "Flere dager" },
-    { dish: "Stekt sild", desc: "Panert i rugmel og stekt i smør. Server med potetsalat", difficulty: "🟢", time: "20 min" }
+    { dish: "Stekt sild", desc: "Panert i rugmel og stekt i smør. Server med potetsalat", difficulty: "🟢", time: "20 min" },
+    { dish: "Marinert sild", desc: "Skaldelikt i essigsalte med løk og krydder", difficulty: "🟡", time: "24 timer" },
+    { dish: "Røkt sild", desc: "Røk over bjørkeved til gyllen farge", difficulty: "🟡", time: "1 time" },
+    { dish: "Sildgryte", desc: "Fløtegryte med sild, løk og poteter", difficulty: "🟡", time: "30 min" }
   ]
 };
 
