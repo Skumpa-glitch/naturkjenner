@@ -136,6 +136,18 @@ body::before {
 .quiz-category-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; justify-content: center; }
 .quiz-cat-chip { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--sand); background: white; font-size: 12px; cursor: pointer; transition: all 0.15s; }
 .quiz-cat-chip.active { border-color: var(--forest); background: var(--forest); color: white; }
+.bird-sound-player { text-align: center; margin-bottom: 16px; }
+.bird-play-btn { width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--forest); background: #e8f5e0; cursor: pointer; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; transition: all 0.2s; }
+.bird-play-btn:hover { background: var(--forest); transform: scale(1.05); }
+.bird-play-btn:hover span { filter: brightness(10); }
+.bird-play-btn.playing { background: var(--forest); animation: pulse-ring 1.5s infinite; }
+.bird-play-btn.playing span { filter: brightness(10); }
+.bird-play-label { font-size: 12px; color: var(--ghost); }
+.bird-loading { font-size: 13px; color: var(--ghost); padding: 20px; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(45,80,22,0.3); } 70% { box-shadow: 0 0 0 12px rgba(45,80,22,0); } 100% { box-shadow: 0 0 0 0 rgba(45,80,22,0); } }
+.bird-sono { width: 100%; max-height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; opacity: 0.7; }
+.quiz-species-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 0; }
+.quiz-img-placeholder { width: 100%; height: 160px; background: #e8efe8; display: flex; align-items: center; justify-content: center; font-size: 48px; }
 
 /* Pin form modal */
 .pin-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
@@ -3818,6 +3830,10 @@ function renderLearnHub() {
         '<div class="qm-icon">🃏</div><div class="qm-title">Gjett arten</div>' +
         '<div class="qm-desc">Les beskrivelsen, gjett riktig art</div>' +
       '</button>' +
+      '<button class="quiz-mode-btn" onclick="startImageQuiz()">' +
+        '<div class="qm-icon">📸</div><div class="qm-title">Gjett fra bilde</div>' +
+        '<div class="qm-desc">Se bildet, gjett hvilken art det er</div>' +
+      '</button>' +
       '<button class="quiz-mode-btn" onclick="startQuiz(\'habitat\')">' +
         '<div class="qm-icon">🏔️</div><div class="qm-title">Habitat-quiz</div>' +
         '<div class="qm-desc">Hvor lever denne arten?</div>' +
@@ -3831,6 +3847,10 @@ function renderLearnHub() {
         '<div class="qm-desc">Koble norsk navn til latinsk</div>' +
       '</button>' +
     '</div>' +
+    '<button class="quiz-mode-btn" style="width:100%;margin-bottom:16px" onclick="startBirdSoundQuiz()">' +
+      '<div class="qm-icon">🐦</div><div class="qm-title">Fuglelyder</div>' +
+      '<div class="qm-desc">Hør fuglelyd → gjett arten. Duolingo-stil!</div>' +
+    '</button>' +
     '<div style="margin-top:8px;text-align:center">' + badgeHtml + '</div>';
 }
 
@@ -4069,7 +4089,412 @@ function renderQuizResults() {
       '</div>' +
     '</div>' +
     '<button class="quiz-next-btn" onclick="startQuiz(\'' + qs.mode + '\')">🔄 Spill igjen</button>' +
-    '<button class="quiz-next-btn" style="background:white;color:var(--forest);border:2px solid var(--forest);margin-top:8px" onclick="quizState=null;renderLearnHub()">← Tilbake til menyern</button>';
+    '<button class="quiz-next-btn" style="background:white;color:var(--forest);border:2px solid var(--forest);margin-top:8px" onclick="quizState=null;renderLearnHub()">← Tilbake til menyen</button>';
+}
+
+// ============================================================
+// IMAGE QUIZ – Gjett fra bilde
+// ============================================================
+let imgQuizState = null;
+
+async function startImageQuiz() {
+  const allSpecies = getAllSpeciesFlat();
+  let pool = quizCatFilter === 'all' ? allSpecies : allSpecies.filter(s => s.catKey === quizCatFilter);
+  if (pool.length < 4) pool = allSpecies;
+
+  const lv = document.getElementById('learnView');
+  lv.innerHTML = '<div class="bird-loading">📸 Henter bilder fra Wikipedia...<br><span style="font-size:11px">Første gang kan ta noen sekunder</span></div>';
+
+  const shuffled = shuffleArray(pool);
+  const questions = [];
+
+  // Try to build 10 questions with images
+  for (let i = 0; i < shuffled.length && questions.length < 10; i++) {
+    const correct = shuffled[i];
+    if (!correct.latin) continue;
+    const imgData = await getSpeciesImageUrl(correct.latin);
+    if (!imgData || !imgData.thumb) continue;
+
+    let wrongPool = pool.filter(s => s.name !== correct.name);
+    if (wrongPool.length < 3) wrongPool = allSpecies.filter(s => s.name !== correct.name);
+    const wrongs = shuffleArray(wrongPool).slice(0, 3);
+
+    questions.push({
+      correct,
+      imgUrl: imgData.thumb,
+      options: shuffleArray([correct.name, ...wrongs.map(w => w.name)]),
+      answer: correct.name,
+    });
+  }
+
+  if (questions.length < 3) {
+    lv.innerHTML = '<div class="bird-loading">😔 Fant ikke nok bilder. Prøv en annen kategori.</div>' +
+      '<button class="quiz-next-btn" style="margin-top:12px" onclick="renderLearnHub()">← Tilbake</button>';
+    return;
+  }
+
+  imgQuizState = { active: true, questions, current: 0, score: 0, answers: [] };
+  renderImgQuestion();
+}
+
+function renderImgQuestion() {
+  const lv = document.getElementById('learnView');
+  const qs = imgQuizState;
+  if (!qs || !qs.active) { renderLearnHub(); return; }
+  if (qs.current >= qs.questions.length) { renderImgResults(); return; }
+
+  const q = qs.questions[qs.current];
+  const dots = qs.questions.map((_, i) => {
+    let cls = 'quiz-dot';
+    if (i < qs.current) cls += qs.answers[i] ? ' done' : ' wrong-dot';
+    else if (i === qs.current) cls += ' current';
+    return '<div class="' + cls + '"></div>';
+  }).join('');
+
+  const optionsHtml = q.options.map((opt, i) =>
+    '<button class="quiz-opt" id="iopt' + i + '" onclick="answerImgQuiz(' + i + ')">' + opt + '</button>'
+  ).join('');
+
+  lv.innerHTML =
+    '<div class="quiz-progress">' + dots + '</div>' +
+    '<div class="quiz-card">' +
+      '<img class="quiz-species-img" src="' + q.imgUrl + '" alt="Gjett arten">' +
+      '<div class="quiz-card-header">' +
+        '<span class="quiz-q-num">Spørsmål ' + (qs.current + 1) + ' / ' + qs.questions.length + '</span>' +
+        '<span class="quiz-q-cat">' + q.correct.category + '</span>' +
+      '</div>' +
+      '<div class="quiz-q-body">' +
+        '<div class="quiz-q-hint">Hvilken art ser du på bildet?</div>' +
+        '<div class="quiz-options" id="imgOptions">' + optionsHtml + '</div>' +
+        '<div id="imgFeedback"></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function answerImgQuiz(idx) {
+  const qs = imgQuizState;
+  const q = qs.questions[qs.current];
+  const selected = q.options[idx];
+  const isCorrect = selected === q.answer;
+
+  qs.answers.push(isCorrect);
+  if (isCorrect) qs.score++;
+
+  quizStats.total++;
+  if (isCorrect) {
+    quizStats.correct++;
+    quizStats.streak++;
+    if (quizStats.streak > quizStats.bestStreak) quizStats.bestStreak = quizStats.streak;
+  } else {
+    quizStats.streak = 0;
+  }
+  if (qs.score >= 8 && qs.questions.length === 10 && !quizStats.badges.includes('👁️ Skarpt blikk')) {
+    quizStats.badges.push('👁️ Skarpt blikk');
+  }
+  saveQuizStats();
+
+  q.options.forEach((opt, i) => {
+    const btn = document.getElementById('iopt' + i);
+    if (!btn) return;
+    btn.classList.add('disabled');
+    if (opt === q.answer) btn.classList.add('correct');
+    if (i === idx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('imgFeedback');
+  fb.innerHTML =
+    '<div class="quiz-feedback ' + (isCorrect ? 'correct' : 'wrong') + '">' +
+      (isCorrect ? '✅ Riktig!' : '❌ Feil! Det var <strong>' + q.answer + '</strong>') +
+      (q.correct.latin ? ' (<em>' + q.correct.latin + '</em>)' : '') +
+      '<br><span style="font-size:12px">' + (q.correct.funFact || q.correct.description.split('.')[0]) + '</span>' +
+    '</div>' +
+    '<button class="quiz-next-btn" onclick="nextImgQuestion()">' +
+      (qs.current + 1 < qs.questions.length ? 'Neste bilde →' : 'Se resultat →') +
+    '</button>';
+
+  const dots = document.querySelectorAll('.quiz-dot');
+  if (dots[qs.current]) {
+    dots[qs.current].classList.remove('current');
+    dots[qs.current].classList.add(isCorrect ? 'done' : 'wrong-dot');
+  }
+}
+
+function nextImgQuestion() {
+  imgQuizState.current++;
+  renderImgQuestion();
+}
+
+function renderImgResults() {
+  const qs = imgQuizState;
+  const lv = document.getElementById('learnView');
+  const pct = Math.round(qs.score / qs.questions.length * 100);
+
+  let emoji = '😐', msg = 'Øvelse gjør mester!';
+  if (pct >= 90) { emoji = '🏆'; msg = 'Fantastisk! Du kjenner artene!'; }
+  else if (pct >= 70) { emoji = '🌟'; msg = 'Veldig bra!'; }
+  else if (pct >= 50) { emoji = '👍'; msg = 'Bra jobba!'; }
+  else { emoji = '💪'; msg = 'Ikke gi opp!'; }
+
+  const newBadge = quizStats.badges.includes('👁️ Skarpt blikk')
+    ? '<div style="margin:8px 0"><span class="quiz-badge">👁️ Skarpt blikk</span></div>' : '';
+
+  const dots = qs.questions.map((_, i) =>
+    '<div class="quiz-dot ' + (qs.answers[i] ? 'done' : 'wrong-dot') + '"></div>'
+  ).join('');
+
+  lv.innerHTML =
+    '<div class="quiz-progress">' + dots + '</div>' +
+    '<div class="quiz-card">' +
+      '<div class="quiz-result">' +
+        '<div class="quiz-result-emoji">' + emoji + '</div>' +
+        '<div class="quiz-result-score">' + qs.score + ' / ' + qs.questions.length + '</div>' +
+        '<div class="quiz-result-label">' + msg + '</div>' +
+        newBadge +
+        '<div style="font-size:13px;color:var(--ghost)">🔥 Streak: ' + quizStats.streak + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="quiz-next-btn" onclick="startImageQuiz()">🔄 Spill igjen</button>' +
+    '<button class="quiz-next-btn" style="background:white;color:var(--forest);border:2px solid var(--forest);margin-top:8px" onclick="imgQuizState=null;renderLearnHub()">← Tilbake til menyen</button>';
+}
+
+// ============================================================
+// BIRD SOUND QUIZ (Xeno-canto)
+// ============================================================
+let birdQuizState = null;
+let birdAudio = null;
+let birdSoundCache = {};
+
+function getBirdSpecies() {
+  return (SPECIES_DB.birds || []).filter(b => b.latin && b.latin.trim().length > 3);
+}
+
+async function fetchBirdSound(latin) {
+  if (birdSoundCache[latin]) return birdSoundCache[latin];
+  try {
+    const query = encodeURIComponent(latin.replace(/\s+/g, '+'));
+    const resp = await fetch('https://xeno-canto.org/api/2/recordings?query=' + query + '+q:A&page=1');
+    const data = await resp.json();
+    if (data.recordings && data.recordings.length > 0) {
+      // Pick from top 5 quality recordings randomly
+      const top = data.recordings.slice(0, 5);
+      const pick = top[Math.floor(Math.random() * top.length)];
+      const result = {
+        file: pick.file.startsWith('//') ? 'https:' + pick.file : pick.file,
+        sono: pick.sono && pick.sono.small ? (pick.sono.small.startsWith('//') ? 'https:' + pick.sono.small : pick.sono.small) : null,
+        type: pick.type || 'song',
+        loc: pick.loc || '',
+        rec: pick.rec || ''
+      };
+      birdSoundCache[latin] = result;
+      return result;
+    }
+  } catch (e) {
+    console.log('Xeno-canto fetch error:', e);
+  }
+  return null;
+}
+
+async function startBirdSoundQuiz() {
+  const birds = getBirdSpecies();
+  if (birds.length < 4) { alert('For få fuglearter i databasen'); return; }
+
+  const lv = document.getElementById('learnView');
+  lv.innerHTML = '<div class="bird-loading">🐦 Henter fuglelyder fra Xeno-canto...<br><span style="font-size:11px">Første gang kan ta noen sekunder</span></div>';
+
+  const shuffled = shuffleArray(birds);
+  const count = Math.min(5, shuffled.length);
+  const questions = [];
+
+  for (let i = 0; i < count; i++) {
+    const correct = shuffled[i];
+    const sound = await fetchBirdSound(correct.latin);
+    if (!sound) continue;
+
+    const wrongs = shuffleArray(birds.filter(b => b.name !== correct.name)).slice(0, 3);
+    questions.push({
+      correct,
+      sound,
+      options: shuffleArray([correct.name, ...wrongs.map(w => w.name)]),
+      answer: correct.name,
+    });
+  }
+
+  if (questions.length === 0) {
+    lv.innerHTML = '<div class="bird-loading">😔 Kunne ikke hente fuglelyder. Sjekk internett og prøv igjen.</div>' +
+      '<button class="quiz-next-btn" style="margin-top:12px" onclick="renderLearnHub()">← Tilbake</button>';
+    return;
+  }
+
+  birdQuizState = {
+    active: true,
+    questions,
+    current: 0,
+    score: 0,
+    answers: [],
+  };
+  renderBirdQuestion();
+}
+
+function renderBirdQuestion() {
+  const lv = document.getElementById('learnView');
+  const qs = birdQuizState;
+  if (!qs || !qs.active) { renderLearnHub(); return; }
+
+  if (qs.current >= qs.questions.length) {
+    renderBirdResults();
+    return;
+  }
+
+  // Stop any playing audio
+  if (birdAudio) { birdAudio.pause(); birdAudio = null; }
+
+  const q = qs.questions[qs.current];
+  const dots = qs.questions.map((_, i) => {
+    let cls = 'quiz-dot';
+    if (i < qs.current) cls += qs.answers[i] ? ' done' : ' wrong-dot';
+    else if (i === qs.current) cls += ' current';
+    return '<div class="' + cls + '"></div>';
+  }).join('');
+
+  const optionsHtml = q.options.map((opt, i) =>
+    '<button class="quiz-opt" id="bopt' + i + '" onclick="answerBirdQuiz(' + i + ')">' + opt + '</button>'
+  ).join('');
+
+  lv.innerHTML =
+    '<div class="quiz-progress">' + dots + '</div>' +
+    '<div class="quiz-card">' +
+      '<div class="quiz-card-header">' +
+        '<span class="quiz-q-num">Fuglelyd ' + (qs.current + 1) + ' / ' + qs.questions.length + '</span>' +
+        '<span class="quiz-q-cat">🐦 Fugl</span>' +
+      '</div>' +
+      '<div class="quiz-q-body">' +
+        '<div class="bird-sound-player">' +
+          (q.sound.sono ? '<img class="bird-sono" src="' + q.sound.sono + '" alt="Sonogram">' : '') +
+          '<button class="bird-play-btn" id="birdPlayBtn" onclick="playBirdSound()">' +
+            '<span>▶️</span>' +
+          '</button>' +
+          '<div class="bird-play-label">Trykk for å spille av lyden</div>' +
+        '</div>' +
+        '<div class="quiz-q-hint">Hvilken fugl hører du?</div>' +
+        '<div class="quiz-options" id="birdOptions">' + optionsHtml + '</div>' +
+        '<div id="birdFeedback"></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function playBirdSound() {
+  const q = birdQuizState.questions[birdQuizState.current];
+  const btn = document.getElementById('birdPlayBtn');
+
+  if (birdAudio && !birdAudio.paused) {
+    birdAudio.pause();
+    birdAudio.currentTime = 0;
+    btn.classList.remove('playing');
+    return;
+  }
+
+  birdAudio = new Audio(q.sound.file);
+  birdAudio.crossOrigin = 'anonymous';
+  btn.classList.add('playing');
+
+  birdAudio.onended = () => { btn.classList.remove('playing'); };
+  birdAudio.onerror = () => {
+    btn.classList.remove('playing');
+    document.querySelector('.bird-play-label').textContent = 'Kunne ikke spille av lyden';
+  };
+  birdAudio.play().catch(() => {
+    btn.classList.remove('playing');
+  });
+}
+
+function answerBirdQuiz(idx) {
+  const qs = birdQuizState;
+  const q = qs.questions[qs.current];
+  const selected = q.options[idx];
+  const isCorrect = selected === q.answer;
+
+  qs.answers.push(isCorrect);
+  if (isCorrect) qs.score++;
+
+  // Update general stats
+  quizStats.total++;
+  if (isCorrect) {
+    quizStats.correct++;
+    quizStats.streak++;
+    if (quizStats.streak > quizStats.bestStreak) quizStats.bestStreak = quizStats.streak;
+  } else {
+    quizStats.streak = 0;
+  }
+  // Bird-specific badge
+  if (qs.score >= 4 && qs.questions.length === 5 && !quizStats.badges.includes('🐦 Fuglelytter')) {
+    quizStats.badges.push('🐦 Fuglelytter');
+  }
+  saveQuizStats();
+
+  // Disable all options
+  q.options.forEach((opt, i) => {
+    const btn = document.getElementById('bopt' + i);
+    if (!btn) return;
+    btn.classList.add('disabled');
+    if (opt === q.answer) btn.classList.add('correct');
+    if (i === idx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('birdFeedback');
+  fb.innerHTML =
+    '<div class="quiz-feedback ' + (isCorrect ? 'correct' : 'wrong') + '">' +
+      (isCorrect ? '✅ Riktig! ' : '❌ Feil! Det var <strong>' + q.answer + '</strong>. ') +
+      '<br><span style="font-size:12px">' + q.correct.description.split('.')[0] + '. ' + (q.correct.funFact || '') + '</span>' +
+      (q.sound.rec ? '<br><span style="font-size:10px;color:var(--ghost)">Opptak: ' + q.sound.rec + ' via Xeno-canto</span>' : '') +
+    '</div>' +
+    '<button class="quiz-next-btn" onclick="nextBirdQuestion()">' +
+      (qs.current + 1 < qs.questions.length ? 'Neste fuglelyd →' : 'Se resultat →') +
+    '</button>';
+
+  // Update dots
+  const dots = document.querySelectorAll('.quiz-dot');
+  if (dots[qs.current]) {
+    dots[qs.current].classList.remove('current');
+    dots[qs.current].classList.add(isCorrect ? 'done' : 'wrong-dot');
+  }
+}
+
+function nextBirdQuestion() {
+  if (birdAudio) { birdAudio.pause(); birdAudio = null; }
+  birdQuizState.current++;
+  renderBirdQuestion();
+}
+
+function renderBirdResults() {
+  if (birdAudio) { birdAudio.pause(); birdAudio = null; }
+  const qs = birdQuizState;
+  const lv = document.getElementById('learnView');
+  const pct = Math.round(qs.score / qs.questions.length * 100);
+
+  let emoji = '😐', msg = 'Øvelse gjør mester!';
+  if (pct >= 80) { emoji = '🐦'; msg = 'Fantastisk! Du kjenner fuglelydene!'; }
+  else if (pct >= 60) { emoji = '🌟'; msg = 'Bra jobba!'; }
+
+  const newBadge = quizStats.badges.includes('🐦 Fuglelytter')
+    ? '<div style="margin:8px 0"><span class="quiz-badge">🐦 Fuglelytter</span></div>' : '';
+
+  const dots = qs.questions.map((_, i) =>
+    '<div class="quiz-dot ' + (qs.answers[i] ? 'done' : 'wrong-dot') + '"></div>'
+  ).join('');
+
+  lv.innerHTML =
+    '<div class="quiz-progress">' + dots + '</div>' +
+    '<div class="quiz-card">' +
+      '<div class="quiz-result">' +
+        '<div class="quiz-result-emoji">' + emoji + '</div>' +
+        '<div class="quiz-result-score">' + qs.score + ' / ' + qs.questions.length + '</div>' +
+        '<div class="quiz-result-label">' + msg + '</div>' +
+        newBadge +
+        '<div style="font-size:13px;color:var(--ghost)">🔥 Streak: ' + quizStats.streak + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="quiz-next-btn" onclick="startBirdSoundQuiz()">🔄 Spill igjen</button>' +
+    '<button class="quiz-next-btn" style="background:white;color:var(--forest);border:2px solid var(--forest);margin-top:8px" onclick="birdQuizState=null;renderLearnHub()">← Tilbake til menyen</button>';
 }
 
 </script>
