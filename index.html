@@ -83,6 +83,10 @@ body::before {
 .map-control-btn { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--sand); background: white; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--ink); transition: all 0.2s; font-family: 'Outfit', sans-serif; }
 .map-control-btn.active, .map-control-btn:hover { background: var(--forest); color: white; border-color: var(--forest); }
 .map-pin-count { font-size: 13px; color: var(--ghost); margin-bottom: 12px; }
+.pin-photo-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 2px dashed var(--sand); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--ghost); transition: all 0.2s; }
+.pin-photo-btn:hover { border-color: var(--forest); color: var(--forest); }
+.export-btn { display: block; width: 100%; padding: 12px; margin-top: 12px; background: var(--forest); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: opacity 0.2s; }
+.export-btn:hover { opacity: 0.9; }
 
 /* Pin form modal */
 .pin-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
@@ -325,6 +329,7 @@ body::before {
       <button class="locate-btn" onclick="locateMe()" title="Finn meg">📍</button>
     </div>
     <p style="font-size:11px;color:var(--ghost);margin-top:8px;text-align:center">Trykk lenge på kartet for å legge til et sted</p>
+    <button class="export-btn" id="exportBtn" onclick="exportReport()" style="display:none">📋 Eksporter rapport</button>
   </div>
   <div id="collectionView" class="hidden"></div>
 </div>
@@ -340,6 +345,17 @@ body::before {
     <div class="pin-form-group">
       <label>Kategori</label>
       <div class="pin-category-grid" id="pinCatGrid"></div>
+    </div>
+    <div class="pin-form-group">
+      <label>Bilde</label>
+      <div id="pinPhotoPreview" style="display:none;margin-bottom:8px;position:relative">
+        <img id="pinPhotoImg" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px">
+        <button onclick="removePinPhoto()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px">×</button>
+      </div>
+      <label class="pin-photo-btn" id="pinPhotoBtn">
+        📸 Ta bilde eller velg fra galleri
+        <input type="file" accept="image/*" capture="environment" id="pinPhotoInput" onchange="handlePinPhoto(this)" style="display:none">
+      </label>
     </div>
     <div class="pin-form-group">
       <label>Notater</label>
@@ -3253,6 +3269,8 @@ function renderMapPins() {
   const filtered = mapFilterCat === 'all' ? mapPins : mapPins.filter(p => p.category === mapFilterCat);
   const countEl = document.getElementById('mapPinCount');
   if (countEl) countEl.textContent = mapPins.length === 0 ? 'Ingen steder lagret ennå' : filtered.length + ' av ' + mapPins.length + ' steder';
+  const expBtn = document.getElementById('exportBtn');
+  if (expBtn) expBtn.style.display = mapPins.length > 0 ? 'block' : 'none';
 
   filtered.forEach(pin => {
     const cat = PIN_CATEGORIES.find(c => c.id === pin.category) || PIN_CATEGORIES[7];
@@ -3264,12 +3282,14 @@ function renderMapPins() {
     });
     const marker = L.marker([pin.lat, pin.lng], { icon }).addTo(mapInstance);
     marker.bindPopup(
-      '<div style="min-width:140px">' +
+      '<div style="min-width:160px;max-width:220px">' +
+        (pin.photo ? '<img src="' + pin.photo + '" style="width:100%;border-radius:6px;margin-bottom:6px;max-height:140px;object-fit:cover">' : '') +
         '<strong style="font-size:14px">' + cat.icon + ' ' + (pin.name || 'Uten navn') + '</strong>' +
         (pin.notes ? '<br><span style="font-size:12px;color:#666">' + pin.notes + '</span>' : '') +
         '<br><span style="font-size:11px;color:#999">' + new Date(pin.created).toLocaleDateString('nb-NO') + '</span>' +
         '<br><button onclick="editPin(\'' + pin.id + '\')" style="margin-top:6px;padding:4px 10px;border:none;background:#1f3d2b;color:white;border-radius:4px;font-size:11px;cursor:pointer">Rediger</button>' +
-      '</div>'
+      '</div>',
+      { maxWidth: 240 }
     );
     mapMarkers.push(marker);
   });
@@ -3319,6 +3339,19 @@ function openPinModal(latlng, existingPin) {
     ? '<button class="pin-btn-delete" onclick="deletePin()">Slett</button><button class="pin-btn-cancel" onclick="closePinModal()">Avbryt</button><button class="pin-btn-save" onclick="savePin()">Lagre</button>'
     : '<button class="pin-btn-cancel" onclick="closePinModal()">Avbryt</button><button class="pin-btn-save" onclick="savePin()">Lagre</button>';
 
+  // Photo
+  if (existingPin && existingPin.photo) {
+    pendingPinPhoto = existingPin.photo;
+    document.getElementById('pinPhotoImg').src = existingPin.photo;
+    document.getElementById('pinPhotoPreview').style.display = 'block';
+    document.getElementById('pinPhotoBtn').style.display = 'none';
+  } else {
+    pendingPinPhoto = null;
+    document.getElementById('pinPhotoPreview').style.display = 'none';
+    document.getElementById('pinPhotoBtn').style.display = 'flex';
+    document.getElementById('pinPhotoInput').value = '';
+  }
+
   document.getElementById('pinModal').classList.add('show');
   setTimeout(() => document.getElementById('pinName').focus(), 300);
 }
@@ -3333,6 +3366,42 @@ function selectPinCat(catId) {
   selectedPinCat = catId;
   document.querySelectorAll('.pin-cat-btn').forEach(btn => btn.classList.remove('selected'));
   event.target.closest('.pin-cat-btn').classList.add('selected');
+}
+
+let pendingPinPhoto = null;
+
+function handlePinPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    // Resize to max 800px for storage
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 800;
+      let w = img.width, h = img.height;
+      if (w > max || h > max) {
+        if (w > h) { h = h * max / w; w = max; }
+        else { w = w * max / h; h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      pendingPinPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('pinPhotoImg').src = pendingPinPhoto;
+      document.getElementById('pinPhotoPreview').style.display = 'block';
+      document.getElementById('pinPhotoBtn').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePinPhoto() {
+  pendingPinPhoto = null;
+  document.getElementById('pinPhotoPreview').style.display = 'none';
+  document.getElementById('pinPhotoBtn').style.display = 'flex';
+  document.getElementById('pinPhotoInput').value = '';
 }
 
 async function savePin() {
@@ -3352,6 +3421,7 @@ async function savePin() {
       pin.name = name;
       pin.notes = notes;
       pin.category = selectedPinCat;
+      pin.photo = pendingPinPhoto || pin.photo || null;
       await savePinToDB(pin);
     }
   } else {
@@ -3362,6 +3432,7 @@ async function savePin() {
       lng: pendingLatLng.lng,
       name, notes,
       category: selectedPinCat,
+      photo: pendingPinPhoto || null,
       created: Date.now()
     };
     mapPins.push(pin);
@@ -3388,6 +3459,83 @@ function editPin(pinId) {
   if (!pin) return;
   mapInstance.closePopup();
   openPinModal({ lat: pin.lat, lng: pin.lng }, pin);
+}
+
+// Export report
+function exportReport() {
+  if (mapPins.length === 0) return;
+  const sorted = [...mapPins].sort((a, b) => a.created - b.created);
+  const date = new Date().toLocaleDateString('nb-NO', { year:'numeric', month:'long', day:'numeric' });
+  const catCounts = {};
+  sorted.forEach(p => {
+    const cat = PIN_CATEGORIES.find(c => c.id === p.category) || PIN_CATEGORIES[7];
+    catCounts[cat.label] = (catCounts[cat.label] || 0) + 1;
+  });
+
+  let pinCards = sorted.map((pin, i) => {
+    const cat = PIN_CATEGORIES.find(c => c.id === pin.category) || PIN_CATEGORIES[7];
+    const d = new Date(pin.created).toLocaleDateString('nb-NO', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    const mapUrl = 'https://www.openstreetmap.org/?mlat=' + pin.lat.toFixed(5) + '&mlon=' + pin.lng.toFixed(5) + '#map=15/' + pin.lat.toFixed(5) + '/' + pin.lng.toFixed(5);
+    return '<div class="pin-card">' +
+      (pin.photo ? '<img src="' + pin.photo + '" class="pin-photo">' : '<div class="pin-no-photo">' + cat.icon + '</div>') +
+      '<div class="pin-info">' +
+        '<div class="pin-num">#' + (i+1) + '</div>' +
+        '<h3>' + cat.icon + ' ' + (pin.name || 'Uten navn') + '</h3>' +
+        '<div class="pin-cat-label">' + cat.label + '</div>' +
+        (pin.notes ? '<p class="pin-notes">' + pin.notes + '</p>' : '') +
+        '<div class="pin-meta">' +
+          '<span>📅 ' + d + '</span>' +
+          '<span>📍 <a href="' + mapUrl + '" target="_blank">' + pin.lat.toFixed(4) + ', ' + pin.lng.toFixed(4) + '</a></span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  let statsHtml = Object.entries(catCounts).map(([label, count]) =>
+    '<div class="stat-item"><span class="stat-num">' + count + '</span><span class="stat-label">' + label + '</span></div>'
+  ).join('');
+
+  const html = '<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
+    '<title>Naturkjenner – Feltrapport</title><style>' +
+    '*{margin:0;padding:0;box-sizing:border-box}' +
+    'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f0eb;color:#2d3b2d;line-height:1.6}' +
+    '.container{max-width:800px;margin:0 auto;padding:20px}' +
+    '.header{background:#2d5016;color:#f5f0eb;padding:24px;border-radius:12px;margin-bottom:20px;text-align:center}' +
+    '.header h1{font-size:24px;margin-bottom:4px}' +
+    '.header p{font-size:13px;opacity:0.8}' +
+    '.stats{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}' +
+    '.stat-item{background:white;border-radius:10px;padding:12px 20px;text-align:center;min-width:80px}' +
+    '.stat-num{display:block;font-size:24px;font-weight:800;color:#2d5016}' +
+    '.stat-label{font-size:11px;color:#6b7c6b}' +
+    '.pin-card{background:white;border-radius:12px;overflow:hidden;margin-bottom:16px;display:flex;flex-direction:column}' +
+    '.pin-photo{width:100%;max-height:300px;object-fit:cover}' +
+    '.pin-no-photo{width:100%;height:120px;background:#e8efe8;display:flex;align-items:center;justify-content:center;font-size:48px}' +
+    '.pin-info{padding:16px}' +
+    '.pin-num{font-size:11px;color:#6b7c6b;font-weight:600;margin-bottom:4px}' +
+    '.pin-info h3{font-size:18px;color:#2d5016;margin-bottom:2px}' +
+    '.pin-cat-label{font-size:12px;color:#6b7c6b;margin-bottom:8px}' +
+    '.pin-notes{font-size:13px;color:#4a5a4a;margin-bottom:8px;font-style:italic}' +
+    '.pin-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#6b7c6b}' +
+    '.pin-meta a{color:#2d5016}' +
+    '.footer{text-align:center;padding:20px;font-size:12px;color:#6b7c6b}' +
+    '@media print{body{background:white}.pin-card{break-inside:avoid;box-shadow:none;border:1px solid #ddd}.header{background:#2d5016 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}' +
+    '</style></head><body>' +
+    '<div class="container">' +
+      '<div class="header">' +
+        '<h1>🌿 Naturkjenner – Feltrapport</h1>' +
+        '<p>' + date + ' · ' + sorted.length + ' funn</p>' +
+      '</div>' +
+      '<div class="stats">' +
+        '<div class="stat-item"><span class="stat-num">' + sorted.length + '</span><span class="stat-label">Totalt funn</span></div>' +
+        statsHtml +
+      '</div>' +
+      pinCards +
+      '<div class="footer">Generert med Naturkjenner 🌿 · skumpa-glitch.github.io/naturkjenner</div>' +
+    '</div></body></html>';
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
 }
 
 // Show map view
