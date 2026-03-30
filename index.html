@@ -286,6 +286,7 @@ body::before {
       <div id="dbSearchResults" class="hidden" style="margin-bottom:16px"></div>
       <div class="explore-grid" id="exploreGrid">
         <button class="explore-btn" onclick="browseCategory('flowers')"><div class="explore-icon">🌸</div><div class="explore-label">Blomster</div></button>
+        <button class="explore-btn" onclick="browseCategory('herbs')"><div class="explore-icon">🪴</div><div class="explore-label">Urter</div></button>
         <button class="explore-btn" onclick="browseCategory('trees')"><div class="explore-icon">🌳</div><div class="explore-label">Trær</div></button>
         <button class="explore-btn" onclick="browseCategory('berries')"><div class="explore-icon">🍇</div><div class="explore-label">Bær</div></button>
         <button class="explore-btn" onclick="browseCategory('mushrooms')"><div class="explore-icon">🍄</div><div class="explore-label">Sopp</div></button>
@@ -397,18 +398,18 @@ const SPECIES_DB = {
     { name:"Røsslyng", latin:"Calluna vulgaris", category:"🌸 Blomst", description:"Norges nasjonalblomst! Farger heia lilla om høsten.", habitat:"Lyngheier, åpen mark", funFact:"Lynghonung er en eksklusiv honningtype laget fra røsslyng.", rarity:"Svært vanlig", edible:false, season:"August–September" },
     { name:"Ballblom", latin:"Trollius europaeus", category:"🌸 Blomst", description:"Rund, gul blomst som lyser opp fuktige fjellenger.", habitat:"Fuktige enger, fjellsider", funFact:"Kalles også 'solei' eller 'engkulla' i ulike dialekter.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
     { name:"Skogstjerne", latin:"Trientalis europaea", category:"🌸 Blomst", description:"Liten, hvit stjerneformet blomst i barskogen.", habitat:"Barskog, blandingsskog", funFact:"Har alltid 7 kronblader – et uvanlig tall i planteverdenen.", rarity:"Vanlig", edible:false, season:"Mai–Juli" },
-    { name:"Ramsløk", latin:"Allium ursinum", category:"🌸 Blomst", description:"Hvite blomster med sterk løklukt. Spiselig og populær vårmat.", habitat:"Fuktige løvskoger, bekkesletter", funFact:"Løklukte forsvinner når blomstene tørker og lages til pesto.", rarity:"Vanlig", edible:true, season:"April–Mai" },
+    // Ramsløk flyttet til herbs
     { name:"Liljekonvall", latin:"Convallaria majalis", category:"🌸 Blomst", description:"Små hvite klokkeformede blomster. Deilig duft. ⚠️ Giftig hvis spist.", habitat:"Løvskoger, hager", funFact:"Brukes i many parfymer. Alle deler av planten er giftig.", rarity:"Vanlig", edible:false, season:"Mai–Juni" },
     { name:"Blåveis", latin:"Veronica chamaedrys", category:"🌸 Blomst", description:"Små lyseblå blomster med hvite striper. Prydelig kavet plante.", habitat:"Enger, gräsmark, veikanter", funFact:"Blomstene åpner seg bare på solskintimer.", rarity:"Svært vanlig", edible:false, season:"Mai–Juli" },
-    { name:"Hestehov", latin:"Tussilago farfara", category:"🌸 Blomst", description:"Gule blomster på nøt stengel. Kommer før bladene. Påkalles når snøen smeltier.", habitat:"Våte steder, bekker, rasmark", funFact:"Gamle navn 'hundehusten' fordi den ble brukt mot hoste.", rarity:"Vanlig", edible:false, season:"Mars–April" },
+    // Hestehov flyttet til herbs
     { name:"Marikåpe", latin:"Alchemilla mollis", category:"🌸 Blomst", description:"Tiny gule blomster i skyld klaser. Gulgrønn farge. Dekorativ.", habitat:"Fuktige enger, skoger, hager", funFact:"Bladene samler duggdråper som funkler i solen – magisk syn.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
     { name:"Gullris", latin:"Solidago virgaurea", category:"🌸 Blomst", description:"Høye gule blomsterknipper. Høstblomst. Lys og luftig.", habitat:"Skogkanter, heier, urteenger", funFact:"Gamle tre var tro på at gullris kunne avsløre metalldepoer.", rarity:"Vanlig", edible:false, season:"Juli–September" },
     { name:"Storkenebb", latin:"Geranium maculatum", category:"🌸 Blomst", description:"Vakre rosa-lilla blomster. Lange, spisse frøhus som ligner storkesnebb.", habitat:"Fukte enger, løvskoger, veikanter", funFact:"Frøhusene spretter og kaster frøene langt når de blir tørre.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
-    { name:"Fjellsyre", latin:"Rumex acetosa", category:"🌸 Blomst", description:"Små rødlige blomster. Sprø, syrlig smak. Norges mikro-grønnsak.", habitat:"Fjellsider, enger, dyrket mark", funFact:"En av de første grønnsakene etter vinteren. Høy i C-vitamin.", rarity:"Vanlig", edible:true, season:"Mai–Juni" },
+    // Fjellsyre flyttet til herbs
     { name:"Jåblom", latin:"Narthecium ossifragum", category:"🌸 Blomst", description:"Små gule blomster på slank stengel. Myrvekster.", habitat:"Våt myr, sumpskoger", funFact:"Inneholder giftstoff som svaknet dyrene – derav gammelt navn 'bendbane'.", rarity:"Vanlig", edible:false, season:"Juni–August" },
     { name:"Orkide (flekkmarihand)", latin:"Dactylorhiza maculata", category:"🌸 Blomst", description:"Vakker rosa-lilla orkide med mørke flekker på blomstene.", habitat:"Fuktige enger, myrer", funFact:"Norges hyppigste villorkide. Hver blomst pollineres av egen insekt-type.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
     { name:"Nyseryllik", latin:"Achillea ptarmica", category:"🌸 Blomst", description:"Små hvite blomster i korymb. Høstblomst. Aristokratisk.", habitat:"Fuktige enger, sumpskoger", funFact:"Navnet kommer av at blomsterstøvet framkalte nys hos folk.", rarity:"Vanlig", edible:false, season:"Juli–September" },
-    { name:"Mjødurt", latin:"Filipendula ulmaria", category:"🌸 Blomst", description:"Deilig duftende gule blomster. Blomstene lager mjød og te.", habitat:"Fuktige enger, bekkesletter, mosehogder", funFact:"Brukt i hundrevis av år til å smaker mjød - derav navnet.", rarity:"Vanlig", edible:true, season:"Juni–Juli" },
+    // Mjødurt flyttet til herbs
     { name:"Blåknapp", latin:"Centaurea cyanus", category:"🌸 Blomst", description:"Vakre kornblå blomster med fyrkantet form. En gang vanlig i kornåkrer.", habitat:"Åkrer, veikanter, sommerkulturer", funFact:"Blomsten var en gang truet av pesticider men er nå gjenstand for restaurering.", rarity:"Vanlig", edible:false, season:"Juni–August" },
     { name:"Engsoleie", latin:"Pulsatilla vulgaris", category:"🌸 Blomst", description:"Silkefin blomst i lilla-blå farge. Blant sjeldne villblomster i Norge.", habitat:"Tørre bakkesider, kalkrikt jord", funFact:"Hele planten er dekket av silkesoften på blomsten og frøene.", rarity:"Sjelden", edible:false, season:"April–Mai" },
     { name:"Engsmelle", latin:"Silene vulgaris", category:"🌸 Blomst", description:"Hvite blomster som ligner små ballonger. Bladene er blågrønne.", habitat:"Fuktige enger, veikanter", funFact:"De hvite blomstene åpner seg bare om kvelden og lukkes på dagen.", rarity:"Vanlig", edible:false, season:"Juni–August" },
@@ -420,20 +421,44 @@ const SPECIES_DB = {
     { name:"Geitrams", latin:"Geranium sylvaticum", category:"🌸 Blomst", description:"Vakre blåviolett blomster i klynger. Høy og delikat.", habitat:"Løvskoger, edelløvskog, bekkesletter", funFact:"Plantens stronke lukter sterkt når den blir knust.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
     { name:"Stemorsblomst", latin:"Viola tricolor", category:"🌸 Blomst", description:"Blomster i gult, blått og fiolett som kullører på et ansikt.", habitat:"Åkrer, veikanter, dyrket mark", funFact:"Blomsten ble dyrket som dekorativ pryd helt til moderkultivar Hornviol.", rarity:"Vanlig", edible:true, season:"Juni–September" },
     { name:"Harerug", latin:"Lagurus ovatus", category:"🌸 Blomst", description:"Søte hvite bomullsaktige blomsteraks. Dekorative og ørrete.", habitat:"Varme, tørre steder, sandmark", funFact:"Blomsterstanden likner en harefrykt – derav navnet.", rarity:"Uvanlig", edible:false, season:"Juni–August" },
-    { name:"Tepperot", latin:"Veronica officinalis", category:"🌸 Blomst", description:"Små lyseblå blomster i tettsittende stilk. Lav-vekst.", habitat:"Heier, tørre enger, steinmark", funFact:"Brukt tradisjonelt til urte-te som ble kalt 'te av tepperot'.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    // Tepperot flyttet til herbs
     { name:"Fjellpryd", latin:"Silene acaulis", category:"🌸 Blomst", description:"Liten og kompakt med små rosa blomster. Mossaktig vekstform.", habitat:"Høyfjellet, steinige områder, alpine turer", funFact:"En av Norges minste blomstende planter, kun 1-2 cm høy.", rarity:"Vanlig", edible:false, season:"Juli–August" },
     { name:"Reinrose", latin:"Dryas octopetala", category:"🌸 Blomst", description:"Hvite åttalobete blomster. Vedvarende fjell- og grunnvekst.", habitat:"Fjellsider, arktiske områder, kalkberg", funFact:"Fossile frø av reinrose finnes fra istiden og brukes til datering.", rarity:"Vanlig", edible:false, season:"Juni–Juli" },
     { name:"Musøre", latin:"Myosotis arvensis", category:"🌸 Blomst", description:"Mikroskopisk små lyseblå blomster som øyne.", habitat:"Åkrer, enger, veikanter", funFact:"Blomsten er europeisk symbol for 'Glem meg ikke'.", rarity:"Vanlig", edible:false, season:"Mai–Juli" },
     { name:"Fjelltjæreblom", latin:"Silene rupestris", category:"🌸 Blomst", description:"Små hvite blomster på fjellstein. Robust alpinplante.", habitat:"Bergvegger, steinmark, høyfjellet", funFact:"Blomsten er tilpasset ekstremalt tørre forhold og kort vekstsesong.", rarity:"Vanlig", edible:false, season:"Juli–August" },
     { name:"Marinøkkel", latin:"Herniaria glabra", category:"🌸 Blomst", description:"Mikroskopisk små grønnligul blomster. Kryplant.", habitat:"Sandig og gravigmark, tørre steder", funFact:"Planten brukes tradisjonelt som homøopatisk legemiddel.", rarity:"Uvanlig", edible:false, season:"Juni–September" },
-    { name:"Rødkløver", latin:"Trifolium pratense", category:"🌸 Blomst", description:"Røde kulerunde blomsterhodet. En av beflingsplantene i Norge.", habitat:"Enger, hager, kulturmark", funFact:"Kløveren gir honningen en rødlig farge og honningen er svært etterspurt.", rarity:"Svært vanlig", edible:true, season:"Juni–August" },
-    { name:"Hvitkløver", latin:"Trifolium repens", category:"🌸 Blomst", description:"Hvite blomsterhodet som blir rosa. Krylant i plenene.", habitat:"Enger, hager, veikanter, plener", funFact:"En av de viktigste beiteplantene og honningplantene i Norge.", rarity:"Svært vanlig", edible:true, season:"Juni–September" },
+    // Rødkløver og Hvitkløver flyttet til herbs
     { name:"Smørbukk", latin:"Ranunculus acris", category:"🌸 Blomst", description:"Glinsende gule blomster som smørfarge. Høye stilker.", habitat:"Fuktige og tørre enger, beitemarker", funFact:"Alle Ranunculus-arter har blank blomsterfarge av en spesiell vokslak.", rarity:"Vanlig", edible:false, season:"Juni–August" },
     { name:"Kvitsoleie", latin:"Anemone ranunculoides", category:"🌸 Blomst", description:"Små hvite blomster på fine stilker. Tidlig vårblomst.", habitat:"Løvskoger, hager, bekkesletter", funFact:"Blomsten åpner seg kun i sollys og lukkes igjen når det blir skyet.", rarity:"Vanlig", edible:false, season:"April–Mai" },
     { name:"Solblom", latin:"Arnica montana", category:"🌸 Blomst", description:"Gule blomster med praktfullt utseende. Bergvekst fra fjellene.", habitat:"Fjellsider, alpine enger, kalkriktjord", funFact:"Brukes i naturmedisin og kremer for skader – 'King of Bruise Remedy'.", rarity:"Uvanlig", edible:false, season:"Juni–August" },
     { name:"Mogop", latin:"Papaver rhoeas", category:"🌸 Blomst", description:"Deilig røde blomster med svarte dotteprikker. Flyktig skjønnhet.", habitat:"Åkrer, kornmark, veikanter", funFact:"Blomsten blir brukt til å dekorere kaker, honning og andre retter.", rarity:"Vanlig", edible:true, season:"Juni–August" },
     { name:"Fjellvalmue", latin:"Papaver radicatum", category:"🌸 Blomst", description:"Små gule blomster på arktiske marker. Alpinvalmue.", habitat:"Høyfjellet, arktiske områder, steinmark", funFact:"Frøene kan ligge i jorda i over 100 år før de spirer.", rarity:"Vanlig", edible:false, season:"Juli–August" },
     { name:"Issoleie", latin:"Anemone hepatica", category:"🌸 Blomst", description:"Vakre blå-lilla blomster på fine stilker. Vintervakner tidlig.", habitat:"Løvskoger, edelløvskog, steinkanter", funFact:"Bladene ligger på planten hele vinteren og blir grønn til våren.", rarity:"Vanlig", edible:false, season:"Mars–April" },
+  ],
+  herbs: [
+    // Flyttet fra Blomster
+    { name:"Ramsløk", latin:"Allium ursinum", category:"🌿 Urte", description:"Hvite blomster med sterk løklukt. Norges mest populære ville urte. Hele planten er spiselig.", habitat:"Fuktige løvskoger, bekkesletter", funFact:"Løklukten forsvinner når blomstene tørker. Fantastisk som pesto!", rarity:"Vanlig", edible:true, season:"April–Mai" },
+    { name:"Fjellsyre", latin:"Rumex acetosa", category:"🌿 Urte", description:"Sprø, syrlig smak. Norges ville sitron. Høy i C-vitamin.", habitat:"Fjellsider, enger, dyrket mark", funFact:"En av de første spiselige plantene etter vinteren.", rarity:"Vanlig", edible:true, season:"Mai–Juni" },
+    { name:"Mjødurt", latin:"Filipendula ulmaria", category:"🌿 Urte", description:"Deilig duftende blomster. Brukes til mjød, te og sirup.", habitat:"Fuktige enger, bekkesletter", funFact:"Brukt i hundrevis av år til å smaksette mjød – derav navnet.", rarity:"Vanlig", edible:true, season:"Juni–Juli" },
+    { name:"Tepperot", latin:"Veronica officinalis", category:"🌿 Urte", description:"Små lyseblå blomster. Tradisjonell urtete-plante.", habitat:"Heier, tørre enger, steinmark", funFact:"Brukt tradisjonelt til urte-te som ble kalt 'te av tepperot'.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Rødkløver", latin:"Trifolium pratense", category:"🌿 Urte", description:"Røde kulerunde blomsterhoder. Blomstene brukes til te og salat.", habitat:"Enger, hager, kulturmark", funFact:"Kløverhonning er svært etterspurt og har en rødlig farge.", rarity:"Svært vanlig", edible:true, season:"Juni–August" },
+    { name:"Hvitkløver", latin:"Trifolium repens", category:"🌿 Urte", description:"Hvite blomsterhoder. Blomster og blader er spiselige i salat.", habitat:"Enger, hager, veikanter, plener", funFact:"En av de viktigste beiteplantene og honningplantene i Norge.", rarity:"Svært vanlig", edible:true, season:"Juni–September" },
+    // Nye urter
+    { name:"Brennesle", latin:"Urtica dioica", category:"🌿 Urte", description:"Brenner ved berøring, men er en fantastisk matplante. Rik på jern og vitaminer.", habitat:"Skogkanter, hager, veikanter, komposthauger", funFact:"Brennesle inneholder mer jern enn spinat og har vært brukt som mat i tusenvis av år.", rarity:"Svært vanlig", edible:true, season:"April–Juni" },
+    { name:"Geitrams", latin:"Chamerion angustifolium", category:"🌿 Urte", description:"Høy plante med rosa-lilla blomster. Unge skudd er spiselige som asparges.", habitat:"Hogstflater, brannflater, veikanter", funFact:"Kalles 'fireweed' på engelsk fordi den er først til å vokse etter skogbrann.", rarity:"Svært vanlig", edible:true, season:"Juni–August" },
+    { name:"Skvallerkål", latin:"Aegopodium podagraria", category:"🌿 Urte", description:"Hageplage for mange, men faktisk en utmerket grønnsak! Smaker som persille og spinat.", habitat:"Hager, parker, løvskoger", funFact:"Ble dyrket som grønnsak av munkene i middelalderen. Smaker best om våren.", rarity:"Svært vanlig", edible:true, season:"April–Juni" },
+    { name:"Løvetann", latin:"Taraxacum officinale", category:"🌿 Urte", description:"Hele planten er spiselig: blader i salat, blomster til sirup, røtter til kaffe.", habitat:"Plener, enger, veikanter – overalt!", funFact:"Løvetannrot kan tørkes og ristes som kaffeerstatning. Brukt under krigen.", rarity:"Svært vanlig", edible:true, season:"Mars–Oktober" },
+    { name:"Karve", latin:"Carum carvi", category:"🌿 Urte", description:"Aromatisk krydderplante. Frøene brukes i brød, ost og akevitt.", habitat:"Enger, veikanter, kulturmark", funFact:"Karve er hovedsmaken i norsk akevitt og tradisjonelt flatbrød.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Kvann", latin:"Angelica archangelica", category:"🌿 Urte", description:"Stor, kraftig urte. Stilkene er spiselige og aromatiske. Norges viktigste ville krydderurt historisk.", habitat:"Fuktige enger, bekkesletter, fjellsider", funFact:"Vikingene dyrket kvann og handlet med den. Stilken kan kandiseres.", rarity:"Vanlig", edible:true, season:"Mai–Juli" },
+    { name:"Hundekjeks", latin:"Anthriscus sylvestris", category:"🌿 Urte", description:"Vanlig skjermplante med hvite blomster. ⚠️ Forveksles lett med giftige arter!", habitat:"Veikanter, hager, skogkanter", funFact:"Unge blader er spiselige, men IKKE plukk uten sikker identifisering – giftig selsnepe ligner!", rarity:"Svært vanlig", edible:true, season:"Mai–Juni" },
+    { name:"Sibirløk", latin:"Allium schoenoprasum", category:"🌿 Urte", description:"Vill gressløk med rosa-lilla blomster. Mildere smak enn hagegressløk.", habitat:"Fjellenger, fuktige bergskrenter", funFact:"Norges ville gressløk! Finnes i hele landet, spesielt i fjellområder.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Mynte (villmynte)", latin:"Mentha arvensis", category:"🌿 Urte", description:"Aromatisk urte med frisk mintsmak. Brukes til te og krydder.", habitat:"Fuktige enger, bekkesletter, grøftekanter", funFact:"Villmynta er forløperen til alle dyrka myntesorter vi kjenner.", rarity:"Vanlig", edible:true, season:"Juni–September" },
+    { name:"Timian (villtimian)", latin:"Thymus serpyllum", category:"🌿 Urte", description:"Krypende urte med sterk, aromatisk duft. Fantastisk krydderplante.", habitat:"Tørre heier, sandmark, kalkfjell", funFact:"Biene elsker villtimian – timianhonning er en eksklusiv delikatesse.", rarity:"Vanlig", edible:true, season:"Juni–August" },
+    { name:"Oregano (kung)", latin:"Origanum vulgare", category:"🌿 Urte", description:"Vill oregano med rosa blomster. Sterk, aromatisk smak.", habitat:"Tørre, kalkrike bakker, Sør-Norge", funFact:"Vill norsk oregano er sterkere i smak enn den du kjøper i butikken!", rarity:"Uvanlig", edible:true, season:"Juli–August" },
+    { name:"Hestehov", latin:"Tussilago farfara", category:"🌿 Urte", description:"Gule blomster tidlig vår, før bladene kommer. Brukt mot hoste i uminnelige tider.", habitat:"Veikanter, bekker, rasmark", funFact:"En av de aller første vårplantene. Bladene brukes til te mot hoste.", rarity:"Vanlig", edible:true, season:"Mars–April" },
+    { name:"Engsyre", latin:"Rumex acetosa", category:"🌿 Urte", description:"Syrlig, frisk smak. Perfekt i salater og supper. Ligner fjellsyre men større.", habitat:"Enger, beiter, grøftekanter", funFact:"Var en viktig C-vitaminkilde for sjøfolk mot skjørbuk.", rarity:"Vanlig", edible:true, season:"Mai–August" },
+    { name:"Grasstjerne (ryllik)", latin:"Achillea millefolium", category:"🌿 Urte", description:"Hvite eller rosa blomsterskjermer. Tusenårig medisinplante og te-urte.", habitat:"Enger, veikanter, tørre steder", funFact:"Oppkalt etter Akilles som ifølge myten brukte den til sårbehandling.", rarity:"Svært vanlig", edible:true, season:"Juni–September" },
+    { name:"Nesle (døvnesle)", latin:"Lamium album", category:"🌿 Urte", description:"Ligner brennesle men brenner IKKE. Hvite blomster. Blader spiselige som spinat.", habitat:"Hager, veikanter, skogkanter", funFact:"Kalles 'døvnesle' fordi den er 'døv' – den brenner ikke som brennesle.", rarity:"Vanlig", edible:true, season:"April–September" },
   ],
   trees: [
     { name:"Bjørk", latin:"Betula pubescens", category:"🌳 Tre", description:"Norges vanligste treslag.", habitat:"Overalt i Norge", funFact:"Bjørkesevje ble tradisjonelt tappet om våren som helsedrikk.", rarity:"Svært vanlig", edible:false, season:"Hele året" },
@@ -815,7 +840,7 @@ const SPECIES_DB = {
     { name:"Mågespor", latin:"Larus argentatus", category:"🐾 Spor", description:"Tretallig webbed spor (5-6 cm) i sand eller mud. Gjerne i grupper.", habitat:"Strender, sandbanker, kystklipper", funFact:"Måke spor viser ofte i grupper når de samles for å gyte.", rarity:"Vanlig", edible:false, season:"Hele året" },
   ]
 };
-const CAT_NAMES = { flowers:"Blomster", trees:"Trær", berries:"Bær", mushrooms:"Sopp", marine:"Fisk", shellfish:"Skalldyr", shells:"Skjell", seaweed:"Tang & Tare", other:"Havliv", birds:"Fugler", animals:"Dyr", insects:"Insekter", tracks:"Dyrespor & Avføring" };
+const CAT_NAMES = { flowers:"Blomster", herbs:"Urter", trees:"Trær", berries:"Bær", mushrooms:"Sopp", marine:"Fisk", shellfish:"Skalldyr", shells:"Skjell", seaweed:"Tang & Tare", other:"Havliv", birds:"Fugler", animals:"Dyr", insects:"Insekter", tracks:"Dyrespor & Avføring" };
 
 // ============================================================
 // SAFETY SYSTEM – Rød-liste for farlige arter
@@ -991,7 +1016,7 @@ For HVER art du identifiserer (maks 3), gi følgende i et JSON-array:
   {
     "name": "Norsk navn",
     "latin": "Latinsk artsnavn",
-    "category": "Bruk en av: 🌸 Blomst, 🌳 Tre, 🍇 Bær, 🍄 Sopp, 🐟 Fisk, 🦀 Skalldyr, 🐚 Skjell, 🌿 Tang/Tare, ⭐ Havliv, 🦭 Sjøpattedyr, 🦅 Fugl, 🦌 Dyr, 🌱 Plante, 🪨 Mose/Lav, 🐛 Insekt, 🐾 Spor",
+    "category": "Bruk en av: 🌸 Blomst, 🌿 Urte (spiselige ville urter/krydderplanter), 🌳 Tre, 🍇 Bær, 🍄 Sopp, 🐟 Fisk, 🦀 Skalldyr, 🐚 Skjell, 🌿 Tang/Tare, ⭐ Havliv, 🦭 Sjøpattedyr, 🦅 Fugl, 🦌 Dyr, 🌱 Plante, 🪨 Mose/Lav, 🐛 Insekt, 🐾 Spor",
     "confidence": 85,
     "description": "Kort beskrivelse på norsk (1-2 setninger)",
     "habitat": "Hvor den finnes i Norge",
@@ -1484,7 +1509,58 @@ const RECIPE_SUGGESTIONS = {
   ],
   "Brennesle": [
     { dish: "Brenneslesuppe", desc: "Plukk topper, fres med løk, tilsett buljong og fløte", difficulty: "🟢", time: "20 min" },
-    { dish: "Brennesle-te", desc: "Tørk og hell over kokende vann. Jernrik!", difficulty: "🟢", time: "10 min" }
+    { dish: "Brennesle-te", desc: "Tørk og hell over kokende vann. Jernrik!", difficulty: "🟢", time: "10 min" },
+    { dish: "Brennesle-pesto", desc: "Blend med parmesan, hvitløk, pinjekjerner og olivenolje", difficulty: "🟢", time: "10 min" }
+  ],
+  "Geitrams": [
+    { dish: "Geitrams-asparges", desc: "Unge skudd dampet som asparges med smør og sitron", difficulty: "🟢", time: "10 min" },
+    { dish: "Geitrams-te", desc: "Tørk bladene, bruk som Ivan-te (russisk tradisjon)", difficulty: "🟢", time: "10 min" }
+  ],
+  "Skvallerkål": [
+    { dish: "Skvallerkål-suppe", desc: "Fres med løk og potet, tilsett buljong. Kjør med stavmikser", difficulty: "🟢", time: "20 min" },
+    { dish: "Skvallerkål-pesto", desc: "Blend med parmesan, nøtter og olivenolje. Erstatter basilikum!", difficulty: "🟢", time: "10 min" },
+    { dish: "Stekt skvallerkål", desc: "Fres raskt i smør med hvitløk. Smaker som spinat møter persille", difficulty: "🟢", time: "5 min" }
+  ],
+  "Løvetann": [
+    { dish: "Løvetannsalat", desc: "Unge blader med chevre, valnøtter og honningdressing", difficulty: "🟢", time: "10 min" },
+    { dish: "Løvetannsirup", desc: "Kok blomster med sukker, sitron og vann. Smaker som honning!", difficulty: "🟢", time: "30 min" },
+    { dish: "Løvetannkaffe", desc: "Tørk og rist røttene. Mal og bruk som kaffeerstatning", difficulty: "🟡", time: "Tørking + 15 min" }
+  ],
+  "Karve": [
+    { dish: "Karvebrød", desc: "Tilsett karvefrø i brøddeig. Klassisk norsk tradisjon", difficulty: "🟡", time: "2 timer" },
+    { dish: "Karve-akevitt", desc: "Legg frø i vodka med litt sukker i 2-4 uker", difficulty: "🟢", time: "2-4 uker" }
+  ],
+  "Kvann": [
+    { dish: "Kandisert kvann", desc: "Kok stilker i sukkerlake. Tradisjonsrik norsk konfekt", difficulty: "🟡", time: "1 time" },
+    { dish: "Kvann-salat", desc: "Unge stilker i tynne skiver i salat. Frisk, aromatisk smak", difficulty: "🟢", time: "5 min" }
+  ],
+  "Sibirløk": [
+    { dish: "Som gressløk", desc: "Klipp fint over egg, potetsalat eller smørbrød", difficulty: "🟢", time: "2 min" },
+    { dish: "Gressløksmør", desc: "Bland finhakket sibirløk i mykt smør med salt", difficulty: "🟢", time: "5 min" }
+  ],
+  "Mynte (villmynte)": [
+    { dish: "Myntte", desc: "Ferske blader i kokende vann. Perfekt etter middag", difficulty: "🟢", time: "5 min" },
+    { dish: "Myntesaus", desc: "Finhakket mynte med eddik og sukker. Klassisk til lam", difficulty: "🟢", time: "10 min" }
+  ],
+  "Timian (villtimian)": [
+    { dish: "Timian-krydder", desc: "Tørk og bruk til kjøtt, fisk, saus og gryter", difficulty: "🟢", time: "Tørking" },
+    { dish: "Timian-honning", desc: "Legg villtimian i honning – trekker smak over uker", difficulty: "🟢", time: "2-4 uker" }
+  ],
+  "Oregano (kung)": [
+    { dish: "Pizza-krydder", desc: "Tørk og bruk på pizza, pasta og tomatsauser", difficulty: "🟢", time: "Tørking" }
+  ],
+  "Grasstjerne (ryllik)": [
+    { dish: "Ryllik-te", desc: "Tørk blomstene. Tradisjonell urtete for magen", difficulty: "🟢", time: "10 min" }
+  ],
+  "Nesle (døvnesle)": [
+    { dish: "Døvnesle som spinat", desc: "Kok eller fres bladene som spinat. Mild smak", difficulty: "🟢", time: "10 min" }
+  ],
+  "Engsyre": [
+    { dish: "Engsyre i salat", desc: "Friske blader gir syrlig kick til salater", difficulty: "🟢", time: "5 min" },
+    { dish: "Engsyresuppe", desc: "Fres med løk, tilsett buljong og fløte. Syrlig og deilig!", difficulty: "🟢", time: "20 min" }
+  ],
+  "Hestehov": [
+    { dish: "Hestehov-te", desc: "Tørk blomster og blader. Tradisjonell hostete", difficulty: "🟢", time: "10 min" }
   ],
 
   // 🌳 Trær med spiselige deler
