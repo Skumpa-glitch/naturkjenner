@@ -88,6 +88,55 @@ body::before {
 .export-btn { display: block; width: 100%; padding: 12px; margin-top: 12px; background: var(--forest); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: opacity 0.2s; }
 .export-btn:hover { opacity: 0.9; }
 
+/* Quiz / Learn */
+.quiz-hub { text-align: center; }
+.quiz-streak-bar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; padding: 10px; background: white; border-radius: 10px; border: 1px solid var(--sand); }
+.quiz-streak-fire { font-size: 22px; }
+.quiz-streak-num { font-size: 20px; font-weight: 800; color: var(--forest); }
+.quiz-streak-label { font-size: 12px; color: var(--ghost); }
+.quiz-stats-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.quiz-stat-box { flex: 1; background: white; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid var(--sand); }
+.quiz-stat-num { font-size: 20px; font-weight: 800; color: var(--forest); }
+.quiz-stat-label { font-size: 10px; color: var(--ghost); text-transform: uppercase; letter-spacing: 0.5px; }
+.quiz-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.quiz-mode-btn { background: white; border: 2px solid var(--sand); border-radius: 12px; padding: 16px 10px; cursor: pointer; transition: all 0.2s; text-align: center; }
+.quiz-mode-btn:hover, .quiz-mode-btn:active { border-color: var(--forest); transform: scale(0.98); }
+.quiz-mode-btn .qm-icon { font-size: 28px; margin-bottom: 6px; }
+.quiz-mode-btn .qm-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+.quiz-mode-btn .qm-desc { font-size: 11px; color: var(--ghost); margin-top: 2px; }
+.quiz-card { background: white; border-radius: 14px; padding: 0; overflow: hidden; border: 1px solid var(--sand); margin-bottom: 12px; }
+.quiz-card-header { padding: 14px 16px 8px; display: flex; justify-content: space-between; align-items: center; }
+.quiz-q-num { font-size: 11px; color: var(--ghost); font-weight: 600; }
+.quiz-q-cat { font-size: 11px; color: var(--forest); font-weight: 600; background: #e8efe8; padding: 2px 8px; border-radius: 6px; }
+.quiz-q-body { padding: 0 16px 16px; }
+.quiz-q-text { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 14px; line-height: 1.4; }
+.quiz-q-hint { font-size: 12px; color: var(--ghost); font-style: italic; margin-bottom: 10px; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt { padding: 12px 14px; border: 2px solid var(--sand); border-radius: 10px; background: white; cursor: pointer; font-size: 14px; color: var(--ink); font-weight: 500; transition: all 0.15s; text-align: left; font-family: 'Outfit', sans-serif; }
+.quiz-opt:hover { border-color: var(--forest); background: #f0f7e8; }
+.quiz-opt.correct { border-color: #2d5016; background: #e0f0d0; color: #2d5016; font-weight: 700; }
+.quiz-opt.wrong { border-color: #a03030; background: #fde8e8; color: #a03030; }
+.quiz-opt.disabled { pointer-events: none; opacity: 0.6; }
+.quiz-opt.disabled.correct { opacity: 1; }
+.quiz-feedback { margin-top: 12px; padding: 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
+.quiz-feedback.correct { background: #e8f5e0; color: #1a4d1a; }
+.quiz-feedback.wrong { background: #fef0e8; color: #6b3a1a; }
+.quiz-next-btn { display: block; width: 100%; padding: 14px; margin-top: 12px; background: var(--forest); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; }
+.quiz-next-btn:hover { opacity: 0.9; }
+.quiz-progress { display: flex; gap: 4px; margin-bottom: 12px; }
+.quiz-dot { flex: 1; height: 4px; border-radius: 2px; background: var(--sand); }
+.quiz-dot.done { background: var(--forest); }
+.quiz-dot.wrong-dot { background: #d06060; }
+.quiz-dot.current { background: var(--gold); }
+.quiz-result { text-align: center; padding: 20px 0; }
+.quiz-result-emoji { font-size: 48px; margin-bottom: 8px; }
+.quiz-result-score { font-size: 32px; font-weight: 800; color: var(--forest); }
+.quiz-result-label { font-size: 14px; color: var(--ghost); margin-bottom: 16px; }
+.quiz-badge { display: inline-block; background: linear-gradient(135deg, #f0d060, #e0a020); color: #5a3e00; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin: 4px; }
+.quiz-category-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; justify-content: center; }
+.quiz-cat-chip { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--sand); background: white; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.quiz-cat-chip.active { border-color: var(--forest); background: var(--forest); color: white; }
+
 /* Pin form modal */
 .pin-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .pin-modal.show { opacity: 1; pointer-events: all; }
@@ -277,6 +326,7 @@ body::before {
 
 <div class="nav-tabs">
   <button class="nav-tab active" id="navHome" onclick="showHome()">🏠 Hjem</button>
+  <button class="nav-tab" id="navLearn" onclick="showLearn()">🧠 Lær</button>
   <button class="nav-tab" id="navMap" onclick="showMap()">🗺️ Kart</button>
   <button class="nav-tab" id="navCollection" onclick="showCollection()">📋 Samling</button>
 </div>
@@ -332,6 +382,7 @@ body::before {
     <button class="export-btn" id="exportBtn" onclick="exportReport()" style="display:none">📋 Eksporter rapport</button>
   </div>
   <div id="collectionView" class="hidden"></div>
+  <div id="learnView" class="hidden"></div>
 </div>
 
 <!-- Pin form modal -->
@@ -1365,9 +1416,11 @@ function showHome() {
   document.getElementById('browseView').classList.add('hidden');
   document.getElementById('collectionView').classList.add('hidden');
   document.getElementById('mapView').classList.add('hidden');
+  document.getElementById('learnView').classList.add('hidden');
   document.getElementById('resultsArea').innerHTML = '';
   document.getElementById('exploreArea').classList.remove('hidden');
   document.getElementById('navHome').classList.add('active');
+  document.getElementById('navLearn').classList.remove('active');
   document.getElementById('navMap').classList.remove('active');
   document.getElementById('navCollection').classList.remove('active');
   // Reset database search
@@ -1385,6 +1438,7 @@ function browseCategory(key) {
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('collectionView').classList.add('hidden');
   document.getElementById('mapView').classList.add('hidden');
+  document.getElementById('learnView').classList.add('hidden');
   const bv = document.getElementById('browseView');
   bv.classList.remove('hidden');
   const species = SPECIES_DB[key] || [];
@@ -2976,10 +3030,12 @@ function showCollection() {
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('browseView').classList.add('hidden');
   document.getElementById('mapView').classList.add('hidden');
+  document.getElementById('learnView').classList.add('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   const cv = document.getElementById('collectionView');
   cv.classList.remove('hidden');
   document.getElementById('navHome').classList.remove('active');
+  document.getElementById('navLearn').classList.remove('active');
   document.getElementById('navMap').classList.remove('active');
   document.getElementById('navCollection').classList.add('active');
 
@@ -3657,8 +3713,10 @@ function showMap() {
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('browseView').classList.add('hidden');
   document.getElementById('collectionView').classList.add('hidden');
+  document.getElementById('learnView').classList.add('hidden');
   document.getElementById('mapView').classList.remove('hidden');
   document.getElementById('navHome').classList.remove('active');
+  document.getElementById('navLearn').classList.remove('active');
   document.getElementById('navMap').classList.add('active');
   document.getElementById('navCollection').classList.remove('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3670,6 +3728,350 @@ function showMap() {
     renderMapPins();
   }, 100);
 }
+
+// ============================================================
+// LEARN / QUIZ SYSTEM
+// ============================================================
+let quizState = null;
+let quizStats = JSON.parse(localStorage.getItem('nk_quiz_stats') || '{"total":0,"correct":0,"streak":0,"bestStreak":0,"badges":[]}');
+
+function saveQuizStats() {
+  localStorage.setItem('nk_quiz_stats', JSON.stringify(quizStats));
+}
+
+function getAllSpeciesFlat() {
+  const all = [];
+  Object.entries(SPECIES_DB).forEach(([catKey, species]) => {
+    species.forEach(s => all.push({ ...s, catKey }));
+  });
+  return all;
+}
+
+function getQuizCategories() {
+  return [
+    { id: 'all', label: 'Alle' },
+    { id: 'flowers', label: '🌸 Blomster' },
+    { id: 'herbs', label: '🪴 Urter' },
+    { id: 'trees', label: '🌳 Trær' },
+    { id: 'berries', label: '🍇 Bær' },
+    { id: 'mushrooms', label: '🍄 Sopp' },
+    { id: 'birds', label: '🦅 Fugler' },
+    { id: 'animals', label: '🦌 Dyr' },
+    { id: 'marine', label: '🐟 Fisk' },
+    { id: 'shellfish', label: '🦀 Skalldyr' },
+    { id: 'shells', label: '🐚 Skjell' },
+    { id: 'seaweed', label: '🌿 Tang' },
+  ];
+}
+
+let quizCatFilter = 'all';
+
+function showLearn() {
+  currentView = 'learn';
+  document.getElementById('homeView').classList.add('hidden');
+  document.getElementById('browseView').classList.add('hidden');
+  document.getElementById('collectionView').classList.add('hidden');
+  document.getElementById('mapView').classList.add('hidden');
+  document.getElementById('learnView').classList.remove('hidden');
+  document.getElementById('navHome').classList.remove('active');
+  document.getElementById('navLearn').classList.add('active');
+  document.getElementById('navMap').classList.remove('active');
+  document.getElementById('navCollection').classList.remove('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (quizState && quizState.active) {
+    renderQuizQuestion();
+  } else {
+    renderLearnHub();
+  }
+}
+
+function renderLearnHub() {
+  const lv = document.getElementById('learnView');
+  const pct = quizStats.total > 0 ? Math.round(quizStats.correct / quizStats.total * 100) : 0;
+  const badgeHtml = quizStats.badges.length > 0
+    ? quizStats.badges.map(b => '<span class="quiz-badge">' + b + '</span>').join('')
+    : '<span style="font-size:12px;color:var(--ghost)">Fullfør quizer for å låse opp badges!</span>';
+
+  const catChips = getQuizCategories().map(c =>
+    '<button class="quiz-cat-chip ' + (quizCatFilter === c.id ? 'active' : '') + '" onclick="quizCatFilter=\'' + c.id + '\';renderLearnHub()">' + c.label + '</button>'
+  ).join('');
+
+  lv.innerHTML =
+    '<div class="section-title" style="margin-bottom:12px">🧠 Lær norsk natur</div>' +
+    '<div class="quiz-streak-bar">' +
+      '<span class="quiz-streak-fire">🔥</span>' +
+      '<span class="quiz-streak-num">' + quizStats.streak + '</span>' +
+      '<span class="quiz-streak-label">streak</span>' +
+      '<span style="margin-left:auto;font-size:12px;color:var(--ghost)">Beste: ' + quizStats.bestStreak + '</span>' +
+    '</div>' +
+    '<div class="quiz-stats-row">' +
+      '<div class="quiz-stat-box"><div class="quiz-stat-num">' + quizStats.total + '</div><div class="quiz-stat-label">Spørsmål</div></div>' +
+      '<div class="quiz-stat-box"><div class="quiz-stat-num">' + pct + '%</div><div class="quiz-stat-label">Riktig</div></div>' +
+      '<div class="quiz-stat-box"><div class="quiz-stat-num">' + quizStats.badges.length + '</div><div class="quiz-stat-label">Badges</div></div>' +
+    '</div>' +
+    '<div style="font-size:12px;font-weight:600;color:var(--ghost);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Velg kategori</div>' +
+    '<div class="quiz-category-picker">' + catChips + '</div>' +
+    '<div style="font-size:12px;font-weight:600;color:var(--ghost);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Velg modus</div>' +
+    '<div class="quiz-modes">' +
+      '<button class="quiz-mode-btn" onclick="startQuiz(\'name\')">' +
+        '<div class="qm-icon">🃏</div><div class="qm-title">Gjett arten</div>' +
+        '<div class="qm-desc">Les beskrivelsen, gjett riktig art</div>' +
+      '</button>' +
+      '<button class="quiz-mode-btn" onclick="startQuiz(\'habitat\')">' +
+        '<div class="qm-icon">🏔️</div><div class="qm-title">Habitat-quiz</div>' +
+        '<div class="qm-desc">Hvor lever denne arten?</div>' +
+      '</button>' +
+      '<button class="quiz-mode-btn" onclick="startQuiz(\'edible\')">' +
+        '<div class="qm-icon">🍽️</div><div class="qm-title">Spiselig?</div>' +
+        '<div class="qm-desc">Er denne arten spiselig eller ikke?</div>' +
+      '</button>' +
+      '<button class="quiz-mode-btn" onclick="startQuiz(\'latin\')">' +
+        '<div class="qm-icon">📖</div><div class="qm-title">Latinsk navn</div>' +
+        '<div class="qm-desc">Koble norsk navn til latinsk</div>' +
+      '</button>' +
+    '</div>' +
+    '<div style="margin-top:8px;text-align:center">' + badgeHtml + '</div>';
+}
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(mode) {
+  const allSpecies = getAllSpeciesFlat();
+  let pool = quizCatFilter === 'all' ? allSpecies : allSpecies.filter(s => s.catKey === quizCatFilter);
+  if (pool.length < 4) pool = allSpecies; // fallback if too few
+
+  const questions = [];
+  const shuffled = shuffleArray(pool);
+  const count = Math.min(10, shuffled.length);
+
+  for (let i = 0; i < count; i++) {
+    const correct = shuffled[i];
+    let wrongPool = pool.filter(s => s.name !== correct.name);
+    if (wrongPool.length < 3) wrongPool = allSpecies.filter(s => s.name !== correct.name);
+    const wrongs = shuffleArray(wrongPool).slice(0, 3);
+
+    let q = {};
+    if (mode === 'name') {
+      q = {
+        text: '«' + correct.description.split('.')[0] + '.»',
+        hint: correct.category,
+        question: 'Hvilken art er dette?',
+        options: shuffleArray([correct.name, ...wrongs.map(w => w.name)]),
+        answer: correct.name,
+        feedback: correct.funFact || correct.habitat
+      };
+    } else if (mode === 'habitat') {
+      q = {
+        text: correct.name,
+        hint: correct.category,
+        question: 'Hvor finner du denne arten?',
+        options: shuffleArray([correct.habitat, ...wrongs.map(w => w.habitat)]),
+        answer: correct.habitat,
+        feedback: correct.description.split('.')[0]
+      };
+    } else if (mode === 'edible') {
+      q = {
+        text: correct.name + (correct.latin ? ' (' + correct.latin + ')' : ''),
+        hint: correct.category,
+        question: 'Er denne arten spiselig?',
+        options: ['Ja, spiselig', 'Nei, ikke spiselig'],
+        answer: correct.edible ? 'Ja, spiselig' : 'Nei, ikke spiselig',
+        feedback: correct.edible
+          ? '✅ Riktig! ' + correct.name + ' er spiselig. ' + (correct.funFact || '')
+          : '❌ ' + correct.name + ' er ikke spiselig. ' + (correct.funFact || '')
+      };
+    } else if (mode === 'latin') {
+      q = {
+        text: correct.name,
+        hint: correct.category,
+        question: 'Hva er det latinske navnet?',
+        options: shuffleArray([correct.latin, ...wrongs.map(w => w.latin)].filter(Boolean)),
+        answer: correct.latin,
+        feedback: correct.description.split('.')[0]
+      };
+    }
+    q.species = correct;
+    questions.push(q);
+  }
+
+  quizState = {
+    active: true,
+    mode,
+    questions,
+    current: 0,
+    score: 0,
+    answers: [],
+  };
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const lv = document.getElementById('learnView');
+  const qs = quizState;
+  if (!qs || !qs.active) { renderLearnHub(); return; }
+
+  if (qs.current >= qs.questions.length) {
+    renderQuizResults();
+    return;
+  }
+
+  const q = qs.questions[qs.current];
+  const dots = qs.questions.map((_, i) => {
+    let cls = 'quiz-dot';
+    if (i < qs.current) cls += qs.answers[i] ? ' done' : ' wrong-dot';
+    else if (i === qs.current) cls += ' current';
+    return '<div class="' + cls + '"></div>';
+  }).join('');
+
+  const optionsHtml = q.options.map((opt, i) =>
+    '<button class="quiz-opt" id="qopt' + i + '" onclick="answerQuiz(' + i + ')">' + opt + '</button>'
+  ).join('');
+
+  lv.innerHTML =
+    '<div class="quiz-progress">' + dots + '</div>' +
+    '<div class="quiz-card">' +
+      '<div class="quiz-card-header">' +
+        '<span class="quiz-q-num">Spørsmål ' + (qs.current + 1) + ' / ' + qs.questions.length + '</span>' +
+        '<span class="quiz-q-cat">' + q.hint + '</span>' +
+      '</div>' +
+      '<div class="quiz-q-body">' +
+        '<div class="quiz-q-text">' + q.text + '</div>' +
+        '<div class="quiz-q-hint">' + q.question + '</div>' +
+        '<div class="quiz-options" id="quizOptions">' + optionsHtml + '</div>' +
+        '<div id="quizFeedback"></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function answerQuiz(idx) {
+  const qs = quizState;
+  const q = qs.questions[qs.current];
+  const selected = q.options[idx];
+  const isCorrect = selected === q.answer;
+
+  qs.answers.push(isCorrect);
+  if (isCorrect) qs.score++;
+
+  // Update stats
+  quizStats.total++;
+  if (isCorrect) {
+    quizStats.correct++;
+    quizStats.streak++;
+    if (quizStats.streak > quizStats.bestStreak) quizStats.bestStreak = quizStats.streak;
+  } else {
+    quizStats.streak = 0;
+  }
+  saveQuizStats();
+
+  // Disable all options and highlight
+  q.options.forEach((opt, i) => {
+    const btn = document.getElementById('qopt' + i);
+    if (!btn) return;
+    btn.classList.add('disabled');
+    if (opt === q.answer) btn.classList.add('correct');
+    if (i === idx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Show feedback
+  const fb = document.getElementById('quizFeedback');
+  fb.innerHTML =
+    '<div class="quiz-feedback ' + (isCorrect ? 'correct' : 'wrong') + '">' +
+      (isCorrect ? '✅ Riktig!' : '❌ Feil! Svaret var: <strong>' + q.answer + '</strong>') +
+      '<br><span style="font-size:12px">' + (q.feedback || '') + '</span>' +
+    '</div>' +
+    '<button class="quiz-next-btn" onclick="nextQuizQuestion()">' +
+      (qs.current + 1 < qs.questions.length ? 'Neste spørsmål →' : 'Se resultat →') +
+    '</button>';
+
+  // Update dots
+  const dots = document.querySelectorAll('.quiz-dot');
+  if (dots[qs.current]) {
+    dots[qs.current].classList.remove('current');
+    dots[qs.current].classList.add(isCorrect ? 'done' : 'wrong-dot');
+  }
+}
+
+function nextQuizQuestion() {
+  quizState.current++;
+  renderQuizQuestion();
+}
+
+function renderQuizResults() {
+  const qs = quizState;
+  const lv = document.getElementById('learnView');
+  const pct = Math.round(qs.score / qs.questions.length * 100);
+
+  let emoji = '😐';
+  let msg = 'Ikke verst!';
+  if (pct >= 90) { emoji = '🏆'; msg = 'Fantastisk! Du er en naturekspert!'; }
+  else if (pct >= 70) { emoji = '🌟'; msg = 'Veldig bra! Du kan mye!'; }
+  else if (pct >= 50) { emoji = '👍'; msg = 'Bra jobba! Øvelse gjør mester.'; }
+  else { emoji = '💪'; msg = 'Ikke gi opp! Prøv igjen.'; }
+
+  // Check for new badges
+  const newBadges = [];
+  if (pct === 100 && !quizStats.badges.includes('🏆 Perfekt score')) {
+    quizStats.badges.push('🏆 Perfekt score');
+    newBadges.push('🏆 Perfekt score');
+  }
+  if (quizStats.total >= 50 && !quizStats.badges.includes('📚 50 spørsmål')) {
+    quizStats.badges.push('📚 50 spørsmål');
+    newBadges.push('📚 50 spørsmål');
+  }
+  if (quizStats.total >= 100 && !quizStats.badges.includes('🎓 100 spørsmål')) {
+    quizStats.badges.push('🎓 100 spørsmål');
+    newBadges.push('🎓 100 spørsmål');
+  }
+  if (quizStats.bestStreak >= 10 && !quizStats.badges.includes('🔥 10-streak')) {
+    quizStats.badges.push('🔥 10-streak');
+    newBadges.push('🔥 10-streak');
+  }
+  if (quizStats.bestStreak >= 25 && !quizStats.badges.includes('⚡ 25-streak')) {
+    quizStats.badges.push('⚡ 25-streak');
+    newBadges.push('⚡ 25-streak');
+  }
+  if (qs.mode === 'edible' && pct >= 80 && !quizStats.badges.includes('🍄 Sankemester')) {
+    quizStats.badges.push('🍄 Sankemester');
+    newBadges.push('🍄 Sankemester');
+  }
+  if (qs.mode === 'latin' && pct >= 80 && !quizStats.badges.includes('📖 Latinkjenner')) {
+    quizStats.badges.push('📖 Latinkjenner');
+    newBadges.push('📖 Latinkjenner');
+  }
+  saveQuizStats();
+
+  const badgeUnlock = newBadges.length > 0
+    ? '<div style="margin:12px 0"><div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px">🎉 Ny badge låst opp!</div>' +
+      newBadges.map(b => '<span class="quiz-badge">' + b + '</span>').join('') + '</div>'
+    : '';
+
+  const dots = qs.questions.map((_, i) => {
+    return '<div class="quiz-dot ' + (qs.answers[i] ? 'done' : 'wrong-dot') + '"></div>';
+  }).join('');
+
+  lv.innerHTML =
+    '<div class="quiz-progress">' + dots + '</div>' +
+    '<div class="quiz-card">' +
+      '<div class="quiz-result">' +
+        '<div class="quiz-result-emoji">' + emoji + '</div>' +
+        '<div class="quiz-result-score">' + qs.score + ' / ' + qs.questions.length + '</div>' +
+        '<div class="quiz-result-label">' + msg + '</div>' +
+        badgeUnlock +
+        '<div style="font-size:13px;color:var(--ghost);margin-bottom:4px">🔥 Streak: ' + quizStats.streak + ' | Beste: ' + quizStats.bestStreak + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="quiz-next-btn" onclick="startQuiz(\'' + qs.mode + '\')">🔄 Spill igjen</button>' +
+    '<button class="quiz-next-btn" style="background:white;color:var(--forest);border:2px solid var(--forest);margin-top:8px" onclick="quizState=null;renderLearnHub()">← Tilbake til menyern</button>';
+}
+
 </script>
 </body>
 </html>
