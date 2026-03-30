@@ -163,6 +163,7 @@ body::before {
 .recipe-link:active { transform: scale(0.97); }
 .recipe-link:hover, .recipe-link:focus { box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-color: var(--forest); }
 .recipe-arrow { font-size: 12px; color: var(--forest); opacity: 0.5; margin-left: 4px; }
+.recipe-fallback-note { font-size: 12px; color: var(--ghost); margin-bottom: 8px; font-style: italic; }
 .recipe-name { font-size: 13px; font-weight: 600; color: var(--forest); margin-bottom: 2px; }
 .recipe-desc { font-size: 12px; color: var(--ghost); line-height: 1.4; }
 .recipe-meta { display: flex; gap: 8px; margin-top: 6px; }
@@ -1225,21 +1226,39 @@ function confidenceHTML(conf) {
 const speciesStore = {};
 
 function recipeHTML(species) {
+  if (!species.edible) return '';
   const recipes = RECIPE_SUGGESTIONS[species.name];
-  if (!recipes || !species.edible) return '';
+  if (recipes) {
+    return '<div class="recipe-section">' +
+      '<div class="recipe-header"><span>🍳</span> Matforslag</div>' +
+      recipes.map(r => {
+        const searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(r.dish + ' oppskrift');
+        return '<a href="' + searchUrl + '" target="_blank" rel="noopener" class="recipe-card recipe-link">' +
+          '<div class="recipe-name">' + r.dish + ' <span class="recipe-arrow">→</span></div>' +
+          '<div class="recipe-desc">' + r.desc + '</div>' +
+          '<div class="recipe-meta">' +
+            '<span class="recipe-tag">' + r.difficulty + ' ' + (r.difficulty === '🟢' ? 'Enkel' : 'Middels') + '</span>' +
+            '<span class="recipe-tag">⏱ ' + r.time + '</span>' +
+          '</div>' +
+        '</a>';
+      }).join('') +
+    '</div>';
+  }
+  // Fallback: spiselig art uten forhåndsdefinerte oppskrifter – vis søkelenker
+  const name = species.name;
+  const searches = [
+    { label: '🔍 Søk oppskrifter med ' + name, q: name + ' oppskrift' },
+    { label: '🍳 ' + name + ' middag', q: name + ' middag oppskrift' },
+    { label: '🥗 ' + name + ' tilberedning', q: 'hvordan tilberede ' + name }
+  ];
   return '<div class="recipe-section">' +
     '<div class="recipe-header"><span>🍳</span> Matforslag</div>' +
-    recipes.map(r => {
-      const searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(r.dish + ' oppskrift');
-      return '<a href="' + searchUrl + '" target="_blank" rel="noopener" class="recipe-card recipe-link">' +
-        '<div class="recipe-name">' + r.dish + ' <span class="recipe-arrow">→</span></div>' +
-        '<div class="recipe-desc">' + r.desc + '</div>' +
-        '<div class="recipe-meta">' +
-          '<span class="recipe-tag">' + r.difficulty + ' ' + (r.difficulty === '🟢' ? 'Enkel' : 'Middels') + '</span>' +
-          '<span class="recipe-tag">⏱ ' + r.time + '</span>' +
-        '</div>' +
-      '</a>';
-    }).join('') +
+    '<div class="recipe-fallback-note">Denne arten er spiselig! Vi har ikke egne oppskrifter ennå, men søk her:</div>' +
+    searches.map(s =>
+      '<a href="https://www.google.com/search?q=' + encodeURIComponent(s.q) + '" target="_blank" rel="noopener" class="recipe-card recipe-link">' +
+        '<div class="recipe-name">' + s.label + ' <span class="recipe-arrow">→</span></div>' +
+      '</a>'
+    ).join('') +
   '</div>';
 }
 
