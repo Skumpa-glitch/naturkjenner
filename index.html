@@ -3003,6 +3003,7 @@ function showCollection() {
       '<div class="collection-stat"><div class="collection-stat-num">' + totalSpecies + '</div><div class="collection-stat-label">Arter</div></div>' +
       '<div class="collection-stat"><div class="collection-stat-num">' + cats.length + '</div><div class="collection-stat-label">Kategorier</div></div>' +
     '</div>' +
+    '<button class="export-btn" onclick="exportCollectionReport()" style="margin-bottom:12px">📋 Eksporter feltrapport</button>' +
     '<input type="search" class="collection-search" placeholder="Søk i samlingen – f.eks. ekorn, kantarell..." value="' + (collectionSearch || '') + '" oninput="searchCollection(this.value)">' +
     '<div class="collection-filter">' +
       '<select id="catFilter" onchange="filterCollection(this.value)">' +
@@ -3461,7 +3462,119 @@ function editPin(pinId) {
   openPinModal({ lat: pin.lat, lng: pin.lng }, pin);
 }
 
-// Export report
+// Export collection report
+function exportCollectionReport() {
+  if (collection.length === 0) return;
+  const sorted = [...collection].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  const date = new Date().toLocaleDateString('nb-NO', { year:'numeric', month:'long', day:'numeric' });
+
+  // Gather stats
+  const totalSpecies = sorted.reduce((sum, evt) => sum + (evt.results ? evt.results.length : 1), 0);
+  const catCounts = {};
+  sorted.forEach(evt => {
+    (evt.categories || [evt.primaryCategory]).filter(Boolean).forEach(c => {
+      catCounts[c] = (catCounts[c] || 0) + 1;
+    });
+  });
+
+  const statsHtml = Object.entries(catCounts).map(([label, count]) =>
+    '<div class="stat-item"><span class="stat-num">' + count + '</span><span class="stat-label">' + label + '</span></div>'
+  ).join('');
+
+  // Build event cards
+  const eventCards = sorted.map((evt, i) => {
+    const results = evt.results || [];
+    const topResult = results[0];
+    const dateStr = evt.timestamp ? new Date(evt.timestamp).toLocaleDateString('nb-NO', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+    const catTags = (evt.categories || [evt.primaryCategory]).filter(Boolean);
+
+    let speciesDetails = results.map((r, j) => {
+      const confCls = (r.confidence || 0) >= 75 ? 'high' : (r.confidence || 0) >= 50 ? 'medium' : 'low';
+      const confColor = confCls === 'high' ? '#2d5016' : confCls === 'medium' ? '#b8860b' : '#8b4513';
+      return '<div class="species-row"' + (j > 0 ? ' style="border-top:1px solid #e8e0d8;padding-top:10px;margin-top:10px"' : '') + '>' +
+        '<div class="species-header">' +
+          '<div>' +
+            '<div class="species-name">' + (j === 0 ? '🏆 ' : '') + r.name + '</div>' +
+            (r.latin ? '<div class="species-latin">' + r.latin + '</div>' : '') +
+          '</div>' +
+          '<span class="conf-badge" style="background:' + confColor + '">' + (r.confidence || '?') + '%</span>' +
+        '</div>' +
+        (r.description ? '<p class="species-desc">' + r.description + '</p>' : '') +
+        '<div class="species-grid">' +
+          (r.habitat ? '<div class="grid-item"><span class="grid-label">📍 Habitat</span><span class="grid-val">' + r.habitat + '</span></div>' : '') +
+          (r.season ? '<div class="grid-item"><span class="grid-label">📅 Sesong</span><span class="grid-val">' + r.season + '</span></div>' : '') +
+          (r.rarity ? '<div class="grid-item"><span class="grid-label">🔍 Sjeldenhet</span><span class="grid-val">' + r.rarity + '</span></div>' : '') +
+          '<div class="grid-item"><span class="grid-label">' + (r.edible ? '✅' : '❌') + ' Spiselig</span><span class="grid-val">' + (r.edible ? 'Ja' : 'Nei') + '</span></div>' +
+        '</div>' +
+        (r.funFact ? '<div class="fun-fact">💡 ' + r.funFact + '</div>' : '') +
+      '</div>';
+    }).join('');
+
+    return '<div class="event-card">' +
+      (evt.image ? '<img src="' + evt.image + '" class="event-photo">' : '<div class="event-no-photo">📷</div>') +
+      '<div class="event-info">' +
+        '<div class="event-num">#' + (i + 1) + '</div>' +
+        '<div class="event-cats">' + catTags.map(c => '<span class="cat-tag">' + c + '</span>').join(' ') + '</div>' +
+        (dateStr ? '<div class="event-date">📅 ' + dateStr + '</div>' : '') +
+        speciesDetails +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  const html = '<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
+    '<title>Naturkjenner – Feltrapport</title><style>' +
+    '*{margin:0;padding:0;box-sizing:border-box}' +
+    'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f0eb;color:#2d3b2d;line-height:1.6}' +
+    '.container{max-width:800px;margin:0 auto;padding:20px}' +
+    '.header{background:#2d5016;color:#f5f0eb;padding:24px;border-radius:12px;margin-bottom:20px;text-align:center}' +
+    '.header h1{font-size:24px;margin-bottom:4px}' +
+    '.header .subtitle{font-size:13px;opacity:0.8}' +
+    '.stats{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}' +
+    '.stat-item{background:white;border-radius:10px;padding:12px 20px;text-align:center;min-width:80px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}' +
+    '.stat-num{display:block;font-size:24px;font-weight:800;color:#2d5016}' +
+    '.stat-label{font-size:11px;color:#6b7c6b}' +
+    '.event-card{background:white;border-radius:12px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}' +
+    '.event-photo{width:100%;max-height:300px;object-fit:cover}' +
+    '.event-no-photo{width:100%;height:100px;background:#e8efe8;display:flex;align-items:center;justify-content:center;font-size:40px}' +
+    '.event-info{padding:16px}' +
+    '.event-num{font-size:11px;color:#6b7c6b;font-weight:600;margin-bottom:4px}' +
+    '.event-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}' +
+    '.cat-tag{background:#e8efe8;color:#2d5016;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}' +
+    '.event-date{font-size:12px;color:#6b7c6b;margin-bottom:10px}' +
+    '.species-row{margin-bottom:6px}' +
+    '.species-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}' +
+    '.species-name{font-size:17px;font-weight:700;color:#2d5016}' +
+    '.species-latin{font-size:12px;color:#6b7c6b;font-style:italic}' +
+    '.conf-badge{color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px}' +
+    '.species-desc{font-size:12.5px;color:#4a4640;line-height:1.6;margin:6px 0}' +
+    '.species-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}' +
+    '.grid-item{background:#faf7f4;border-radius:8px;padding:8px}' +
+    '.grid-label{display:block;font-size:10px;color:#6b7c6b;font-weight:600;margin-bottom:2px}' +
+    '.grid-val{font-size:12px;color:#2d3b2d}' +
+    '.fun-fact{font-size:12px;color:#5a6a5a;background:#f0f7e8;padding:8px 10px;border-radius:8px;margin-top:6px;line-height:1.5}' +
+    '.footer{text-align:center;padding:24px;font-size:12px;color:#6b7c6b}' +
+    '@media print{body{background:white}.event-card{break-inside:avoid;box-shadow:none;border:1px solid #ddd}.header{-webkit-print-color-adjust:exact;print-color-adjust:exact}}' +
+    '</style></head><body>' +
+    '<div class="container">' +
+      '<div class="header">' +
+        '<h1>🌿 Naturkjenner – Feltrapport</h1>' +
+        '<div class="subtitle">' + date + ' · ' + sorted.length + ' hendelser · ' + totalSpecies + ' arter</div>' +
+      '</div>' +
+      '<div class="stats">' +
+        '<div class="stat-item"><span class="stat-num">' + sorted.length + '</span><span class="stat-label">Hendelser</span></div>' +
+        '<div class="stat-item"><span class="stat-num">' + totalSpecies + '</span><span class="stat-label">Arter</span></div>' +
+        statsHtml +
+      '</div>' +
+      eventCards +
+      '<div class="footer">Generert med Naturkjenner 🌿 · skumpa-glitch.github.io/naturkjenner</div>' +
+    '</div></body></html>';
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+}
+
+// Export map pins report
 function exportReport() {
   if (mapPins.length === 0) return;
   const sorted = [...mapPins].sort((a, b) => a.created - b.created);
