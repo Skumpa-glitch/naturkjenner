@@ -1846,6 +1846,364 @@ const RECIPE_SUGGESTIONS = {
     { dish: "Marinert sild", desc: "Skaldelikt i essigsalte med løk og krydder", difficulty: "🟡", time: "24 timer" },
     { dish: "Røkt sild", desc: "Røk over bjørkeved til gyllen farge", difficulty: "🟡", time: "1 time" },
     { dish: "Sildgryte", desc: "Fløtegryte med sild, løk og poteter", difficulty: "🟡", time: "30 min" }
+  ],
+
+  // 🦀 Skalldyr
+  "Taskekrabbe": [
+    { dish: "Kokt krabbe", desc: "Kok hel i saltvann 15-20 min. Norges nasjonalrett fra sjøen!", difficulty: "🟢", time: "20 min" },
+    { dish: "Krabbeklør med aioli", desc: "Knekk klør, server med hjemmelaget hvitløksaioli og brød", difficulty: "🟢", time: "10 min" },
+    { dish: "Krabbesalat", desc: "Plukk kjøtt, bland med majones, dill og sitron på toast", difficulty: "🟢", time: "20 min" },
+    { dish: "Krabbegratin", desc: "Bland krabbesmør med fløte og ost, gratiner i skallet", difficulty: "🟡", time: "30 min" },
+    { dish: "Krabbesuppe", desc: "Kok skall til kraft, tilsett fløte, tomat og konjakk", difficulty: "🟡", time: "45 min" }
+  ],
+  "Kongekrabbe": [
+    { dish: "Kokte kongekrabbeben", desc: "Kok i saltvann 5-7 min. Dypp i smeltet smør. Luksus!", difficulty: "🟢", time: "10 min" },
+    { dish: "Grillet kongekrabbe", desc: "Del ben, pensle med hvitløkssmør, grill 5 min", difficulty: "🟢", time: "15 min" },
+    { dish: "Kongekrabbepasta", desc: "Plukk kjøtt i tagliatelle med hvitvin, chili og persille", difficulty: "🟡", time: "25 min" },
+    { dish: "Kongekrabbe tempura", desc: "Dypp i lett tempurarøre, friter raskt. Sprøtt og saftig", difficulty: "🟡", time: "20 min" },
+    { dish: "Kongekrabbesalat", desc: "Plukket kjøtt med avokado, mango og lime-dressing", difficulty: "🟢", time: "15 min" }
+  ],
+  "Hummer": [
+    { dish: "Kokt hummer", desc: "Kok i kraftig saltvann 12-15 min. Server med smør og sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Grillet hummer", desc: "Del i to, pensle med urtersmør, grill 8 min", difficulty: "🟡", time: "20 min" },
+    { dish: "Hummerbisque", desc: "Kok skall til kraft med tomat, fløte og konjakk", difficulty: "🟡", time: "45 min" },
+    { dish: "Hummerrisotto", desc: "Kremete risotto med hummerkjøtt og safran", difficulty: "🟡", time: "40 min" },
+    { dish: "Hummertermidor", desc: "Gratinert hummer med sennepssaus og ost i skallet", difficulty: "🟡", time: "35 min" }
+  ],
+  "Dypvannsreke": [
+    { dish: "Reker med majones", desc: "Pill og server med majones, sitron og hvitt brød. Norsk sommer!", difficulty: "🟢", time: "5 min" },
+    { dish: "Rekesalat", desc: "Pill reker, bland med dill, agurk og rømmedressing", difficulty: "🟢", time: "10 min" },
+    { dish: "Rekesmørbrød", desc: "Stablet høyt med egg, majones, sitron og dill", difficulty: "🟢", time: "10 min" },
+    { dish: "Rekegryte", desc: "Fløtegryte med reker, hvitvin, tomat og basilikum", difficulty: "🟢", time: "20 min" },
+    { dish: "Rekecocktail", desc: "Klassisk forrett med reker, cocktailsaus og salat", difficulty: "🟢", time: "10 min" }
+  ],
+  "Sjøkreps": [
+    { dish: "Kokt sjøkreps", desc: "Kok i saltvann 3-4 min. Server med smeltet smør", difficulty: "🟢", time: "10 min" },
+    { dish: "Grillet sjøkreps", desc: "Del i to, pensle med hvitløkssmør, grill raskt", difficulty: "🟢", time: "15 min" },
+    { dish: "Sjøkrepspasta", desc: "Halerte i linguine med hvitvin, chili og tomat", difficulty: "🟡", time: "25 min" },
+    { dish: "Sjøkreps-bisque", desc: "Kok skallene til fond, tilsett fløte og konjakk", difficulty: "🟡", time: "40 min" },
+    { dish: "Fritert sjøkreps", desc: "Panert i tempura og fritert. Sprøtt og delikat", difficulty: "🟡", time: "20 min" }
+  ],
+  "Trollkrabbe": [
+    { dish: "Kokt trollkrabbe", desc: "Kok i saltvann som vanlig krabbe. Overraskende godt kjøtt!", difficulty: "🟢", time: "20 min" },
+    { dish: "Trollkrabbe med smør", desc: "Plukk kjøtt og server med smeltet smør og sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Trollkrabbegratin", desc: "Gratiner krabbematen med fløte, ost og urter", difficulty: "🟡", time: "30 min" },
+    { dish: "Trollkrabbesalat", desc: "Plukk kjøtt, bland med majones, dill og litt chili", difficulty: "🟢", time: "15 min" },
+    { dish: "Trollkrabbesuppe", desc: "Kok skall til kraft med rotgrønnsaker og fløte", difficulty: "🟡", time: "40 min" }
+  ],
+  "Strandkrabbe": [
+    { dish: "Krabbefond", desc: "Kok hele krabber til fond – fantastisk smaksbase til supper", difficulty: "🟢", time: "30 min" },
+    { dish: "Stekt strandkrabbe", desc: "Softshell-strandkrabbe stekt i smør. Spises hel!", difficulty: "🟡", time: "15 min" },
+    { dish: "Krabbesmør", desc: "Kok ut smak fra skallene i smør. Smaksbombe!", difficulty: "🟢", time: "20 min" },
+    { dish: "Krabbesuppe", desc: "Kok mange krabber til en kraftig bisque med tomat", difficulty: "🟡", time: "45 min" },
+    { dish: "Tempura strandkrabbe", desc: "Frys, dypp i røre og friter. Sprø snacks!", difficulty: "🟡", time: "20 min" }
+  ],
+  "Strandreke": [
+    { dish: "Kokt strandreke", desc: "Kok i saltvann 2 min. Pill og spis med brød", difficulty: "🟢", time: "5 min" },
+    { dish: "Strandreker på smørbrød", desc: "Pill og legg på brød med egg og majones", difficulty: "🟢", time: "10 min" },
+    { dish: "Stekt strandreke", desc: "Stek i hvitløkssmør med chili. Tapas-stil!", difficulty: "🟢", time: "10 min" },
+    { dish: "Rekesaus", desc: "Kok skallene til fond, tilsett fløte. Perfekt til fisk", difficulty: "🟢", time: "20 min" },
+    { dish: "Strandreke-omelet", desc: "Pisk egg, tilsett pillede reker, dill og litt fløte", difficulty: "🟢", time: "10 min" }
+  ],
+  "Springkreps": [
+    { dish: "Kokt springkreps", desc: "Kok i saltvann som reker. Pill og server med smør", difficulty: "🟢", time: "5 min" },
+    { dish: "Springkreps i hvitløk", desc: "Stek hele i olivenolje med hvitløk og chili", difficulty: "🟢", time: "10 min" },
+    { dish: "Springkreps-pasta", desc: "Halene i pasta med hvitvin og urtesaus", difficulty: "🟡", time: "20 min" },
+    { dish: "Springkreps-spyd", desc: "Tre på spyd, pensle med urtersmør, grill", difficulty: "🟢", time: "15 min" },
+    { dish: "Springkreps-cocktail", desc: "Pillede haler med cocktailsaus som forrett", difficulty: "🟢", time: "10 min" }
+  ],
+  "Trollhummer": [
+    { dish: "Kokt trollhummer", desc: "Kok i saltvann 8-10 min. Knekk og dypp i smør", difficulty: "🟢", time: "15 min" },
+    { dish: "Grillet trollhummer", desc: "Del i to, pensle med urtersmør, grill 5 min", difficulty: "🟢", time: "15 min" },
+    { dish: "Trollhummerpasta", desc: "Plukk kjøtt i tagliatelle med fløte og dill", difficulty: "🟡", time: "25 min" },
+    { dish: "Trollhummer-bisque", desc: "Kok skallene med tomat, fløte og hvitvin", difficulty: "🟡", time: "40 min" },
+    { dish: "Trollhummer gratinert", desc: "Gratiner halene med parmesan og hvitløkssmør", difficulty: "🟡", time: "20 min" }
+  ],
+  "Bokstavhummer": [
+    { dish: "Kokt bokstavhummer", desc: "Kok i saltvann 10-12 min. Server med smør", difficulty: "🟢", time: "15 min" },
+    { dish: "Bokstavhummer gratin", desc: "Gratiner med fløte, ost og urter i skallet", difficulty: "🟡", time: "25 min" },
+    { dish: "Bokstavhummer-salat", desc: "Plukk kjøtt, bland med avokado og sitron-dressing", difficulty: "🟢", time: "15 min" },
+    { dish: "Bokstavhummer-risotto", desc: "Kremete risotto med plukket kjøtt og safran", difficulty: "🟡", time: "35 min" },
+    { dish: "Bokstavhummer i smør", desc: "Stek halene i smør med hvitløk og persille", difficulty: "🟢", time: "10 min" }
+  ],
+  "Hestereke": [
+    { dish: "Kokt hestereke", desc: "Kok raskt i saltvann. Søte og delikate!", difficulty: "🟢", time: "5 min" },
+    { dish: "Hestereke-toast", desc: "Topp ristet brød med pillede reker og smør", difficulty: "🟢", time: "10 min" },
+    { dish: "Hestereke-omelet", desc: "Bland pillede reker i omelet med dill og fløte", difficulty: "🟢", time: "10 min" },
+    { dish: "Hestereke i hvitløk", desc: "Stek i smør med hvitløk og chili. Tapas!", difficulty: "🟢", time: "10 min" },
+    { dish: "Hestereke-krokett", desc: "Bland med bechamel, paner og fritter. Belgisk klassiker", difficulty: "🟡", time: "30 min" }
+  ],
+  "Pepperkrabbe": [
+    { dish: "Kokt pepperkrabbe", desc: "Kok i saltvann. Lite kjøtt men god smak!", difficulty: "🟢", time: "15 min" },
+    { dish: "Pepperkrabbe-fond", desc: "Kok hele krabber til smakfull kraft for supper", difficulty: "🟢", time: "30 min" },
+    { dish: "Stekt pepperkrabbe", desc: "Stek hele i wok med chili, hvitløk og ingefær", difficulty: "🟡", time: "15 min" },
+    { dish: "Pepperkrabbe-smør", desc: "Kok ut smak i smør. Bruk som smaksbombe på fisk", difficulty: "🟢", time: "20 min" },
+    { dish: "Pepperkrabbesuppe", desc: "Asiatisk-inspirert suppe med kokos og lime", difficulty: "🟡", time: "30 min" }
+  ],
+  "Svømmekrabbe": [
+    { dish: "Kokt svømmekrabbe", desc: "Kok i saltvann 10 min. Knekk og spis med smør", difficulty: "🟢", time: "15 min" },
+    { dish: "Svømmekrabbe-fond", desc: "Perfekt til fond og bisque – mye smak i skallet", difficulty: "🟢", time: "30 min" },
+    { dish: "Wok svømmekrabbe", desc: "Stek i wok med sort bønnesaus og ingefær", difficulty: "🟡", time: "15 min" },
+    { dish: "Svømmekrabbesalat", desc: "Plukk kjøtt, bland med mango og chilidressing", difficulty: "🟢", time: "15 min" },
+    { dish: "Svømmekrabbe-pasta", desc: "Kjøtt i spaghetti med tomat, hvitløk og chili", difficulty: "🟡", time: "25 min" }
+  ],
+  "Keiserhummer": [
+    { dish: "Kokt keiserhummer", desc: "Kok i saltvann 8 min. Plukk det delikate halekjøttet", difficulty: "🟢", time: "10 min" },
+    { dish: "Grillet keiserhummer", desc: "Del i to, pensle med smør, grill kort", difficulty: "🟢", time: "15 min" },
+    { dish: "Keiserhummer-pasta", desc: "Halekjøtt i linguine med hvitvin og fløte", difficulty: "🟡", time: "25 min" },
+    { dish: "Keiserhummer-suppe", desc: "Kok skallene til bisque med tomat og konjakk", difficulty: "🟡", time: "40 min" },
+    { dish: "Keiserhummer med aioli", desc: "Kokt og avkjølt, server med hjemmelaget aioli", difficulty: "🟢", time: "15 min" }
+  ],
+  "Blåkrabbe": [
+    { dish: "Kokt blåkrabbe", desc: "Kok i saltvann. Overraskende godt kjøtt tross liten størrelse", difficulty: "🟢", time: "15 min" },
+    { dish: "Blåkrabbe-fond", desc: "Kok mange krabber til kraftig smaksbase", difficulty: "🟢", time: "30 min" },
+    { dish: "Blåkrabbe i chili", desc: "Wok-stekt med sweet chili, hvitløk og koriander", difficulty: "🟡", time: "15 min" },
+    { dish: "Blåkrabbe-cakes", desc: "Plukk kjøtt, bland med brødrasp og egg, stek som kaker", difficulty: "🟡", time: "25 min" },
+    { dish: "Blåkrabbe-smør", desc: "Kok skall i smør for fantastisk krabbesmør", difficulty: "🟢", time: "20 min" }
+  ],
+  "Edderkopp-krabbe": [
+    { dish: "Kokt edderkoppkrabbe", desc: "Kok i saltvann 15-20 min. Mye kjøtt i bena!", difficulty: "🟢", time: "20 min" },
+    { dish: "Edderkoppkrabbe gratinert", desc: "Plukk kjøtt, bland med fløte og ost, gratiner", difficulty: "🟡", time: "30 min" },
+    { dish: "Edderkoppkrabbe-salat", desc: "Plukk kjøtt, bland med avokado og lime", difficulty: "🟢", time: "20 min" },
+    { dish: "Edderkoppkrabbe-suppe", desc: "Kok skall til fond med fløte og tomat", difficulty: "🟡", time: "40 min" },
+    { dish: "Edderkoppkrabbe med smør", desc: "Kokt og servert med smeltet urtersmør og sitron", difficulty: "🟢", time: "20 min" }
+  ],
+  "Snøkrabbe": [
+    { dish: "Kokt snøkrabbe", desc: "Kok ben i saltvann 10 min. Dypp i smeltet smør", difficulty: "🟢", time: "15 min" },
+    { dish: "Snøkrabbe-sushi", desc: "Plukk kjøtt til nigiri eller maki-ruller", difficulty: "🟡", time: "30 min" },
+    { dish: "Snøkrabbepasta", desc: "Plukket kjøtt i spaghetti med hvitvin og chili", difficulty: "🟡", time: "25 min" },
+    { dish: "Snøkrabbe-salat", desc: "Avkjølt krabbematen i salat med mango og koriander", difficulty: "🟢", time: "15 min" },
+    { dish: "Snøkrabbe-gratin", desc: "Gratiner kjøttet med bechamel og parmesan", difficulty: "🟡", time: "25 min" }
+  ],
+
+  // 🐚 Skjell
+  "Blåskjell": [
+    { dish: "Blåskjell i hvitvin", desc: "Kok med hvitvin, hvitløk, persille og smør. Klassiker!", difficulty: "🟢", time: "15 min" },
+    { dish: "Blåskjellsuppe", desc: "Fløtebasert suppe med blåskjell, safran og brød", difficulty: "🟡", time: "30 min" },
+    { dish: "Gratinerte blåskjell", desc: "Topp med hvitløkssmør og brødsmuler, gratiner", difficulty: "🟢", time: "15 min" },
+    { dish: "Blåskjell-pasta", desc: "Spaghetti alle cozze – med tomat, hvitløk og chili", difficulty: "🟡", time: "25 min" },
+    { dish: "Blåskjell i curry", desc: "Kok med kokosmelk, karri og koriander. Thai-stil!", difficulty: "🟡", time: "20 min" }
+  ],
+  "Kamskjell": [
+    { dish: "Stekt kamskjell", desc: "Stek i smør 1-2 min per side. Rosa i midten. Gourmet!", difficulty: "🟡", time: "10 min" },
+    { dish: "Kamskjell-ceviche", desc: "Skjær tynt, mariner i lime og chili. Rått og friskt", difficulty: "🟡", time: "15 min" },
+    { dish: "Kamskjell med blomkålpuré", desc: "Stekt kamskjell på kremete blomkålpuré med trøffel", difficulty: "🟡", time: "25 min" },
+    { dish: "Gratinert kamskjell", desc: "Gratiner i skallet med smør, hvitløk og brødsmuler", difficulty: "🟢", time: "15 min" },
+    { dish: "Kamskjell-carpaccio", desc: "Fryst, skjær papirynt, server med olivenolje og sitron", difficulty: "🟡", time: "10 min" }
+  ],
+  "Østers": [
+    { dish: "Østers naturell", desc: "Åpne, drypp sitron. Spis rå – luksus fra fjorden!", difficulty: "🟢", time: "5 min" },
+    { dish: "Gratinerte østers", desc: "Topp med spinat, fløte og parmesan. Rockefeller-stil", difficulty: "🟡", time: "20 min" },
+    { dish: "Østers i tempura", desc: "Dypp i tempurarøre og friter raskt. Sprøtt og salt", difficulty: "🟡", time: "15 min" },
+    { dish: "Østers med mignonette", desc: "Rå østers med rødvinseddik, sjalottløk og pepper", difficulty: "🟢", time: "10 min" },
+    { dish: "Stekt østers", desc: "Paner i maismel og stek i smør. Sørstats-klassiker", difficulty: "🟡", time: "15 min" }
+  ],
+  "Strandsnegl": [
+    { dish: "Kokt strandsnegl", desc: "Kok i saltvann 5 min. Plukk ut med nål. Delikat!", difficulty: "🟢", time: "10 min" },
+    { dish: "Strandsnegl i hvitløksmør", desc: "Kok, plukk ut, stek raskt i hvitløkssmør", difficulty: "🟢", time: "15 min" },
+    { dish: "Strandsnegl-bruschetta", desc: "Plukket sneglekjøtt på ristet brød med urter", difficulty: "🟢", time: "15 min" },
+    { dish: "Strandsnegl-fond", desc: "Kok skallene til kraft. Fin smaksbase!", difficulty: "🟢", time: "20 min" },
+    { dish: "Strandsnegl à la Provençale", desc: "Stek med tomat, hvitløk, persille og hvitvin", difficulty: "🟡", time: "20 min" }
+  ],
+  "Hjerteskjell": [
+    { dish: "Dampet hjerteskjell", desc: "Damp med hvitvin og urter til de åpner seg", difficulty: "🟢", time: "10 min" },
+    { dish: "Hjerteskjell i fløtesaus", desc: "Kok med fløte, hvitvin og dill. Server med brød", difficulty: "🟢", time: "15 min" },
+    { dish: "Hjerteskjell-pasta", desc: "Bland med spaghetti, hvitløk og olivenolje", difficulty: "🟢", time: "20 min" },
+    { dish: "Stekt hjerteskjell", desc: "Åpne, stek kjøttet raskt i smør med sitron", difficulty: "🟢", time: "10 min" },
+    { dish: "Hjerteskjell-suppe", desc: "Kok med poteter, løk og fløte til en kremet suppe", difficulty: "🟡", time: "25 min" }
+  ],
+  "Sandskjell": [
+    { dish: "Dampet sandskjell", desc: "Damp som blåskjell – åpner seg når de er klare", difficulty: "🟢", time: "10 min" },
+    { dish: "Sandskjell i hvitvin", desc: "Kok med hvitvin, hvitløk og persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Stekt sandskjell", desc: "Åpne, paner kjøttet og stek i smør", difficulty: "🟡", time: "15 min" },
+    { dish: "Sandskjell-chowder", desc: "Kremet suppe med poteter, bacon og sandskjell", difficulty: "🟡", time: "30 min" },
+    { dish: "Sandskjell-gratin", desc: "Gratiner med brødmuler, hvitløkssmør og ost", difficulty: "🟡", time: "20 min" }
+  ],
+  "Kongesnegl": [
+    { dish: "Kokt kongesnegl", desc: "Kok i saltvann 10 min. Skjær og server med smør", difficulty: "🟢", time: "15 min" },
+    { dish: "Kongesnegl i hvitløkssmør", desc: "Skjær i skiver, stek i smør med hvitløk og persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Kongesnegl-salat", desc: "Kokt og avkjølt, skiver i salat med vinaigrette", difficulty: "🟢", time: "15 min" },
+    { dish: "Kongesnegl-tempura", desc: "Skjær, dypp i tempura og friter. Sprøtt og godt", difficulty: "🟡", time: "20 min" },
+    { dish: "Kongesnegl-gryte", desc: "Stuet i fløtesaus med poteter og dill", difficulty: "🟡", time: "25 min" }
+  ],
+  "Kuskjell": [
+    { dish: "Dampet kuskjell", desc: "Damp med hvitvin og urter. Mildt, fint kjøtt", difficulty: "🟢", time: "10 min" },
+    { dish: "Kuskjell i smør", desc: "Åpne og stek kjøttet i hvitløkssmør", difficulty: "🟢", time: "10 min" },
+    { dish: "Kuskjell-suppe", desc: "Kok med fløte, løk og poteter", difficulty: "🟡", time: "25 min" },
+    { dish: "Kuskjell på grill", desc: "Legg på grillen med urtersmør til de åpner seg", difficulty: "🟢", time: "10 min" },
+    { dish: "Kuskjell-pasta", desc: "Bland med linguine, hvitvin og cherry-tomat", difficulty: "🟡", time: "20 min" }
+  ],
+  "Knivskjell": [
+    { dish: "Grillet knivskjell", desc: "Legg på grillen med hvitløkssmør. Åpner seg selv!", difficulty: "🟢", time: "10 min" },
+    { dish: "Knivskjell i hvitvin", desc: "Damp med hvitvin, persille og smør. Spansk stil!", difficulty: "🟢", time: "10 min" },
+    { dish: "Stekt knivskjell", desc: "Stek raskt i smør med chili og hvitløk", difficulty: "🟢", time: "10 min" },
+    { dish: "Knivskjell-salat", desc: "Kokt og avkjølt, skiver i salat med sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Knivskjell-pasta", desc: "Skjær kjøttet, bland i spaghetti med tomat og urter", difficulty: "🟡", time: "20 min" }
+  ],
+  "Rur": [
+    { dish: "Kokt rur", desc: "Kok i saltvann og plukk ut kjøttet. Unik sjøsmak!", difficulty: "🟢", time: "10 min" },
+    { dish: "Stekt rur", desc: "Plukk ut kjøttet, stek i smør med hvitløk", difficulty: "🟢", time: "15 min" },
+    { dish: "Rur i fond", desc: "Kok skallene til smakfull kraft for fiskesupper", difficulty: "🟢", time: "20 min" },
+    { dish: "Rur-bruschetta", desc: "Plukket kjøtt på ristet brød med aioli", difficulty: "🟢", time: "15 min" },
+    { dish: "Rur tapas", desc: "Stek plukket kjøtt med chili og olivenolje. Server med brød", difficulty: "🟢", time: "10 min" }
+  ],
+  "Oskjell": [
+    { dish: "Oskjell naturell", desc: "Åpne og server rå med sitron og pepper", difficulty: "🟢", time: "5 min" },
+    { dish: "Gratinert oskjell", desc: "Topp med spinat, fløte og ost. Ovnsbak kort", difficulty: "🟡", time: "20 min" },
+    { dish: "Oskjell-suppe", desc: "Fløtesuppe med oskjell og dill", difficulty: "🟡", time: "25 min" },
+    { dish: "Stekt oskjell", desc: "Paner og stek i smør. Sprøtt og salt", difficulty: "🟡", time: "15 min" },
+    { dish: "Oskjell med mignonette", desc: "Rå med rødvinseddik og finhakket sjalottløk", difficulty: "🟢", time: "10 min" }
+  ],
+  "Haneskjell": [
+    { dish: "Stekt haneskjell", desc: "Stek som kamskjell i smør 1-2 min per side", difficulty: "🟡", time: "10 min" },
+    { dish: "Haneskjell-ceviche", desc: "Mariner rått kjøtt i lime, chili og koriander", difficulty: "🟡", time: "15 min" },
+    { dish: "Gratinert haneskjell", desc: "Gratiner i skallet med hvitløkssmør og brødsmuler", difficulty: "🟢", time: "15 min" },
+    { dish: "Haneskjell-pasta", desc: "Stek og bland i pasta med fløte og dill", difficulty: "🟡", time: "20 min" },
+    { dish: "Haneskjell-salat", desc: "Lett stekt på salat med sitron-vinaigrette", difficulty: "🟢", time: "15 min" }
+  ],
+  "Peppermusling": [
+    { dish: "Dampet peppermusling", desc: "Damp som blåskjell i hvitvin og urter", difficulty: "🟢", time: "10 min" },
+    { dish: "Peppermusling i fløte", desc: "Kok med fløte, hvitvin og hvitløk", difficulty: "🟢", time: "15 min" },
+    { dish: "Peppermusling-pasta", desc: "Bland med spaghetti og tomatbasert saus", difficulty: "🟡", time: "20 min" },
+    { dish: "Stekt peppermusling", desc: "Åpne og stek kjøttet raskt i smør", difficulty: "🟢", time: "10 min" },
+    { dish: "Peppermusling-suppe", desc: "Kok med poteter og løk til en kremet suppe", difficulty: "🟡", time: "25 min" }
+  ],
+  "Teppeskjell": [
+    { dish: "Dampet teppeskjell", desc: "Damp med hvitvin og hvitløk. Delikat!", difficulty: "🟢", time: "10 min" },
+    { dish: "Teppeskjell i saus", desc: "Kok med tomat, hvitløk og basilikum", difficulty: "🟢", time: "15 min" },
+    { dish: "Teppeskjell-pasta", desc: "Vongole-stil med linguine og olivenolje", difficulty: "🟡", time: "20 min" },
+    { dish: "Gratinert teppeskjell", desc: "Topp med brødmuler og urtersmør, gratiner", difficulty: "🟢", time: "15 min" },
+    { dish: "Teppeskjell-risotto", desc: "Kremete risotto med dampede teppeskjell", difficulty: "🟡", time: "30 min" }
+  ],
+  "Toppsnegl": [
+    { dish: "Kokt toppsnegl", desc: "Kok i saltvann 5 min. Plukk ut med nål", difficulty: "🟢", time: "10 min" },
+    { dish: "Toppsnegl i hvitløk", desc: "Plukk ut kjøttet, stek i hvitløkssmør", difficulty: "🟢", time: "15 min" },
+    { dish: "Toppsnegl-bruschetta", desc: "Kjøtt på ristet brød med urter og aioli", difficulty: "🟢", time: "15 min" },
+    { dish: "Toppsnegl i fond", desc: "Kok skallene til en smakfull sjømatfond", difficulty: "🟢", time: "20 min" },
+    { dish: "Toppsnegl tapas", desc: "Stek med chili og hvitløk. Server med brød", difficulty: "🟢", time: "10 min" }
+  ],
+  "Vårsnegl": [
+    { dish: "Kokt vårsnegl", desc: "Kok i saltvann og plukk ut med nål. Tradisjonskost!", difficulty: "🟢", time: "10 min" },
+    { dish: "Vårsnegl i smør", desc: "Plukk og stek raskt i hvitløkssmør og persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Vårsnegl à la Portugisiske", desc: "Kok med hvitløk, oregano og olivenolje", difficulty: "🟢", time: "15 min" },
+    { dish: "Vårsnegl-fond", desc: "Kok skallene til smakfull kraft for supper", difficulty: "🟢", time: "20 min" },
+    { dish: "Vårsnegl-tapas", desc: "Server kokt med aioli og sitron som tapas", difficulty: "🟢", time: "10 min" }
+  ],
+  "Trompetsnegl": [
+    { dish: "Kokt trompetsnegl", desc: "Kok i saltvann 10 min. Skjær og server med smør", difficulty: "🟢", time: "15 min" },
+    { dish: "Trompetsnegl i hvitløk", desc: "Skiver stekt i hvitløkssmør med persille", difficulty: "🟢", time: "15 min" },
+    { dish: "Trompetsnegl-salat", desc: "Kokt, avkjølt og i salat med vinaigrette", difficulty: "🟢", time: "15 min" },
+    { dish: "Trompetsnegl-gryte", desc: "Stuet med poteter og fløte. Tradisjonskost", difficulty: "🟡", time: "25 min" },
+    { dish: "Trompetsnegl-wok", desc: "Stek med ingefær, soyasaus og sesamolje", difficulty: "🟡", time: "15 min" }
+  ],
+  "Svartskjell": [
+    { dish: "Svartskjell i hvitvin", desc: "Kok som blåskjell med hvitvin, hvitløk og urter", difficulty: "🟢", time: "15 min" },
+    { dish: "Gratinerte svartskjell", desc: "Topp med hvitløkssmør og parmesan, gratiner", difficulty: "🟢", time: "15 min" },
+    { dish: "Svartskjell-pasta", desc: "I spaghetti med tomat, chili og basilikum", difficulty: "🟡", time: "25 min" },
+    { dish: "Svartskjell i curry", desc: "Kok med kokosmelk, karripaste og koriander", difficulty: "🟡", time: "20 min" },
+    { dish: "Svartskjell-suppe", desc: "Fløtesuppe med svartskjell, safran og brød", difficulty: "🟡", time: "30 min" }
+  ],
+
+  // 🌿 Tang & Tare
+  "Sukkertare": [
+    { dish: "Sukkertare-chips", desc: "Tørk og stek raskt i olje. Sprø, salte snacks!", difficulty: "🟢", time: "10 min" },
+    { dish: "Sukkertare i salat", desc: "Skjær i strimler og bland i asiatisk salat", difficulty: "🟢", time: "10 min" },
+    { dish: "Sukkertare-dashi", desc: "Trekk i varmt vann til japansk suppebase", difficulty: "🟢", time: "15 min" },
+    { dish: "Sukkertare-smør", desc: "Bland tørket, malt tare i mykt smør. Umami!", difficulty: "🟢", time: "5 min" },
+    { dish: "Sukkertare-pasta", desc: "Kok fersk tare med pasta. Naturlig salt smak", difficulty: "🟢", time: "15 min" }
+  ],
+  "Butare": [
+    { dish: "Stekt butare", desc: "Stek raskt i sesamolje. Sprøtt og næringsrikt!", difficulty: "🟢", time: "5 min" },
+    { dish: "Butare-chips", desc: "Tørk og friter raskt. Perfekt snacks", difficulty: "🟢", time: "10 min" },
+    { dish: "Butare i suppe", desc: "Skjær i strimler og tilsett miso-suppe", difficulty: "🟢", time: "10 min" },
+    { dish: "Butare-salat", desc: "Skjær fersk butare i strimler med sesamdressing", difficulty: "🟢", time: "10 min" },
+    { dish: "Butare-pesto", desc: "Blend med pinjekjerner, parmesan og olivenolje", difficulty: "🟢", time: "10 min" }
+  ],
+  "Grisetang": [
+    { dish: "Grisetang-krydder", desc: "Tørk og mal til pulver. Fantastisk umami-krydder!", difficulty: "🟢", time: "Tørking" },
+    { dish: "Grisetang-bad", desc: "Kok tang og bruk vannet til baking – gir fukt og smak", difficulty: "🟢", time: "15 min" },
+    { dish: "Grisetang-smør", desc: "Bland tørket tangpulver i smør. Sjømatsmør!", difficulty: "🟢", time: "5 min" },
+    { dish: "Grisetang i gryte", desc: "Legg i gryteretter for ekstra umami og mineraler", difficulty: "🟢", time: "5 min" },
+    { dish: "Grisetang-salt", desc: "Tørk, mal og bland med havsalt. Gourmet-salt!", difficulty: "🟢", time: "Tørking" }
+  ],
+  "Søl": [
+    { dish: "Søl-chips", desc: "Tørk og stek i olje. Sprø, salte snacks fra fjæra!", difficulty: "🟢", time: "10 min" },
+    { dish: "Søl i salat", desc: "Fersk eller tørket i asiatisk salat med sesam", difficulty: "🟢", time: "10 min" },
+    { dish: "Søl som nori", desc: "Tørk flatt og bruk som sushi-wrap", difficulty: "🟡", time: "Tørking + 15 min" },
+    { dish: "Søl-suppe", desc: "Tilsett i miso-suppe for ekstra næring og smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Laverbread (søl-puré)", desc: "Kok og mos søl. Walisisk tradisjon – server med bacon!", difficulty: "🟡", time: "30 min" }
+  ],
+  "Blæretang": [
+    { dish: "Blæretang-krydder", desc: "Tørk og mal til pulver. Naturlig saltsmak!", difficulty: "🟢", time: "Tørking" },
+    { dish: "Blæretang-te", desc: "Tørk og trekk i varmt vann. Rik på jod", difficulty: "🟢", time: "10 min" },
+    { dish: "Blæretang i baking", desc: "Tilsett tangpulver i brød for sjøsmak og næring", difficulty: "🟢", time: "5 min" },
+    { dish: "Blæretang-salt", desc: "Tørk, mal og bland med flaksalt. Gourmet!", difficulty: "🟢", time: "Tørking" },
+    { dish: "Blæretang-fond", desc: "Kok tang til smakfull suppebase for sjømatsupper", difficulty: "🟢", time: "20 min" }
+  ],
+  "Fingertare": [
+    { dish: "Fingertare-chips", desc: "Tørk og friter raskt. Naturlig salt og sprøtt!", difficulty: "🟢", time: "10 min" },
+    { dish: "Fingertare i salat", desc: "Fersk i strimler med asiatisk dressing", difficulty: "🟢", time: "10 min" },
+    { dish: "Fingertare-tempura", desc: "Dypp i tempurarøre og friter. Sprøtt og godt!", difficulty: "🟡", time: "15 min" },
+    { dish: "Fingertare-pesto", desc: "Blend med nøtter, hvitløk og olivenolje", difficulty: "🟢", time: "10 min" },
+    { dish: "Fingertare-smør", desc: "Tørket og malt i smør. Perfekt til sjømat", difficulty: "🟢", time: "5 min" }
+  ],
+  "Krusflik": [
+    { dish: "Krusflik i salat", desc: "Fersk i salat med sesamolje og ris-eddik", difficulty: "🟢", time: "10 min" },
+    { dish: "Krusflik-snacks", desc: "Tørk i ovn og spis som chips. Sprøtt og salt!", difficulty: "🟢", time: "Tørking" },
+    { dish: "Krusflik i suppe", desc: "Tilsett i miso eller fiskesuppe for ekstra smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Krusflik-gelé", desc: "Inneholder carrageenan – naturlig geleringsmiddel!", difficulty: "🟡", time: "30 min" },
+    { dish: "Krusflik-smoothie", desc: "Blend fersk tang i smoothie med frukt og banan", difficulty: "🟢", time: "5 min" }
+  ],
+  "Havsalat": [
+    { dish: "Havsalat i salat", desc: "Fersk rett i salaten – derav navnet! Mild sjøsmak", difficulty: "🟢", time: "5 min" },
+    { dish: "Havsalat-chips", desc: "Tørk og stek raskt i olje. Sprøtt og salt!", difficulty: "🟢", time: "10 min" },
+    { dish: "Havsalat-wrap", desc: "Bruk som wrap rundt fisk eller sushi-fyll", difficulty: "🟢", time: "10 min" },
+    { dish: "Havsalat-pesto", desc: "Blend med nøtter, hvitløk og olje. Grønn og frisk!", difficulty: "🟢", time: "10 min" },
+    { dish: "Havsalat i wok", desc: "Stek raskt med nudler, soya og sesamolje", difficulty: "🟢", time: "10 min" }
+  ],
+  "Stortare": [
+    { dish: "Stortare-pulver", desc: "Tørk og mal til umami-pulver. Bruk i alt!", difficulty: "🟢", time: "Tørking" },
+    { dish: "Stortare-fond", desc: "Kok til dashi-lignende suppebase. Ren umami", difficulty: "🟢", time: "15 min" },
+    { dish: "Stortare i gryte", desc: "Tilsett i gryteretter for dybde og næring", difficulty: "🟢", time: "5 min" },
+    { dish: "Stortare-salt", desc: "Tørk, mal og bland med havsalt", difficulty: "🟢", time: "Tørking" },
+    { dish: "Stortare-chips", desc: "Friter tynne biter raskt i olje", difficulty: "🟢", time: "10 min" }
+  ],
+  "Rødalge": [
+    { dish: "Rødalge i salat", desc: "Fersk eller tørket i asiatisk salat med sesam", difficulty: "🟢", time: "10 min" },
+    { dish: "Rødalge-snacks", desc: "Tørk i ovn. Sprø snacks rike på mineraler", difficulty: "🟢", time: "Tørking" },
+    { dish: "Rødalge i suppe", desc: "Tilsett i fiskesuppe for farge og næring", difficulty: "🟢", time: "10 min" },
+    { dish: "Rødalge-krydder", desc: "Tørk og mal til fargerikt, smakfullt krydder", difficulty: "🟢", time: "Tørking" },
+    { dish: "Rødalge-smoothie", desc: "Blend med frukt og yoghurt. Næringstett!", difficulty: "🟢", time: "5 min" }
+  ],
+  "Sauetang": [
+    { dish: "Sauetang i salat", desc: "Fersk i salat – mild, fin sjøsmak", difficulty: "🟢", time: "5 min" },
+    { dish: "Sauetang-chips", desc: "Tørk og friter. Lett og sprøtt!", difficulty: "🟢", time: "10 min" },
+    { dish: "Sauetang-krydder", desc: "Tørk og mal til pulver for krydring", difficulty: "🟢", time: "Tørking" },
+    { dish: "Sauetang-pesto", desc: "Blend med nøtter og olivenolje", difficulty: "🟢", time: "10 min" },
+    { dish: "Sauetang i omelett", desc: "Hakk fersk tang og tilsett i omelett med ost", difficulty: "🟢", time: "10 min" }
+  ],
+  "Remtang": [
+    { dish: "Remtang-krydder", desc: "Tørk og mal. Brukes som naturlig smaksforsterker", difficulty: "🟢", time: "Tørking" },
+    { dish: "Remtang i fond", desc: "Kok til dashi-base for japansk-inspirerte supper", difficulty: "🟢", time: "15 min" },
+    { dish: "Remtang-salt", desc: "Bland tørket tangpulver med flaksalt", difficulty: "🟢", time: "Tørking" },
+    { dish: "Remtang i gryte", desc: "Legg i gryteretter for umami-smak", difficulty: "🟢", time: "5 min" },
+    { dish: "Remtang-smør", desc: "Bland malt tare i smør. Server til sjømat", difficulty: "🟢", time: "5 min" }
+  ],
+  "Japansk drivtang": [
+    { dish: "Drivtang-wakame", desc: "Bruk som wakame i miso-suppe og salater", difficulty: "🟢", time: "10 min" },
+    { dish: "Drivtang-salat", desc: "Skjær i strimler med sesamolje og riseddik", difficulty: "🟢", time: "10 min" },
+    { dish: "Drivtang i suppe", desc: "Tilsett i asiatiske supper for tekstur og smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Drivtang-krydder", desc: "Tørk og mal til umami-rikt krydder", difficulty: "🟢", time: "Tørking" },
+    { dish: "Drivtang-chips", desc: "Tørk og friter i sesamolje. Sprø snacks!", difficulty: "🟢", time: "10 min" }
+  ],
+
+  // 🦔 Havliv
+  "Sjøpinnsvin": [
+    { dish: "Sjøpinnsvin-uni", desc: "Åpne og spis rognen rå med sitron. Ren luksus!", difficulty: "🟡", time: "5 min" },
+    { dish: "Uni på sushi", desc: "Legg rogn på sushiris. Japansk delikatesse", difficulty: "🟡", time: "15 min" },
+    { dish: "Uni-pasta", desc: "Bland rogn i varm pasta med smør og sitron", difficulty: "🟡", time: "15 min" },
+    { dish: "Sjøpinnsvin-toast", desc: "Rogn på ristet brød med smør og flaksalt", difficulty: "🟢", time: "5 min" },
+    { dish: "Uni-saus", desc: "Blend rogn med fløte og smør. Fantastisk til fisk", difficulty: "🟡", time: "10 min" }
   ]
 };
 
