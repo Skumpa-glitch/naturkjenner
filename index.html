@@ -726,7 +726,7 @@ const SPECIES_DB = {
     { name:"Bevergnag", latin:"Castor fiber", category:"🐾 Spor", description:"Tydelige tannmerker på trær. Timeglassform der beveren har gnagd. Spon på bakken.", habitat:"Elver, innsjøer, bekker", funFact:"En bever kan felle et tre med 15 cm diameter på under 30 minutter.", rarity:"Vanlig", edible:false, season:"Hele året" },
     { name:"Oterspor", latin:"Lutra lutra", category:"🐾 Spor", description:"5 tydelige tær med svømmehud-avtrykk. Ca. 6-7 cm bredt. Ofte glidemønstre i snø/gjørme.", habitat:"Elver, innsjøer, kyst", funFact:"Oteren glir på magen ned bakker og snøflater – sporene viser tydelig sklimønster.", rarity:"Uvanlig", edible:false, season:"Hele året" },
     { name:"Grevlingspor", latin:"Meles meles", category:"🐾 Spor", description:"Bredt spor (6-7 cm) med 5 tær og tydelige klomerker. Ligner en liten bjørnepote.", habitat:"Løvskog, jordbruksland", funFact:"Grevlingen har egne 'do-groper' – grunne hull der hele familiegruppen gjør fra seg.", rarity:"Vanlig", edible:false, season:"Apr–Okt" },
-    { name:"Fuglespor i snø", latin:"Bird track", category:"🐾 Spor", description:"Varierer fra små meise-spor (2 cm) til store orrfugl-spor (8 cm). Ser etter antall tær og mønster.", habitat:"Over hele Norge", funFact:"Ryper graver seg ned i snøen for å sove – du kan se hull der de dykket ned og kom opp.", rarity:"Svært vanlig", edible:false, season:"Okt–Apr" },
+    { name:"Fuglespor i snø", latin:"Lagopus muta", category:"🐾 Spor", description:"Varierer fra små meise-spor (2 cm) til store orrfugl-spor (8 cm). Ser etter antall tær og mønster.", habitat:"Over hele Norge", funFact:"Ryper graver seg ned i snøen for å sove – du kan se hull der de dykket ned og kom opp.", rarity:"Svært vanlig", edible:false, season:"Okt–Apr" },
     { name:"Bjørnespor", latin:"Ursus arctos", category:"🐾 Spor", description:"Enormt spor (15-20 cm) med 5 tær og klomerker. Bakpoten ligner et menneskefotspor.", habitat:"Finnmark, Troms, indre Hedmark", funFact:"Norge har kun ca. 175 bjørner – å finne bjørnespor er ekstremt sjeldent!", rarity:"Svært sjelden", edible:false, season:"Apr–Okt" },
     { name:"Mårspor", latin:"Martes martes", category:"🐾 Spor", description:"Liten, sprøtt spor (3 cm). Langstrakt avtrykk i snø - 'telemark' hoppgang.", habitat:"Barskog, blandingsskog", funFact:"Måren hopper i spor - etterlater lange groper i snøen.", rarity:"Uvanlig", edible:false, season:"Hele året" },
     { name:"Minkspor", latin:"Neovison vison", category:"🐾 Spor", description:"Liten spor (3 cm) med svømmehudspor. Ofte langs bekker og bredder.", habitat:"Bekker, småelver, kysten", funFact:"Minkesporet er mindre og mer rundere enn oterens spor.", rarity:"Vanlig", edible:false, season:"Hele året" },
@@ -1271,7 +1271,7 @@ async function getSpeciesImageUrl(latin) {
       // Filter out maps, range diagrams, phylogenetic trees etc
       if (thumbUrl) {
         const lc = thumbUrl.toLowerCase();
-        if (lc.includes('range_map') || lc.includes('distribution') || lc.includes('phylogenetic') || lc.includes('map_of') || lc.includes('_range.') || lc.includes('_range_') || lc.includes('verbreitung')) {
+        if (lc.includes('range_map') || lc.includes('distribution') || lc.includes('phylogenetic') || lc.includes('map_of') || lc.includes('_range.') || lc.includes('_range_') || lc.includes('verbreitung') || /_dis\.(png|svg|jpg|jpeg)/.test(lc)) {
           thumbUrl = null;
         }
       }
@@ -1290,11 +1290,11 @@ async function getSpeciesImageUrl(latin) {
 
 function openImgCacheDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('nk-imgcache', 2);
+    const req = indexedDB.open('nk-imgcache', 3);
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
-      // Version 2: clear old broken 320px URLs and re-fetch
-      if (e.oldVersion < 2 && db.objectStoreNames.contains('images')) {
+      // Version 3: clear old cache (v1 had broken 320px URLs, v2 had map images)
+      if (e.oldVersion < 3 && db.objectStoreNames.contains('images')) {
         db.deleteObjectStore('images');
       }
       if (!db.objectStoreNames.contains('images')) db.createObjectStore('images');
