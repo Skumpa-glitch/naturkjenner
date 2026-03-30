@@ -156,6 +156,13 @@ body::before {
 .detail-value { font-size: 12px; font-weight: 600; color: var(--ink); }
 .fun-fact { background: var(--warm); border-radius: 6px; padding: 10px 14px; display: flex; gap: 8px; align-items: flex-start; }
 .fun-fact span { font-size: 13px; color: #6a4a20; line-height: 1.55; }
+.recipe-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--sand); }
+.recipe-header { font-size: 14px; font-weight: 600; color: var(--forest); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.recipe-card { background: white; border: 1px solid var(--sand); border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; }
+.recipe-name { font-size: 13px; font-weight: 600; color: var(--forest); margin-bottom: 2px; }
+.recipe-desc { font-size: 12px; color: var(--ghost); line-height: 1.4; }
+.recipe-meta { display: flex; gap: 8px; margin-top: 6px; }
+.recipe-tag { font-size: 11px; background: var(--warm); padding: 2px 8px; border-radius: 4px; color: var(--ghost); }
 /* Safety warnings */
 .safety-warning { background: #fde8e8; border: 2px solid #c0392b; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; }
 .safety-warning.caution { background: #fef3e2; border-color: #c9923a; }
@@ -1188,6 +1195,24 @@ function confidenceHTML(conf) {
 
 const speciesStore = {};
 
+function recipeHTML(species) {
+  const recipes = RECIPE_SUGGESTIONS[species.name];
+  if (!recipes || !species.edible) return '';
+  return '<div class="recipe-section">' +
+    '<div class="recipe-header"><span>🍳</span> Matforslag</div>' +
+    recipes.map(r =>
+      '<div class="recipe-card">' +
+        '<div class="recipe-name">' + r.dish + '</div>' +
+        '<div class="recipe-desc">' + r.desc + '</div>' +
+        '<div class="recipe-meta">' +
+          '<span class="recipe-tag">' + r.difficulty + ' ' + (r.difficulty === '🟢' ? 'Enkel' : 'Middels') + '</span>' +
+          '<span class="recipe-tag">⏱ ' + r.time + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('') +
+  '</div>';
+}
+
 function speciesCardHTML(species, rank, showConfidence) {
   const isTop = rank === 0 && showConfidence;
   const id = 'card-' + Math.random().toString(36).substr(2, 8);
@@ -1216,6 +1241,7 @@ function speciesCardHTML(species, rank, showConfidence) {
           '<div class="detail-item"><div class="detail-label">' + (species.edible ? '✅' : '❌') + ' Spiselig</div><div class="detail-value">' + (species.edible ? 'Ja' : 'Nei') + '</div></div>' +
         '</div>' +
         (species.funFact ? '<div class="fun-fact"><span style="font-size:16px;flex-shrink:0">💡</span><span>' + species.funFact + '</span></div>' : '') +
+        recipeHTML(species) +
       '</div>' +
       '<div class="toggle-hint" id="hint-' + id + '">▼ Vis detaljer</div>' +
     '</div></div>';
@@ -1317,6 +1343,223 @@ function formatDate(ts) {
 }
 
 // ============================================================
+// RECIPE SUGGESTIONS – matforslag for spiselige arter
+// ============================================================
+const RECIPE_SUGGESTIONS = {
+  // 🍄 Sopp
+  "Kantarell": [
+    { dish: "Kantarelltoast", desc: "Stek i smør med hvitløk, server på ristet surdeigsbrød med crème fraîche", difficulty: "🟢", time: "15 min" },
+    { dish: "Kantarellsuppe", desc: "Fløtebasert suppe med løk, timian og litt sherry", difficulty: "🟢", time: "30 min" },
+    { dish: "Kantarellpasta", desc: "Tagliatelle med stekt kantarell, parmesan og persille", difficulty: "🟢", time: "20 min" }
+  ],
+  "Steinsopp": [
+    { dish: "Risotto med steinsopp", desc: "Klassisk italiensk risotto med tørket eller fersk steinsopp", difficulty: "🟡", time: "40 min" },
+    { dish: "Steinsopp i smør", desc: "Skiver stekt i smør med salt, pepper og frisk timian", difficulty: "🟢", time: "10 min" },
+    { dish: "Tørket steinsopp-pulver", desc: "Tørk og mal til pulver – perfekt smaksforsterker til sausar", difficulty: "🟢", time: "Tørking" }
+  ],
+  "Sopphatt (Karl Johan)": [
+    { dish: "Risotto med Karl Johan", desc: "Kremete risotto med fersk eller tørket Karl Johan-sopp", difficulty: "🟡", time: "40 min" },
+    { dish: "Grillet Karl Johan", desc: "Hele hatter penslet med olivenolje, hvitløk og urter på grillen", difficulty: "🟢", time: "15 min" }
+  ],
+  "Piggsopp": [
+    { dish: "Stekt piggsopp", desc: "Enkelt stekt i smør med salt og pepper. Mild, nøtteaktig smak", difficulty: "🟢", time: "10 min" },
+    { dish: "Piggsoppgryte", desc: "Fløtegryte med piggsopp, bacon og timian. Server med ris", difficulty: "🟢", time: "25 min" }
+  ],
+  "Traktkantarell": [
+    { dish: "Traktkantarell på toast", desc: "Stek raskt i smør, server på ristet brød med rømme", difficulty: "🟢", time: "10 min" },
+    { dish: "Tørket traktkantarell", desc: "Tørk på snor eller i ovn – fantastisk i gryteretter hele vinteren", difficulty: "🟢", time: "Tørking" }
+  ],
+  "Sjampinjong": [
+    { dish: "Sjampinjongsaus", desc: "Klassisk fløtesaus med stekt sjampinjong til biff eller kylling", difficulty: "🟢", time: "15 min" },
+    { dish: "Fylte sjampinjonger", desc: "Fyll med kremost, hvitløk og urter. Gratiner i ovn", difficulty: "🟢", time: "25 min" }
+  ],
+  "Svart trompetsopp": [
+    { dish: "Trompetsopp-smør", desc: "Bland finrevet trompetsopp i mykt smør med salt. Fantastisk på brød", difficulty: "🟢", time: "10 min" },
+    { dish: "Pasta med trompetsopp", desc: "Fløtepasta med svart trompetsopp og parmesan", difficulty: "🟢", time: "20 min" }
+  ],
+  "Krepling": [
+    { dish: "Stekt krepling", desc: "Skiv og stek i smør med salt og pepper – norsk klassiker", difficulty: "🟢", time: "10 min" },
+    { dish: "Krepling i fløtesaus", desc: "Fløtesaus med krepling, løk og timian til vilt eller biff", difficulty: "🟢", time: "20 min" }
+  ],
+  "Parasollsopp": [
+    { dish: "Panert parasollhatt", desc: "Dypp i egg og brødrasp, stek som en schnitzel. Fantastisk!", difficulty: "🟢", time: "15 min" }
+  ],
+  "Honningsopp": [
+    { dish: "Honningsopp-gryte", desc: "Stuet i fløte med løk, bacon og timian. Må kokes godt først!", difficulty: "🟡", time: "30 min" }
+  ],
+  "Rødskrubb": [
+    { dish: "Stekt rødskrubb", desc: "Skiv og stek i smør. Blir mørk ved oppvarming – helt normalt", difficulty: "🟢", time: "10 min" }
+  ],
+  "Brunskrubb": [
+    { dish: "Soppgryte med brunskrubb", desc: "Bland med andre skogssopp i en kremete gryte", difficulty: "🟢", time: "25 min" }
+  ],
+  "Matblekksopp": [
+    { dish: "Stekt matblekksopp", desc: "Stek raskt i smør. Spis IKKE med alkohol – gir ubehag!", difficulty: "🟡", time: "10 min" }
+  ],
+  "Blek kremle": [
+    { dish: "Kremle i smør", desc: "Stek i skiver med smør, salt og pepper. Sprø og god", difficulty: "🟢", time: "10 min" }
+  ],
+  "Granpiggsopp": [
+    { dish: "Stekt granpiggsopp", desc: "Stek i smør med hvitløk. Mild, nøtteaktig smak", difficulty: "🟢", time: "10 min" }
+  ],
+
+  // 🍇 Bær
+  "Blåbær": [
+    { dish: "Blåbærpai", desc: "Klassisk pai med ferske blåbær, sukker og smør", difficulty: "🟡", time: "45 min" },
+    { dish: "Blåbærsyltetøy", desc: "Kok med sukker 1:1 – holder hele vinteren", difficulty: "🟢", time: "20 min" },
+    { dish: "Blåbær med melk", desc: "Den norske klassikeren: ferske blåbær, melk og sukker", difficulty: "🟢", time: "2 min" }
+  ],
+  "Tyttebær": [
+    { dish: "Tyttebærsyltetøy (rått rørt)", desc: "Rør tyttebær med sukker – ikke kok! Perfekt til kjøttkaker", difficulty: "🟢", time: "10 min" },
+    { dish: "Tyttebærsaus", desc: "Varm saus til vilt, ribbe eller kjøttkaker", difficulty: "🟢", time: "15 min" }
+  ],
+  "Molte": [
+    { dish: "Multekrem", desc: "Pisk fløte, bland inn multer og sukker. Norges nasjonaldessert!", difficulty: "🟢", time: "10 min" },
+    { dish: "Multesyltetøy", desc: "Kok forsiktig med sukker. Gull verdt på vafler!", difficulty: "🟢", time: "15 min" }
+  ],
+  "Bringebær": [
+    { dish: "Bringebærsyltetøy", desc: "Kok med sukker og litt sitronsaft. Enkelt og godt", difficulty: "🟢", time: "20 min" },
+    { dish: "Bringebærsorbet", desc: "Frys med sukkerlag – perfekt sommersnack", difficulty: "🟢", time: "Frysing" },
+    { dish: "Bringebærsmoothie", desc: "Blend med yoghurt, banan og honning", difficulty: "🟢", time: "5 min" }
+  ],
+  "Markjordbær": [
+    { dish: "Markjordbær med fløte", desc: "Ikke gjør noe fancy – bare fløte og litt sukker!", difficulty: "🟢", time: "2 min" },
+    { dish: "Markjordbær-is", desc: "Bland med kondensert melk og fløte, frys", difficulty: "🟢", time: "Frysing" }
+  ],
+  "Bjørnebær": [
+    { dish: "Bjørnebær-crumble", desc: "Ovnsbakt med havresmuldretopping og vaniljeis", difficulty: "🟢", time: "35 min" },
+    { dish: "Bjørnebærsyltetøy", desc: "Kok med sukker og litt sitron", difficulty: "🟢", time: "20 min" }
+  ],
+  "Krekling": [
+    { dish: "Kreklinggelé", desc: "Kok saft, sil og tilsett gelatin. Flott farge!", difficulty: "🟡", time: "30 min" },
+    { dish: "Krekling med sukker", desc: "Enkelt og godt – rett fra fjellet", difficulty: "🟢", time: "2 min" }
+  ],
+  "Tranebær": [
+    { dish: "Tranebærsaus", desc: "Kok med sukker og appelsinskall. Perfekt til vilt!", difficulty: "🟢", time: "15 min" },
+    { dish: "Tørket tranebær", desc: "Tørk i ovn på lav varme – snacks hele vinteren", difficulty: "🟢", time: "Tørking" }
+  ],
+  "Slåpetorn": [
+    { dish: "Slåpebærlikør", desc: "Legg bær i vodka med sukker i 3 mnd. Norsk sloe gin!", difficulty: "🟢", time: "3 mnd" },
+    { dish: "Slåpebærgelé", desc: "Kok saft og lag gelé med sukker og pektin", difficulty: "🟡", time: "30 min" }
+  ],
+  "Hagebær/Nyper": [
+    { dish: "Nypesyltetøy", desc: "Del, fjern frø, kok med sukker. Rik på C-vitamin!", difficulty: "🟡", time: "45 min" },
+    { dish: "Nypete", desc: "Tørk nyper, kok som te. Vitaminbombe!", difficulty: "🟢", time: "10 min" }
+  ],
+  "Rips": [
+    { dish: "Ripsgelé", desc: "Kok saft med sukker – perfekt til ost og kjøtt", difficulty: "🟢", time: "20 min" },
+    { dish: "Ripssaft", desc: "Press saft, tilsett sukker. Forfriskende sommerdrikk", difficulty: "🟢", time: "15 min" }
+  ],
+  "Solbær": [
+    { dish: "Solbærsaft", desc: "Press og kok med sukker. Rik på vitamin C", difficulty: "🟢", time: "20 min" },
+    { dish: "Solbærsorbet", desc: "Frys med sukkerlake – intens smak", difficulty: "🟢", time: "Frysing" }
+  ],
+  "Stikkelsbær": [
+    { dish: "Stikkelsbær-fool", desc: "Kok bærene, bland med pisket fløte. Engelsk klassiker", difficulty: "🟢", time: "20 min" },
+    { dish: "Stikkelsbærsyltetøy", desc: "Kok med sukker – perfekt på scones", difficulty: "🟢", time: "20 min" }
+  ],
+  "Trollbær": [
+    { dish: "Trollbær-marmelade", desc: "Eksklusiv marmelade – kok forsiktig med sukker", difficulty: "🟡", time: "25 min" }
+  ],
+  "Skogsjordbær": [
+    { dish: "Skogsjordbær med fløte", desc: "La de snakke for seg selv – bare fløte og sukker", difficulty: "🟢", time: "2 min" }
+  ],
+
+  // 🌸 Urter og blomster
+  "Ramsløk": [
+    { dish: "Ramsløkpesto", desc: "Blend med parmesan, pinjekjerner, olivenolje og salt", difficulty: "🟢", time: "10 min" },
+    { dish: "Ramsløksmør", desc: "Bland finhakket ramsløk i mykt smør. Fantastisk på brød!", difficulty: "🟢", time: "5 min" },
+    { dish: "Ramsløksuppe", desc: "Fres i smør, tilsett poteter og buljong. Kjør med stavmikser", difficulty: "🟢", time: "25 min" }
+  ],
+  "Fjellsyre": [
+    { dish: "Fjellsyre-salat", desc: "Friske blader i salat – gir en deilig syrlig smak", difficulty: "🟢", time: "5 min" },
+    { dish: "Fjellsyre-dressing", desc: "Blend med olivenolje, honning og salt", difficulty: "🟢", time: "5 min" }
+  ],
+  "Mjødurt": [
+    { dish: "Mjødurt-te", desc: "Tørk blomstene, hell over kokende vann. Deilig honningduft", difficulty: "🟢", time: "10 min" },
+    { dish: "Mjødurt-sirup", desc: "Kok blomster med sukker og vann. Bruk i desserter", difficulty: "🟢", time: "20 min" }
+  ],
+  "Rødkløver": [
+    { dish: "Kløver-te", desc: "Tørk blomstene, bruk som urtete. Mild, søtlig smak", difficulty: "🟢", time: "10 min" }
+  ],
+  "Brennesle": [
+    { dish: "Brenneslesuppe", desc: "Plukk topper, fres med løk, tilsett buljong og fløte", difficulty: "🟢", time: "20 min" },
+    { dish: "Brennesle-te", desc: "Tørk og hell over kokende vann. Jernrik!", difficulty: "🟢", time: "10 min" }
+  ],
+
+  // 🌳 Trær med spiselige deler
+  "Einer": [
+    { dish: "Einerbær-krydder", desc: "Tørk bærene, bruk som krydder til vilt og sausar", difficulty: "🟢", time: "Tørking" },
+    { dish: "Einerbær-sirup", desc: "Kok med sukker og vann. Aromatisk til desserter", difficulty: "🟢", time: "20 min" }
+  ],
+  "Einer (bær)": [
+    { dish: "Einerbær til viltkjøtt", desc: "Knus bær og bruk som krydder til elg, rådyr eller reinsdyr", difficulty: "🟢", time: "5 min" },
+    { dish: "Hjemmelaget akevitt", desc: "Legg einerbær i vodka med karve i 2-4 uker", difficulty: "🟢", time: "2-4 uker" }
+  ],
+  "Hassel": [
+    { dish: "Ristede hasselnøtter", desc: "Rist i ovn på 180°C i 10 min. Perfekt snacks!", difficulty: "🟢", time: "10 min" },
+    { dish: "Hasselnøtt-pesto", desc: "Erstatt pinjekjerner med hasselnøtter i pesto", difficulty: "🟢", time: "10 min" }
+  ],
+  "Rogn": [
+    { dish: "Rognegelé", desc: "Kok bær, sil og lag gelé med sukker. God til vilt", difficulty: "🟡", time: "40 min" }
+  ],
+  "Rogn (bær)": [
+    { dish: "Rognegelé", desc: "Kok bær etter frost, sil og lag gelé. Perfekt til ost", difficulty: "🟡", time: "40 min" }
+  ],
+  "Bøk": [
+    { dish: "Ristede bøkenøtter", desc: "Samle nøtter om høsten, rist i panne. Nøtteaktig smak", difficulty: "🟢", time: "10 min" }
+  ],
+
+  // 🐟 Fisk
+  "Torsk": [
+    { dish: "Kokt torsk med lever", desc: "Norsk klassiker: kokt torsk med lever, rogn og gulrøtter", difficulty: "🟢", time: "25 min" },
+    { dish: "Fiskesuppe", desc: "Fløtebasert suppe med torsk, gulrot og persille", difficulty: "🟢", time: "30 min" },
+    { dish: "Bacalao", desc: "Portugisisk-inspirert gryte med torsk, tomat og paprika", difficulty: "🟡", time: "45 min" }
+  ],
+  "Laks": [
+    { dish: "Gravlaks", desc: "Salt, sukker, dill – la trekke i 48 timer. Festmat!", difficulty: "🟢", time: "48 timer" },
+    { dish: "Ovnsbakt laks", desc: "Bak med sitron, dill og smør på 200°C i 20 min", difficulty: "🟢", time: "25 min" },
+    { dish: "Laksesashimi", desc: "Frys først i 24t, skjær tynt. Server med soya og wasabi", difficulty: "🟡", time: "15 min" }
+  ],
+  "Ørret": [
+    { dish: "Røkt ørret", desc: "Røk over bjørkeved. Fantastisk med rømme og flatbrød", difficulty: "🟡", time: "2 timer" },
+    { dish: "Stekt ørret", desc: "Hel ørret stekt i smør med mandler og sitron", difficulty: "🟢", time: "20 min" }
+  ],
+  "Sei": [
+    { dish: "Seibiff", desc: "Skiv sei tykt, stek i smør med løk og bacon", difficulty: "🟢", time: "15 min" },
+    { dish: "Seifiskekaker", desc: "Mal sei, bland med mel og krydder, stek som kaker", difficulty: "🟡", time: "30 min" }
+  ],
+  "Hyse": [
+    { dish: "Fish and chips", desc: "Panert hyse fritert med hjemmelagde chips", difficulty: "🟡", time: "30 min" },
+    { dish: "Kokt hyse", desc: "Pocher i lettsaltet vann med smørsaus og gulrot", difficulty: "🟢", time: "20 min" }
+  ],
+  "Makrell": [
+    { dish: "Stekt makrell", desc: "Fersk makrell stekt hel i panne med smør og sitron", difficulty: "🟢", time: "15 min" },
+    { dish: "Røkt makrell", desc: "Røk over alved eller bjørk. Server med brød og agurksalat", difficulty: "🟡", time: "1 time" }
+  ],
+  "Kveite": [
+    { dish: "Ovnsbakt kveite", desc: "Bak med urter, sitron og hvitvin på 180°C", difficulty: "🟢", time: "25 min" }
+  ],
+  "Lange": [
+    { dish: "Lutefisk av lange", desc: "Tradisjonell norsk julemat – lut, kok og server med bacon", difficulty: "🟡", time: "Flere dager" }
+  ],
+  "Abbor": [
+    { dish: "Stekt abbor", desc: "Filetér og stek i smør med sitron. Hvitt, fast kjøtt", difficulty: "🟢", time: "15 min" }
+  ],
+  "Gjedde": [
+    { dish: "Gjeddefiskekaker", desc: "Mal kjøttet og lag fiskekaker med dill og pepper", difficulty: "🟡", time: "30 min" }
+  ],
+  "Røye": [
+    { dish: "Røkt røye", desc: "Røk over bjørkeved – norsk delikatesse fra fjellvann", difficulty: "🟡", time: "2 timer" },
+    { dish: "Stekt røye", desc: "Filet stekt i smør med mandler og persille", difficulty: "🟢", time: "15 min" }
+  ],
+  "Sild": [
+    { dish: "Spekesild", desc: "Salt og krydder – tradisjonell norsk matskatt", difficulty: "🟡", time: "Flere dager" },
+    { dish: "Stekt sild", desc: "Panert i rugmel og stekt i smør. Server med potetsalat", difficulty: "🟢", time: "20 min" }
+  ]
+};
+
+// ============================================================
 // IMAGE OVERRIDES – direct Wikimedia Commons URLs for species
 // where Wikipedia returns wrong/missing images
 // ============================================================
@@ -1345,7 +1588,13 @@ const IMAGE_OVERRIDES = {
   "Bevergnag": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Beaver_gnaw_01.jpg/330px-Beaver_gnaw_01.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/6/6c/Beaver_gnaw_01.jpg" },
   "Beverdam": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Beaver_dam_in_Tierra_del_Fuego.jpg/330px-Beaver_dam_in_Tierra_del_Fuego.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/e/e8/Beaver_dam_in_Tierra_del_Fuego.jpg" },
   "Mågespor": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gull_Footprints_at_Forest_Cove.jpg/330px-Gull_Footprints_at_Forest_Cove.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/d/dd/Gull_Footprints_at_Forest_Cove.jpg" },
-  "Harespor": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Hare_tracks_on_snow_in_forest_Laajasalo_Helsinki.jpg/330px-Hare_tracks_on_snow_in_forest_Laajasalo_Helsinki.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/2/24/Hare_tracks_on_snow_in_forest_Laajasalo_Helsinki.jpg" }
+  "Harespor": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Hare_tracks_on_snow_in_forest_Laajasalo_Helsinki.jpg/330px-Hare_tracks_on_snow_in_forest_Laajasalo_Helsinki.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/2/24/Hare_tracks_on_snow_in_forest_Laajasalo_Helsinki.jpg" },
+  // Batch 3: remaining track/scat species
+  "Rev-avføring": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Fox_Droppings%2C_Irton_Park%2C_Cumbria_-_geograph.org.uk_-_3522189.jpg/330px-Fox_Droppings%2C_Irton_Park%2C_Cumbria_-_geograph.org.uk_-_3522189.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/4/42/Fox_Droppings%2C_Irton_Park%2C_Cumbria_-_geograph.org.uk_-_3522189.jpg" },
+  "Minkspor": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Martes.martes.tracks.jpg/330px-Martes.martes.tracks.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/e/ef/Martes.martes.tracks.jpg" },
+  "Villsvinavføring": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Sus.scrofa.dung.jpg/330px-Sus.scrofa.dung.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/9/92/Sus.scrofa.dung.jpg" },
+  "Pinnsvinhull": { thumb:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Erinaceus.europaeus.tracks.jpg/330px-Erinaceus.europaeus.tracks.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/8/85/Erinaceus.europaeus.tracks.jpg" },
+  "Harespor-sommar": { thumb:"https://upload.wikimedia.org/wikipedia/commons/e/e1/TraceLievre.jpg", orig:"https://upload.wikimedia.org/wikipedia/commons/e/e1/TraceLievre.jpg" }
 };
 
 // ============================================================
@@ -1392,11 +1641,11 @@ async function getSpeciesImageUrl(latin) {
 
 function openImgCacheDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('nk-imgcache', 5);
+    const req = indexedDB.open('nk-imgcache', 6);
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
-      // Version 5: fix broken hash paths in override URLs (v1=broken 320px, v2=map images, v3=tracks showed animals, v4=wrong hashes)
-      if (e.oldVersion < 5 && db.objectStoreNames.contains('images')) {
+      // Version 6: add remaining 5 track/scat overrides (v5=fix hash paths, v4=wrong hashes, v3=tracks showed animals)
+      if (e.oldVersion < 6 && db.objectStoreNames.contains('images')) {
         db.deleteObjectStore('images');
       }
       if (!db.objectStoreNames.contains('images')) db.createObjectStore('images');
@@ -1767,35 +2016,12 @@ function updateSeasonGuide() {
 // ============================================================
 // SERVICE WORKER – Offline support
 // ============================================================
+// Service Worker registrering
+// sw.js må deployes i samme mappe som index.html på GitHub Pages
 if ('serviceWorker' in navigator) {
-  const SW_VERSION = 'nk-v3';
-  const swCode = `
-    const CACHE_NAME = '${SW_VERSION}';
-    const OFFLINE_URLS = ['/'];
-    self.addEventListener('install', e => {
-      e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(OFFLINE_URLS)).then(() => self.skipWaiting()));
-    });
-    self.addEventListener('activate', e => {
-      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim()));
-    });
-    self.addEventListener('fetch', e => {
-      if (e.request.method !== 'GET') return;
-      const url = new URL(e.request.url);
-      if (url.origin !== location.origin && !url.hostname.includes('fonts.googleapis.com') && !url.hostname.includes('fonts.gstatic.com')) return;
-      e.respondWith(
-        fetch(e.request).then(resp => {
-          if (resp && resp.status === 200) {
-            const clone = resp.clone();
-            caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-          }
-          return resp;
-        }).catch(() => caches.match(e.request))
-      );
-    });
-  `;
-  const swBlob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl, { scope: '/' }).catch(() => {});
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log('SW registrert, scope:', reg.scope))
+    .catch(() => console.log('SW registrering feilet – fungerer fortsatt uten'));
 }
 
 // Init
