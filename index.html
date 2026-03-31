@@ -1548,12 +1548,15 @@ function processBirdRecording() {
     '<div class="bird-listener-result">' +
       '<div style="font-weight:600;margin-bottom:8px">🎵 Opptak ferdig (' + duration + ' sek)</div>' +
       '<audio controls src="' + audioUrl + '" style="width:100%;margin-bottom:12px"></audio>' +
-      '<div style="font-size:13px;color:var(--ghost);margin-bottom:12px">Hør på opptaket ditt, og trykk under for å identifisere fuglen:</div>' +
-      '<a href="https://birdnet.cornell.edu/demo/" target="_blank" rel="noopener" class="birdnet-link-btn" onclick="saveBirdRecording(\'' + audioUrl + '\')">' +
-        '<span style="font-size:20px">🐦</span> Åpne BirdNET Live for identifisering' +
+      '<div style="font-size:13px;color:var(--ghost);margin-bottom:12px">Slik identifiserer du fuglen:</div>' +
+      '<a href="' + audioUrl + '" download="minviten-fuglelyd.wav" class="birdnet-link-btn" style="background:#555;margin-bottom:8px">' +
+        '<span style="font-size:20px">💾</span> 1. Last ned opptaket' +
+      '</a>' +
+      '<a href="https://birdnet.cornell.edu/demo/" target="_blank" rel="noopener" class="birdnet-link-btn">' +
+        '<span style="font-size:20px">🐦</span> 2. Åpne BirdNET og velg "Choose file"' +
       '</a>' +
       '<div style="font-size:11px;color:var(--ghost);margin-top:8px;line-height:1.4">' +
-        '💡 Spill av opptaket ditt i BirdNET for å få artsnavn. Kom tilbake hit for å utforske arten videre!' +
+        '💡 Last opp filen du nettopp lagret i BirdNET. Kom tilbake hit for å utforske arten videre!' +
       '</div>' +
     '</div>';
 }
