@@ -4299,8 +4299,9 @@ async function fetchBirdSound(latin) {
       // Pick from top 5 quality recordings randomly
       const top = data.recordings.slice(0, 5);
       const pick = top[Math.floor(Math.random() * top.length)];
+      const rawFile = pick.file.startsWith('//') ? 'https:' + pick.file : pick.file;
       const result = {
-        file: pick.file.startsWith('//') ? 'https:' + pick.file : pick.file,
+        file: WORKER_URL ? WORKER_URL + '/audio?url=' + encodeURIComponent(rawFile) : rawFile,
         sono: pick.sono && pick.sono.small ? (pick.sono.small.startsWith('//') ? 'https:' + pick.sono.small : pick.sono.small) : null,
         type: pick.type || 'song',
         loc: pick.loc || '',
