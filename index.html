@@ -1271,7 +1271,7 @@ function resizeImage(dataUrl, maxWidth) {
 }
 
 function startCapture() {
-  if (!getApiKey()) {
+  if (!getApiKey() && !WORKER_URL) {
     document.getElementById('apiKeyInput')?.focus();
     return;
   }
@@ -1549,11 +1549,11 @@ function processBirdRecording() {
       '<div style="font-weight:600;margin-bottom:8px">🎵 Opptak ferdig (' + duration + ' sek)</div>' +
       '<audio controls src="' + audioUrl + '" style="width:100%;margin-bottom:12px"></audio>' +
       '<div style="font-size:13px;color:var(--ghost);margin-bottom:12px">Hør på opptaket ditt, og trykk under for å identifisere fuglen:</div>' +
-      '<a href="https://birdnet.cornell.edu/app/" target="_blank" rel="noopener" class="birdnet-link-btn" onclick="saveBirdRecording(\'' + audioUrl + '\')">' +
+      '<a href="https://birdnet.cornell.edu/demo/" target="_blank" rel="noopener" class="birdnet-link-btn" onclick="saveBirdRecording(\'' + audioUrl + '\')">' +
         '<span style="font-size:20px">🐦</span> Åpne BirdNET Live for identifisering' +
       '</a>' +
       '<div style="font-size:11px;color:var(--ghost);margin-top:8px;line-height:1.4">' +
-        '💡 Tips: I BirdNET Live, trykk på mikrofon-knappen og hold telefonen mot fuglelyden – eller spill av opptaket ditt.' +
+        '💡 Spill av opptaket ditt i BirdNET for å få artsnavn. Kom tilbake hit for å utforske arten videre!' +
       '</div>' +
     '</div>';
 }
