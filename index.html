@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Naturkjenner">
+<meta name="apple-mobile-web-app-title" content="Minviten">
 <meta name="theme-color" content="#1f3d2b">
 <meta name="description" content="Identifiser norske arter med AI – planter, dyr, sopp, fugler, dyrespor og marint liv">
-<link rel="manifest" href="data:application/json,{%22name%22:%22Naturkjenner%22,%22short_name%22:%22Naturkjenner%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f7f3ec%22,%22theme_color%22:%22%231f3d2b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Crect%2520fill%3D%27%25231f3d2b%27%2520width%3D%2527100%27%2520height%3D%2527100%27%2520rx%3D%252720%27%2F%253E%253Ctext%2520y%3D%2527.9em%27%2520x%3D%252750%27%2520text-anchor%3D%27middle%27%2520font-size%3D%252760%27%2520dominant-baseline%3D%27middle%27%253E%25F0%259F%258C%25BF%253C%2Ftext%253E%253C%2Fsvg%253E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+<link rel="manifest" href="data:application/json,{%22name%22:%22Minviten%22,%22short_name%22:%22Minviten%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f7f3ec%22,%22theme_color%22:%22%231f3d2b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520100%2520100%27%253E%253Crect%2520fill%3D%27%25231f3d2b%27%2520width%3D%2527100%27%2520height%3D%2527100%27%2520rx%3D%252720%27%2F%253E%253Ctext%2520y%3D%2527.9em%27%2520x%3D%252750%27%2520text-anchor%3D%27middle%27%2520font-size%3D%252760%27%2520dominant-baseline%3D%27middle%27%253E%25F0%259F%258C%25BF%253C%2Ftext%253E%253C%2Fsvg%253E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f3d2b' width='100' height='100' rx='20'/><text y='.9em' x='50' text-anchor='middle' font-size='60' dominant-baseline='middle'>🌿</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f3d2b' width='100' height='100' rx='20'/><text y='.9em' x='50' text-anchor='middle' font-size='60' dominant-baseline='middle'>🌿</text></svg>">
-<title>Naturkjenner</title>
+<title>Minviten</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -325,7 +325,7 @@ body::before {
 <div class="header">
   <div class="header-inner">
     <div>
-      <h1>Naturkjenner <span class="ai-badge">AI</span></h1>
+      <h1>Minviten <span class="ai-badge">AI</span></h1>
       <div class="subtitle">Identifiser planter, dyr, spor og marint liv</div>
     </div>
     <button class="collection-badge" onclick="showCollection()">
@@ -443,21 +443,27 @@ body::before {
 // ============================================================
 // API KEY MANAGEMENT
 // ============================================================
+// Cloudflare Worker URL – sett denne etter deploy
+const WORKER_URL = 'https://minviten-api.minviten.workers.dev';
+
 function getApiKey() {
-  return localStorage.getItem('naturkjenner_api_key') || '';
+  return localStorage.getItem('minviten_api_key') || '';
 }
 function saveApiKey(key) {
-  localStorage.setItem('naturkjenner_api_key', key.trim());
+  localStorage.setItem('minviten_api_key', key.trim());
   renderApiStatus();
 }
 function clearApiKey() {
-  localStorage.removeItem('naturkjenner_api_key');
+  localStorage.removeItem('minviten_api_key');
   renderApiStatus();
 }
 function renderApiStatus() {
   const area = document.getElementById('apiSetupArea');
   const key = getApiKey();
-  if (key) {
+  if (WORKER_URL) {
+    // Worker er konfigurert – ingen nøkkel trengs i nettleseren
+    area.innerHTML = '<div class="api-status">🟢 AI-identifisering klar</div>';
+  } else if (key) {
     area.innerHTML = '<div class="api-status">🟢 API-nøkkel aktiv (' + key.substring(0,8) + '...)<span class="api-change" onclick="clearApiKey()">Endre</span></div>';
   } else {
     area.innerHTML = '<div class="api-setup">' +
@@ -983,7 +989,7 @@ function safetyWarningHTML(species) {
 // ============================================================
 // INDEXEDDB – persistent collection storage
 // ============================================================
-const DB_NAME = 'naturkjenner';
+const DB_NAME = 'minviten';
 const DB_VERSION = 1;
 const STORE_NAME = 'collection';
 
@@ -1035,7 +1041,7 @@ async function dbDelete(id) {
 
 // Migrate old localStorage collection to IndexedDB (event format)
 async function migrateFromLocalStorage() {
-  const old = localStorage.getItem('naturkjenner_collection');
+  const old = localStorage.getItem('minviten_collection');
   if (!old) return;
   try {
     const items = JSON.parse(old);
@@ -1053,7 +1059,7 @@ async function migrateFromLocalStorage() {
         await dbAdd(evt);
       }
     }
-    localStorage.removeItem('naturkjenner_collection');
+    localStorage.removeItem('minviten_collection');
   } catch(e) { console.warn('Migration failed:', e); }
 }
 
@@ -1069,7 +1075,7 @@ let currentScanImage = null; // holds image from current scan
 // ============================================================
 async function identifyWithGemini(base64Image) {
   const apiKey = getApiKey();
-  if (!apiKey) throw new Error('Ingen API-nøkkel konfigurert. Legg inn nøkkelen din øverst på siden.');
+  if (!apiKey && !WORKER_URL) throw new Error('Ingen API-nøkkel konfigurert. Legg inn nøkkelen din øverst på siden.');
 
   const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
   const mimeMatch = base64Image.match(/^data:(image\/\w+);base64,/);
@@ -1114,24 +1120,36 @@ For HVER art du identifiserer (maks 3), gi følgende i et JSON-array:
 confidence skal være 0-100 basert på hvor sikker du er. Vær streng – bruk lav confidence hvis du er usikker.
 Svar KUN med JSON-arrayet, ingen annen tekst.`;
 
-  const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
-
-  const response = await fetch(geminiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inlineData: { mimeType, data: base64Data } }
-        ]
-      }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 4096
-      }
-    })
+  const requestBody = JSON.stringify({
+    contents: [{
+      parts: [
+        { text: prompt },
+        { inlineData: { mimeType, data: base64Data } }
+      ]
+    }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 4096
+    }
   });
+
+  let response;
+  if (WORKER_URL) {
+    // Bruk Cloudflare Worker (API-nøkkel skjult på server)
+    response = await fetch(WORKER_URL + '/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: requestBody
+    });
+  } else {
+    // Fallback: direkte til Gemini (krever API-nøkkel i nettleseren)
+    const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+    response = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: requestBody
+    });
+  }
 
   if (!response.ok) {
     const errText = await response.text();
@@ -3590,7 +3608,7 @@ function exportCollectionReport() {
   }).join('');
 
   const html = '<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
-    '<title>Naturkjenner – Feltrapport</title><style>' +
+    '<title>Minviten – Feltrapport</title><style>' +
     '*{margin:0;padding:0;box-sizing:border-box}' +
     'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f0eb;color:#2d3b2d;line-height:1.6}' +
     '.container{max-width:800px;margin:0 auto;padding:20px}' +
@@ -3625,7 +3643,7 @@ function exportCollectionReport() {
     '</style></head><body>' +
     '<div class="container">' +
       '<div class="header">' +
-        '<h1>🌿 Naturkjenner – Feltrapport</h1>' +
+        '<h1>🌿 Minviten – Feltrapport</h1>' +
         '<div class="subtitle">' + date + ' · ' + sorted.length + ' hendelser · ' + totalSpecies + ' arter</div>' +
       '</div>' +
       '<div class="stats">' +
@@ -3634,7 +3652,7 @@ function exportCollectionReport() {
         statsHtml +
       '</div>' +
       eventCards +
-      '<div class="footer">Generert med Naturkjenner 🌿 · skumpa-glitch.github.io/naturkjenner</div>' +
+      '<div class="footer">Generert med Minviten 🌿 · skumpa-glitch.github.io/naturkjenner</div>' +
     '</div></body></html>';
 
   const blob = new Blob([html], { type: 'text/html' });
@@ -3677,7 +3695,7 @@ function exportReport() {
   ).join('');
 
   const html = '<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
-    '<title>Naturkjenner – Feltrapport</title><style>' +
+    '<title>Minviten – Feltrapport</title><style>' +
     '*{margin:0;padding:0;box-sizing:border-box}' +
     'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f0eb;color:#2d3b2d;line-height:1.6}' +
     '.container{max-width:800px;margin:0 auto;padding:20px}' +
@@ -3703,7 +3721,7 @@ function exportReport() {
     '</style></head><body>' +
     '<div class="container">' +
       '<div class="header">' +
-        '<h1>🌿 Naturkjenner – Feltrapport</h1>' +
+        '<h1>🌿 Minviten – Feltrapport</h1>' +
         '<p>' + date + ' · ' + sorted.length + ' funn</p>' +
       '</div>' +
       '<div class="stats">' +
@@ -3711,7 +3729,7 @@ function exportReport() {
         statsHtml +
       '</div>' +
       pinCards +
-      '<div class="footer">Generert med Naturkjenner 🌿 · skumpa-glitch.github.io/naturkjenner</div>' +
+      '<div class="footer">Generert med Minviten 🌿 · skumpa-glitch.github.io/naturkjenner</div>' +
     '</div></body></html>';
 
   const blob = new Blob([html], { type: 'text/html' });
@@ -4272,7 +4290,10 @@ async function fetchBirdSound(latin) {
   if (birdSoundCache[latin]) return birdSoundCache[latin];
   try {
     const query = encodeURIComponent(latin.replace(/\s+/g, '+'));
-    const resp = await fetch('https://xeno-canto.org/api/2/recordings?query=' + query + '+q:A&page=1');
+    const xcApiUrl = WORKER_URL
+      ? WORKER_URL + '/xeno-canto?query=' + query + '+q:A'
+      : 'https://xeno-canto.org/api/2/recordings?query=' + query + '+q:A&page=1';
+    const resp = await fetch(xcApiUrl);
     const data = await resp.json();
     if (data.recordings && data.recordings.length > 0) {
       // Pick from top 5 quality recordings randomly
