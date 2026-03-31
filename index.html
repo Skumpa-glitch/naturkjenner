@@ -146,6 +146,13 @@ body::before {
 .bird-sound-card-btn:hover { background: var(--forest); color: white; }
 .bird-sound-icon { font-size: 18px; }
 .bird-sound-player-inline { padding: 4px 0; }
+.birdnet-link-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border-radius: 10px;
+  background: var(--forest); color: white; text-decoration: none;
+  font-size: 15px; font-weight: 600; transition: all 0.2s;
+}
+.birdnet-link-btn:hover { opacity: 0.9; transform: scale(0.99); }
 .bird-play-btn.playing span { filter: brightness(10); }
 .bird-play-label { font-size: 12px; color: var(--ghost); }
 .bird-loading { font-size: 13px; color: var(--ghost); padding: 20px; }
@@ -189,6 +196,34 @@ body::before {
 }
 .camera-btn:active { opacity: 0.85; transform: scale(0.99); }
 .camera-btn.loading { background: var(--ghost); pointer-events: none; }
+.capture-buttons { display: flex; flex-direction: column; gap: 8px; }
+.mic-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 24px; border-radius: 8px;
+  background: transparent; color: var(--forest);
+  border: 2px solid var(--forest); cursor: pointer;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 15px; font-weight: 400; font-style: italic;
+  transition: all 0.2s; -webkit-appearance: none;
+}
+.mic-btn:active { opacity: 0.85; transform: scale(0.99); }
+.mic-btn:hover { background: var(--forest); color: var(--paper); }
+.bird-listener-card {
+  background: white; border-radius: 12px; padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; margin-top: 12px;
+}
+.mic-recording-btn {
+  width: 90px; height: 90px; border-radius: 50%; border: none;
+  cursor: pointer; font-size: 36px; display: flex; align-items: center;
+  justify-content: center; margin: 16px auto; transition: all 0.3s;
+}
+.mic-recording-btn.ready { background: var(--forest); color: white; }
+.mic-recording-btn.recording { background: #c0392b; color: white; animation: mic-pulse 1.2s infinite; }
+@keyframes mic-pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192,57,43,0.4); } 50% { transform: scale(1.05); box-shadow: 0 0 0 16px rgba(192,57,43,0); } }
+.mic-timer { font-size: 28px; font-weight: 700; color: var(--forest); margin: 8px 0; font-variant-numeric: tabular-nums; }
+.mic-visualizer { height: 48px; display: flex; align-items: center; justify-content: center; gap: 3px; margin: 12px 0; }
+.mic-bar { width: 4px; background: var(--forest); border-radius: 2px; transition: height 0.1s; }
+.bird-listener-result { margin-top: 16px; padding: 16px; background: #f0f7ed; border-radius: 10px; text-align: left; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
 .overlay { position: fixed; inset: 0; background: rgba(30,28,24,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
@@ -352,9 +387,15 @@ body::before {
   <div id="homeView">
     <div id="apiSetupArea"></div>
     <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(event)">
-    <button class="camera-btn" id="cameraBtn" onclick="startCapture()">
-      <span style="font-size:24px">📸</span> Ta bilde eller velg fra galleri
-    </button>
+    <div class="capture-buttons">
+      <button class="camera-btn" id="cameraBtn" onclick="startCapture()">
+        <span style="font-size:24px">📸</span> Ta bilde eller velg fra galleri
+      </button>
+      <button class="mic-btn" id="micBtn" onclick="startBirdListener()">
+        <span style="font-size:24px">🎙️</span> Lytt etter fugler
+      </button>
+    </div>
+    <div id="birdListenerArea" class="hidden"></div>
     <div id="resultsArea"></div>
     <div id="exploreArea" style="margin-top:24px">
       <div class="explore-title" id="exploreTitle">Utforsk arter</div>
@@ -1362,6 +1403,163 @@ function recipeHTML(species) {
       '</a>'
     ).join('') +
   '</div>';
+}
+
+// ============================================================
+// BIRD LISTENER – Mikrofon-opptak + BirdNET Live
+// ============================================================
+let birdListenerState = { recording: false, mediaRecorder: null, stream: null, chunks: [], timer: null, seconds: 0, analyser: null, animFrame: null };
+
+function startBirdListener() {
+  const area = document.getElementById('birdListenerArea');
+  area.classList.remove('hidden');
+  area.innerHTML =
+    '<div class="bird-listener-card">' +
+      '<div style="font-size:14px;color:var(--ghost);margin-bottom:4px">🐦 Fugleidentifisering</div>' +
+      '<div style="font-size:18px;font-weight:600;color:var(--ink);margin-bottom:4px">Lytt etter fugler</div>' +
+      '<div style="font-size:13px;color:var(--ghost);margin-bottom:12px">Hold telefonen mot fuglelyden og trykk for å ta opp</div>' +
+      '<div class="mic-visualizer" id="micVisualizer">' +
+        Array.from({length: 20}, () => '<div class="mic-bar" style="height:4px"></div>').join('') +
+      '</div>' +
+      '<div class="mic-timer" id="micTimer">0:00</div>' +
+      '<button class="mic-recording-btn ready" id="micRecBtn" onclick="toggleBirdRecording()">🎙️</button>' +
+      '<div style="font-size:13px;color:var(--ghost)" id="micInstruction">Trykk for å starte opptak</div>' +
+      '<div id="birdListenerResult"></div>' +
+      '<button class="back-btn" style="margin-top:12px" onclick="closeBirdListener()">← Tilbake</button>' +
+    '</div>';
+  window.scrollTo({ top: area.offsetTop - 80, behavior: 'smooth' });
+}
+
+function closeBirdListener() {
+  stopBirdRecording(false);
+  const area = document.getElementById('birdListenerArea');
+  area.classList.add('hidden');
+  area.innerHTML = '';
+}
+
+async function toggleBirdRecording() {
+  if (birdListenerState.recording) {
+    stopBirdRecording(true);
+  } else {
+    await startBirdRecording();
+  }
+}
+
+async function startBirdRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 48000, channelCount: 1, echoCancellation: false, noiseSuppression: false } });
+    birdListenerState.stream = stream;
+    birdListenerState.chunks = [];
+    birdListenerState.seconds = 0;
+
+    // Audio visualizer
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    source.connect(analyser);
+    birdListenerState.analyser = analyser;
+    birdListenerState.audioCtx = audioCtx;
+    animateVisualizer();
+
+    // MediaRecorder
+    const mr = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4' });
+    mr.ondataavailable = function(e) { if (e.data.size > 0) birdListenerState.chunks.push(e.data); };
+    mr.start(100);
+    birdListenerState.mediaRecorder = mr;
+    birdListenerState.recording = true;
+
+    // Timer
+    const timerEl = document.getElementById('micTimer');
+    birdListenerState.timer = setInterval(() => {
+      birdListenerState.seconds++;
+      const m = Math.floor(birdListenerState.seconds / 60);
+      const s = birdListenerState.seconds % 60;
+      if (timerEl) timerEl.textContent = m + ':' + String(s).padStart(2, '0');
+    }, 1000);
+
+    // UI
+    const btn = document.getElementById('micRecBtn');
+    const inst = document.getElementById('micInstruction');
+    if (btn) { btn.className = 'mic-recording-btn recording'; btn.textContent = '⏹️'; }
+    if (inst) inst.textContent = 'Lytter... Trykk for å stoppe';
+
+    // Auto-stop etter 15 sek
+    setTimeout(() => { if (birdListenerState.recording) stopBirdRecording(true); }, 15000);
+  } catch (e) {
+    const res = document.getElementById('birdListenerResult');
+    if (res) res.innerHTML = '<div style="color:#c00;padding:8px">Kunne ikke starte mikrofon. Sjekk at du har gitt tilgang i nettleseren.</div>';
+  }
+}
+
+function animateVisualizer() {
+  const analyser = birdListenerState.analyser;
+  if (!analyser) return;
+  const bars = document.querySelectorAll('#micVisualizer .mic-bar');
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  function draw() {
+    if (!birdListenerState.recording) return;
+    analyser.getByteFrequencyData(data);
+    bars.forEach((bar, i) => {
+      const val = data[i] || 0;
+      bar.style.height = Math.max(4, (val / 255) * 44) + 'px';
+    });
+    birdListenerState.animFrame = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function stopBirdRecording(process) {
+  birdListenerState.recording = false;
+  if (birdListenerState.timer) { clearInterval(birdListenerState.timer); birdListenerState.timer = null; }
+  if (birdListenerState.animFrame) { cancelAnimationFrame(birdListenerState.animFrame); }
+  if (birdListenerState.analyser) { birdListenerState.analyser = null; }
+  if (birdListenerState.audioCtx) { birdListenerState.audioCtx.close(); birdListenerState.audioCtx = null; }
+
+  const bars = document.querySelectorAll('#micVisualizer .mic-bar');
+  bars.forEach(b => b.style.height = '4px');
+
+  if (birdListenerState.mediaRecorder && birdListenerState.mediaRecorder.state !== 'inactive') {
+    birdListenerState.mediaRecorder.stop();
+  }
+  if (birdListenerState.stream) {
+    birdListenerState.stream.getTracks().forEach(t => t.stop());
+    birdListenerState.stream = null;
+  }
+
+  const btn = document.getElementById('micRecBtn');
+  const inst = document.getElementById('micInstruction');
+  if (btn) { btn.className = 'mic-recording-btn ready'; btn.textContent = '🎙️'; }
+  if (inst) inst.textContent = 'Trykk for å starte opptak';
+
+  if (process && birdListenerState.chunks.length > 0) {
+    processBirdRecording();
+  }
+}
+
+function processBirdRecording() {
+  const blob = new Blob(birdListenerState.chunks, { type: birdListenerState.mediaRecorder ? birdListenerState.mediaRecorder.mimeType : 'audio/webm' });
+  const audioUrl = URL.createObjectURL(blob);
+  const duration = birdListenerState.seconds;
+  const res = document.getElementById('birdListenerResult');
+  if (!res) return;
+
+  res.innerHTML =
+    '<div class="bird-listener-result">' +
+      '<div style="font-weight:600;margin-bottom:8px">🎵 Opptak ferdig (' + duration + ' sek)</div>' +
+      '<audio controls src="' + audioUrl + '" style="width:100%;margin-bottom:12px"></audio>' +
+      '<div style="font-size:13px;color:var(--ghost);margin-bottom:12px">Hør på opptaket ditt, og trykk under for å identifisere fuglen:</div>' +
+      '<a href="https://birdnet.cornell.edu/app/" target="_blank" rel="noopener" class="birdnet-link-btn" onclick="saveBirdRecording(\'' + audioUrl + '\')">' +
+        '<span style="font-size:20px">🐦</span> Åpne BirdNET Live for identifisering' +
+      '</a>' +
+      '<div style="font-size:11px;color:var(--ghost);margin-top:8px;line-height:1.4">' +
+        '💡 Tips: I BirdNET Live, trykk på mikrofon-knappen og hold telefonen mot fuglelyden – eller spill av opptaket ditt.' +
+      '</div>' +
+    '</div>';
+}
+
+function saveBirdRecording(url) {
+  // Fremtidig: last ned opptaket lokalt
 }
 
 function birdSoundBtnHTML(species, cardId) {
