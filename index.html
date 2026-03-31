@@ -4289,10 +4289,10 @@ function getBirdSpecies() {
 async function fetchBirdSound(latin) {
   if (birdSoundCache[latin]) return birdSoundCache[latin];
   try {
-    const query = encodeURIComponent(latin.replace(/\s+/g, '+'));
+    const query = encodeURIComponent(latin + ' q:A');
     const xcApiUrl = WORKER_URL
-      ? WORKER_URL + '/xeno-canto?query=' + query + '+q:A'
-      : 'https://xeno-canto.org/api/2/recordings?query=' + query + '+q:A&page=1';
+      ? WORKER_URL + '/xeno-canto?query=' + query
+      : 'https://xeno-canto.org/api/2/recordings?query=' + query + '&page=1';
     const resp = await fetch(xcApiUrl);
     const data = await resp.json();
     if (data.recordings && data.recordings.length > 0) {
