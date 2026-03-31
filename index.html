@@ -141,6 +141,11 @@ body::before {
 .bird-play-btn:hover { background: var(--forest); transform: scale(1.05); }
 .bird-play-btn:hover span { filter: brightness(10); }
 .bird-play-btn.playing { background: var(--forest); animation: pulse-ring 1.5s infinite; }
+.bird-sound-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.bird-sound-card-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 14px; border: 2px solid var(--forest); border-radius: 10px; background: #e8f5e0; color: var(--forest); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.bird-sound-card-btn:hover { background: var(--forest); color: white; }
+.bird-sound-icon { font-size: 18px; }
+.bird-sound-player-inline { padding: 4px 0; }
 .bird-play-btn.playing span { filter: brightness(10); }
 .bird-play-label { font-size: 12px; color: var(--ghost); }
 .bird-loading { font-size: 13px; color: var(--ghost); padding: 20px; }
@@ -1359,6 +1364,77 @@ function recipeHTML(species) {
   '</div>';
 }
 
+function birdSoundBtnHTML(species, cardId) {
+  if (!species.category || !species.category.toLowerCase().includes('fugl')) return '';
+  if (!species.latin || species.latin.trim().length < 4) return '';
+  return '<div class="bird-sound-section" id="bsound-' + cardId + '">' +
+    '<button class="bird-sound-card-btn" onclick="event.stopPropagation(); playBirdSoundFromCard(\'' + cardId + '\', \'' + species.latin.replace(/'/g, "\\'") + '\')">' +
+      '<span class="bird-sound-icon">🔊</span> Hør fuglelyd' +
+    '</button>' +
+    '<div class="bird-sound-player-inline" id="bplayer-' + cardId + '" style="display:none"></div>' +
+  '</div>';
+}
+
+let activeBirdAudio = null;
+
+async function playBirdSoundFromCard(cardId, latin) {
+  const container = document.getElementById('bplayer-' + cardId);
+  const btn = container.previousElementSibling;
+  if (!container) return;
+
+  // If already playing, stop
+  if (activeBirdAudio && activeBirdAudio.cardId === cardId) {
+    activeBirdAudio.audio.pause();
+    activeBirdAudio = null;
+    container.style.display = 'none';
+    btn.innerHTML = '<span class="bird-sound-icon">🔊</span> Hør fuglelyd';
+    return;
+  }
+
+  // Stop any other playing audio
+  if (activeBirdAudio) {
+    activeBirdAudio.audio.pause();
+    const oldContainer = document.getElementById('bplayer-' + activeBirdAudio.cardId);
+    const oldBtn = oldContainer ? oldContainer.previousElementSibling : null;
+    if (oldContainer) oldContainer.style.display = 'none';
+    if (oldBtn) oldBtn.innerHTML = '<span class="bird-sound-icon">🔊</span> Hør fuglelyd';
+    activeBirdAudio = null;
+  }
+
+  btn.innerHTML = '<span class="bird-sound-icon">⏳</span> Henter lyd...';
+  container.style.display = 'block';
+  container.innerHTML = '<div style="font-size:12px;color:var(--ghost);padding:6px 0">Laster fra Xeno-canto...</div>';
+
+  try {
+    const sound = await fetchBirdSound(latin);
+    if (!sound) {
+      container.innerHTML = '<div style="font-size:12px;color:#c00;padding:6px 0">Fant ingen lyd for denne arten</div>';
+      btn.innerHTML = '<span class="bird-sound-icon">🔊</span> Hør fuglelyd';
+      return;
+    }
+
+    const audio = new Audio(sound.file);
+    audio.play().then(() => {
+      btn.innerHTML = '<span class="bird-sound-icon">⏹️</span> Stopp lyd';
+      container.innerHTML =
+        (sound.sono ? '<img src="' + sound.sono + '" style="width:100%;border-radius:6px;margin:4px 0" alt="Sonogram">' : '') +
+        '<div style="font-size:11px;color:var(--ghost);padding:2px 0">📍 ' + sound.loc + ' · 🎙 ' + sound.rec + '</div>' +
+        '<div style="font-size:10px;color:var(--ghost)">Kilde: xeno-canto.org (CC BY-NC-SA)</div>';
+      activeBirdAudio = { audio, cardId };
+      audio.onended = function() {
+        btn.innerHTML = '<span class="bird-sound-icon">🔊</span> Hør fuglelyd';
+        activeBirdAudio = null;
+      };
+    }).catch(() => {
+      container.innerHTML = '<div style="font-size:12px;color:#c00;padding:6px 0">Kunne ikke spille av lyden</div>';
+      btn.innerHTML = '<span class="bird-sound-icon">🔊</span> Hør fuglelyd';
+    });
+  } catch (e) {
+    container.innerHTML = '<div style="font-size:12px;color:#c00;padding:6px 0">Feil ved henting av lyd</div>';
+    btn.innerHTML = '<span class="bird-sound-icon">🔊</span> Hør fuglelyd';
+  }
+}
+
 function speciesCardHTML(species, rank, showConfidence) {
   const isTop = rank === 0 && showConfidence;
   const id = 'card-' + Math.random().toString(36).substr(2, 8);
@@ -1388,6 +1464,7 @@ function speciesCardHTML(species, rank, showConfidence) {
         '</div>' +
         (species.funFact ? '<div class="fun-fact"><span style="font-size:16px;flex-shrink:0">💡</span><span>' + species.funFact + '</span></div>' : '') +
         recipeHTML(species) +
+        birdSoundBtnHTML(species, id) +
       '</div>' +
       '<div class="toggle-hint" id="hint-' + id + '">▼ Vis detaljer</div>' +
     '</div></div>';
